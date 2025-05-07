@@ -51,7 +51,7 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible) => {
   };
 
   const editHandler = async (chatId, messageId, token, to, from, val) => {
-    await dispatch(editMsgHandler({ search, messageId, token, newText: editMessage }));
+    await dispatch(editMsgHandler({ search, messageId, token, newText: editMessage, to, from }));
     setVisible(null);
   };
 

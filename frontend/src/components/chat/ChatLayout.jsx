@@ -23,6 +23,7 @@ import {
   checkConversation,
   setMessagesValue,
   messageStatu,
+  messageEdit,
 } from "../../redux/slice/messageSlice";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -74,6 +75,10 @@ const ChatLayout = () => {
     });
     socket.on("delete_message", (data) => {
       dispatch(messageStatu(data));
+    });
+    socket.on("edit_message", (data) => {
+      console.log("edit socket called")
+      dispatch(messageEdit(data));
     });
     socket.on("user_status", (data) => {
       dispatch(setStatus(data));

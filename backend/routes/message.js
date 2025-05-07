@@ -5,7 +5,7 @@ const upload = require("../middleware/multer");
 router.get("/conversations",authorization.protect, messageController.conversations);
 router.get("/selectedConversation",authorization.protect, messageController.selectedConversation);
 router.patch("/status",authorization.protect, messageController.status);
-router.patch("/message",authorization.protect, messageController.message);
+// router.patch("/message",authorization.protect, messageController.message);
 // router.post("/group",authorization.protect, messageController.group);
 router.get("/group",authorization.protect, messageController.groups);
 router.patch("/members",authorization.protect, messageController.addmembers);

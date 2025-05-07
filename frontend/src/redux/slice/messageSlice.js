@@ -122,7 +122,7 @@ const conversationSlice = createSlice({
           ];
           if (
             state.direct_chat.current_user._id ===
-              selfConvo.participants[0]._id &&
+            selfConvo.participants[0]._id &&
             state.direct_chat.current_conversation === undefined
           ) {
             state.direct_chat.current_conversation = data.conversation_id;
@@ -209,23 +209,23 @@ const conversationSlice = createSlice({
               if (index) {
                 state.group_chat.messages = dateMessage
                   ? [
-                      ...state.group_chat.messages.slice(0, index),
-                      message,
-                      dateMessage,
-                      ...state.group_chat.messages.slice(index + 1),
-                    ]
+                    ...state.group_chat.messages.slice(0, index),
+                    message,
+                    dateMessage,
+                    ...state.group_chat.messages.slice(index + 1),
+                  ]
                   : [
-                      ...state.group_chat.messages.slice(0, index),
-                      message,
-                      ...state.group_chat.messages.slice(index + 1),
-                    ];
+                    ...state.group_chat.messages.slice(0, index),
+                    message,
+                    ...state.group_chat.messages.slice(index + 1),
+                  ];
               } else if (index === 0) {
                 state.group_chat.messages = dateMessage
                   ? [
-                      message,
-                      dateMessage,
-                      ...state.group_chat.messages.slice(1),
-                    ]
+                    message,
+                    dateMessage,
+                    ...state.group_chat.messages.slice(1),
+                  ]
                   : [message, ...state.group_chat.messages.slice(1)];
               } else {
                 state.group_chat.messages = dateMessage
@@ -299,10 +299,45 @@ const conversationSlice = createSlice({
             indexMessage
           ] = {
             ...state.direct_chat.conversations[conversationIndex].messages[
-              indexMessage
+            indexMessage
             ],
             ...obj,
           };
+        }
+      }
+    },
+    messageEdit: (state, action) => {
+      console.log("state", state);
+      console.log("action", action);
+      const { search, messageId, newText } = action.payload;
+      if (state.direct_chat.current_conversation === action.payload.search) {
+        const index = state.direct_chat.messages.findIndex(
+          (val) => val._id === action.payload.messageId
+        );
+
+        if (index !== -1) {
+          state.direct_chat.messages[index] = {
+            ...state.direct_chat.messages[index],
+            ...{ text: newText },
+          };
+        }
+        const conversationIndex = state.direct_chat.conversations.findIndex(
+          (val) => val._id === search
+        );
+        if (conversationIndex !== -1) {
+          const indexMessage = state.direct_chat.conversations[
+            conversationIndex
+          ].messages.findIndex((val) => val._id === messageId);
+          if (indexMessage !== -1) {
+            state.direct_chat.conversations[conversationIndex].messages[
+              indexMessage
+            ] = {
+              ...state.direct_chat.conversations[conversationIndex].messages[
+              indexMessage
+              ],
+              ...{ text: newText },
+            };
+          }
         }
       }
     },
@@ -337,12 +372,6 @@ const conversationSlice = createSlice({
           state.direct_chat.current_conversation = null;
         }
         state.error = action.payload;
-      })
-      .addCase(editMsgHandler.fulfilled, (state, action) => {
-        const data = action.payload;
-        console.log(data);
-        state.direct_chat.messages = data.messages;
-        state.direct_chat.current_conversation = data.conversation;
       })
       .addCase(fetchSelectedConversation.pending, (state, action) => {
         state.loading = true;
@@ -704,11 +733,11 @@ export const messageStatus = createAsyncThunk(
 
 export const editMsgHandler = createAsyncThunk(
   "conversation/editMsgHandler",
-  async ({ search, messageId, token, newText }, { rejectWithValue }) => {
+  async ({ search, messageId, token, newText, to, from }, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
         `${Base_Url}/api/user/message?search=${search}&messageId=${messageId}`,
-        { newText },
+        { newText, to, from },
         {
           headers: {
             authorization: token,
@@ -814,4 +843,5 @@ export const {
   setMessagesValue,
   setStatus,
   messageStatu,
+  messageEdit,
 } = conversationSlice.actions;

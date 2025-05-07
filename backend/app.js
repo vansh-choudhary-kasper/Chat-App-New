@@ -79,7 +79,6 @@ const limiter = rateLimit({
 });
 
 app.use("/api", limiter);
-app.use("/api", routes);
 
 process.on("uncaughtException", (err) => {
   console.log(err);
@@ -992,6 +991,93 @@ io.on("connection", async (socket) => {
     }
   );
 
+  routers.patch("/user/message",authorization.protect, async (req, res) => {
+    const { search, messageId } = req.query;
+    const { newText, to, from } = req.body;
+    console.log("io seted");
+
+    const to_user = await User.findById({ _id: to });
+    const from_user = await User.findById({ _id: from });
+  
+    if (!search || search.trim() === "") {
+      return res.status(400).json({
+        status: "failed",
+        message: "Search is required",
+      });
+    }
+  
+    if (!messageId || messageId.trim() === "") {
+      return res.status(400).json({
+        status: "failed",
+        message: "Message ID is required",
+      });
+    }
+  
+    console.log("new text", newText);
+  
+    if (!newText || newText.trim() === "") {
+      return res.status(400).json({
+        status: "failed",
+        message: "New Text is required",
+      });
+    }
+  
+    try {
+      const conversation = await OneToOneMessage.findOne({
+        _id: search,
+        "messages._id": messageId,
+      }).populate(
+        "participants",
+        "firstname lastname _id status socket_id profile"
+      );
+  
+      if (!conversation) {
+        return res.status(404).json({
+          status: "failed",
+          message: "No Conversation found",
+          data: [],
+        });
+      }
+  
+      console.log(messageId);
+      const index = conversation.messages.findIndex(
+        (val) => val._id.toString() === messageId
+      );
+      if (index === -1) return res.status(404).json({
+        status: "failed",
+        message: "No matching conversation or message found",
+        data: [],
+      });
+  
+      conversation.messages[index].text = newText;
+      await conversation.save();
+
+      io.to(to_user.socket_id).emit("edit_message", {
+        search,
+        messageId,
+        newText,
+      });
+
+      io.to(from_user.socket_id).emit("edit_message", {
+        search,
+        messageId,
+        newText,
+      });
+  
+      res.status(200).json({
+        status: "success",
+        message: "Message updated successfully",
+        data: { index, conversation },
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        status: "failed",
+        message: "Server error",
+      });
+    }
+  });
+
   socket.on("join-video-room", async ({ to, roomId, from }) => {
     createOneToOneRoom(roomId, from);
     const to_user = await User.findOne({ _id: to });
@@ -1489,6 +1575,7 @@ app.use("*", (req, res, next) => {
   next();
 });
 
+app.use("/api", routes);
 app.use("/api", routers);
 
 module.exports = { io, routers };
