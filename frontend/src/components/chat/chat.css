@@ -1,0 +1,176 @@
+.chat_section_container{
+    width:100%;
+    flex: 1;
+   height: 76vw !important;
+    border-bottom: 1px solid #C3C3C3;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column-reverse;
+   
+    overflow: hidden;
+    overflow-y: auto;
+    
+}
+.message_main_container{
+    display: flex;
+    flex-direction: column-reverse;
+    
+}
+.message .message_time{
+    position: absolute;
+    left: 0;
+    bottom: -1vw;
+    list-style: none;
+    font-size: 0.7vw;
+    color: #B1B1B1;
+   
+
+}
+.message_recieve .message_time{
+    position: absolute;
+    right: 0;
+    bottom: -1vw;
+    list-style: none;
+    font-size: 0.7vw;
+    color: #B1B1B1;
+   
+
+}
+
+.message, .message_recieve{
+    display: flex;
+    margin-left: 1.05vw;
+    margin-bottom: 2.2vw;
+    /* background-color: red; */
+    width:60%;
+    align-items: flex-end;
+    position: relative;
+}
+.message p, .message_recieve p{
+    color: #2F2F2F;
+font-size: 1vw;
+background-color: #ECECEC;
+border-radius: 0.6vw;
+font-weight: 500; 
+    /* background-color: aqua; */
+max-width:100%;
+display: flex;
+padding: 0.6vw 0.4vw;
+position: relative;
+word-break: break-all;
+}
+.message svg,.message_recieve svg{
+    font-size: 1.4vw;
+    margin-bottom: 0.8vw;
+color: #acaaaa;
+}
+.message_recieve{
+    align-self: flex-end;
+    flex-direction: row-reverse;
+    margin-right: 1.05vw;
+    margin-left: 0vw;
+    position: relative;
+    max-width: 60%;
+  
+}
+.message_recieve p{
+    background-color:#E2E4FF ;
+    color: black;
+}
+
+.message .options, .message_recieve .options{
+    position: absolute;
+    right: -10vw; 
+    bottom: -1vw;
+    /* bottom: 0; */
+    /* right: -10.3vw; */
+    text-align: center;
+    display: flex;
+    min-width: 9vw;
+    max-width: 9vw;
+    width: 9vw;
+    flex-direction: column;
+   cursor: pointer;z-index: 1;
+}
+ .message_recieve .options{
+    position: absolute;
+    left: -10vw !important;
+    bottom: -4vw;
+    /* width: 9vw; */
+    z-index: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+   
+}
+.message_recieve .first_messages, .message .first_messages{
+    position: absolute;
+ 
+    bottom: 0vw !important;
+}
+.message .options p,.message_recieve .options p{
+    min-width: 100%;
+    height: 3vw;
+    font-style: normal;
+    color:  #235C95;
+    border-radius: 0;
+    font-size: 1.2vw;
+    border-bottom: 1px solid #D3D3D3;
+   display: flex;
+   justify-content: center;
+   gap: 0.2vw;
+   background-color: #F4F4F4;
+   border-radius: 8px 8px 0 0;
+
+   
+}
+
+.message .options p:last-child,.message_recieve .options p:last-child{
+    border-bottom: 0;
+    color: #F9595F;
+font-family: "Open Sans";
+ border-radius: 0 0 8px 8px; 
+/* border-radius: 0.4vw; */
+font-weight: 500;
+   
+}
+.message .options p{
+    border-bottom: 0;
+
+ border-radius:8px; 
+/* border-radius: 0.4vw; */
+font-weight: 500;
+   
+}
+ .message .first_messages{
+    position: absolute;
+ 
+    bottom: -4vw !important;
+}
+.message .options .delete_options{
+    display: none !important;
+}
+.message .options p svg,.message_recieve .options p svg{
+   color:  #235C95;
+   margin-top: 0.1vw;
+ 
+}
+
+/* image messages css */
+
+/* mobile view */
+.mobileTextMessage{
+    margin-bottom: 6vw;
+}
+.mobileTextMessage p{
+font-size: 4vw;
+border-radius: 1vw;
+padding: 1vw 1.2vw;
+}
+.mobileTextMessage svg{
+    font-size: 4vw;
+}
+.mobileTextMessage .message_time{
+font-size: 3vw;
+bottom: -4vw;
+}

@@ -1,0 +1,230 @@
+.selfprofile {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 23vw;
+    background-color: #fff;
+    border-left: 0.1vw solid #ddd;
+    overflow-y: auto;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .selfprofile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.2vw;
+    margin-top: 1vw;
+    height: 2.5vw;
+  }
+  
+  .selfprofile-header_hr {
+    margin-top: 0.5vw;
+    border: none;
+    border-bottom: 1px solid #C3C3C3;
+  }
+  
+  .selfprofile-header h3 {
+    font-size: 1.3vw;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .cross-icon {
+    font-size: 1.5vw;
+    cursor: pointer;
+    color: #959595;
+  }
+  
+  .users-contact {
+    text-align: center;
+    margin-bottom: 3vh;
+    position: relative;
+  }
+  
+  .users-contact .dp-bx {
+    width: 6vw;
+    height: 6vw;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    margin: 1vh auto 1vh;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0.4vw 0.8vw rgba(0, 0, 0, 0.1);
+  }
+  
+  .users-contact .dp-bx img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .camera-icon {
+    position: absolute;
+    bottom: 37%;
+    right: 37%;
+    width: 2vw;
+    height: 2vw;
+    background-color: rgba(106, 104, 104, 0.223);
+    color: rgb(27, 25, 25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 0.1vw solid white;
+    font-size: 1vw;
+    z-index: 1;
+    cursor: pointer;
+  }
+  
+  .camera-icon input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  .users-contact .user-name {
+    margin-bottom: 1.5vh;
+    font-size: 1.2vw;
+    color: black;
+  }
+  
+  .about {
+    margin-bottom: 2vh;
+    padding: 1vw;
+    border-top: 0.1vw solid #ddd;
+    border-bottom: 0.1vw solid #ddd;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .about-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .edit-icon {
+    font-size: 1.1vw;
+    cursor: pointer;
+    color: #646AFD;
+    transition: color 0.3s;
+  }
+  
+  .edit-icon:hover {
+    color: #4a58e0;
+  }
+  
+  .save-icon {
+    color: #6169FF;
+  }
+  
+  .about-text {
+    color: #666;
+    font-size: 0.9vw;
+    margin-top: 0.5vh;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  
+  .about-input {
+    width: 100%;
+    height: 6vh;
+    font-size: 0.9vw;
+    padding: 0.5vh;
+    border: 0.1vw solid #ddd;
+    border-radius: 0.5vw;
+    outline: none;
+    resize: none;
+  }
+  
+  .save-btn {
+    width: 90%;
+    margin: 1vh auto;
+    padding: 1vh;
+    background-color: #6169FF;
+    color: white;
+    font-size: 1vw;
+    font-weight: bold;
+    border: none;
+    border-radius: 0.5vw;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .save-btn:hover {
+    background-color: #4b53f7;
+  }
+  .mobile_home .selfprofile {
+    width: 100vw !important;
+  }
+  
+  .mobile_home .selfprofile-header {
+    height: 12vw !important;
+  }
+  
+  .mobile_home .selfprofile-header h3 {
+    font-size: 6vw !important;
+  }
+  
+  .mobile_home .cross-icon {
+    font-size: 6vw !important;
+  }
+  
+  .mobile_home .users-contact {
+    margin-bottom: 3vh !important;
+  }
+  
+  .mobile_home .users-contact .dp-bx {
+    width: 40vw !important;
+    height: 40vw !important;
+  }
+  
+  .mobile_home .camera-icon {
+    width: 8vw !important;
+    height: 8vw !important;
+    font-size: 3vw !important;
+    bottom: 30% !important;
+    right: 30% !important;
+  }
+  
+  .mobile_home .users-contact .user-name {
+    font-size: 6vw !important;
+  }
+  
+  .mobile_home .about {
+    padding: 3vw !important;
+  }
+  
+  .mobile_home .about-header p {
+    font-size: 5vw !important;
+  }
+  
+  .mobile_home .edit-icon {
+    font-size: 4vw !important;
+  }
+  
+  .mobile_home .about-text {
+    font-size: 4vw !important;
+  }
+  
+  .mobile_home .about-input {
+    font-size: 4vw !important;
+    height: 10vw !important;
+    border-radius: 2vw !important;
+  }
+  
+  .mobile_home .save-btn {
+    font-size: 5vw !important;
+    padding: 2vw !important;
+    border-radius: 2vw !important;
+  }
+  

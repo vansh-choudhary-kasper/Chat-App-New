@@ -1,0 +1,54 @@
+.mobileSideBarOpen{
+    z-index: 2;
+    position: absolute;
+    background-color: white;
+    display: flex;
+    height: 100vh;
+    left: 0;
+    transition: 0.5s;
+    width:45vw;
+}
+.mobileSideBarClose{
+    z-index: 2;
+    position: absolute;
+    background-color: white;
+    display: flex;
+    height: 100vh;
+    left: -25vw;
+    transition: 0.5s;
+
+}
+.mobileSideBarOpen  .sideLink_logo{
+    width:45vw;
+}
+.mobileSideBarOpen .closingToggle{
+    position: absolute;
+    top: 0.6vw;
+    right: -0.2vw;
+    font-size:10vw;
+    color: #6169FF;
+}
+.mobileSideBarOpen hr{
+    margin-top: 8vw;
+}
+.mobileSideBarOpen .sideLink_icons_container{
+    gap: 4vw;
+}
+.mobileSideBarOpen .sideLink_icons {
+  height: 15vw;
+  font-size: 9vw;
+}
+.mobileSideBarOpen .home_profile_container {
+    width: 11.5vw;
+    height: 11.5vw;
+    margin-bottom: 2.5vw;
+}
+.mobileSideBarOpen .logout_menu{
+    bottom: 13vw;
+    left: 32.5vw;
+}
+
+.mobileSideBarOpen .logout_menu button{
+    padding: 2vw 3.2vw;
+    font-size: 3.5vw;
+}

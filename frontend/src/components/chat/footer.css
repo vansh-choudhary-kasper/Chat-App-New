@@ -1,0 +1,219 @@
+.footer_main_container{
+   position: relative;
+    height: 5vw;
+    /* overflow: hidden; */
+}
+.reply{
+    position: absolute;
+    left: 6vw;
+    top: -2.6vw;
+    background-color: white;
+    padding: 0.2vw 0.4vw;
+    width: 85%;
+    max-height: 3.9vw;
+    border-radius: 0.4vw;
+    border: 1px solid #A1A1A1;
+    border-bottom: none;
+    overflow: hidden;
+    z-index: 1;
+}
+.reply p{
+    background-color: #a1a1a177;
+    /* max-height: 9%; */
+    overflow: hidden;
+    border-radius: 0.4vw;
+    font-family: "Open Sans";
+    padding: 0.2vw 0.5vw 0.2vw;
+font-size: 0.9vw;
+}
+.reply_close{
+    position: absolute;
+    top: 0.15vw;
+    right:0.3vw;
+   color: #636262;
+    font-size: 1.3vw;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.footer_container{
+    display: flex;
+    align-items: center;
+    gap: 0.6vw;
+    height: 100%;
+
+}
+.footer_icon{
+    flex: 0.08;
+    height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 2vw;
+    color: #6169FF;
+    cursor: pointer;
+    position: relative;
+}
+.footer_input{
+    flex: 0.86;
+    display: flex;
+    height: 100%;
+    position: relative;
+    
+}
+.footer_input input{
+    width: 100%;
+    height: 60%;
+    margin: auto 0;
+    border-radius: 0.8vw;
+    outline: none;
+    border: 1px solid #A1A1A1;
+    padding: 15px;
+    font-size: 1.1vw;
+
+}
+.footer_send_icon{
+    flex: 0.05;
+    height: 100%;
+}
+
+.footer_send_icon{
+    height: 3.5vw;
+    width: 3.5vw;
+    margin: auto 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border: 1px solid #A1A1A1; */
+    font-size: 2vw;
+    color: #6169FF;
+    border-radius: 0.4vw;
+    cursor: pointer;
+}
+.footer_icon_child{
+    position: absolute;
+    bottom: 4.5vw;
+    right: -1vw;
+  z-index: 8;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.6vw;
+    transition: 0.5s
+}
+.hidden{
+    position: absolute;
+ 
+    bottom:-25vw;
+    right: -1vw;
+  z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vw;
+    transition: 0.5s
+}
+.footer_select_icon{
+    background-color: #6169FF;
+    color: white;
+    border-radius: 0.4vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.5s;
+    height: 3vw;
+    width: 3vw;
+    
+    
+}
+.footer_select_icon:hover{
+    font-size: 2.5vw;
+}
+/* for image reply */
+
+.reply_image_main_container {
+    position: absolute;
+    left: 6vw;
+    top: auto;  /* Do not fix the top */
+    bottom:4vw;  /* Align the bottom to 0, which allows expansion towards the top */
+    background-color: white;
+    padding: 0.2vw;
+    width: 85%;
+    max-height: 12vw;  /* Maximum height */
+    height: auto;  /* Allow the height to adjust automatically */
+    border-radius: 0.4vw;
+    border: 1px solid #A1A1A1;
+    border-bottom: none;
+    overflow: hidden;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .reply_image_container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    padding: 0.5vw;
+    max-height: 12vw; /* Ensure that the container respects the max height */
+  }
+  
+  .reply_image_content {
+    width: auto; 
+    height: 100%; 
+    max-height: 10vw;
+    object-fit: contain;
+    object-position: center; 
+    border-radius: 0.4vw;
+  }
+  
+  .reply_image_close {
+    position: absolute;
+    top: 0.15vw;
+    right: 0.3vw;
+    color: #636262;
+    font-size: 1.8vw;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .reply_pdf{
+    align-items: flex-start;
+  }
+  .reply_pdf_container{
+    display: flex;
+    align-items: center;
+    padding: 0.4vw;
+    justify-content: flex-start;
+
+  }
+  .reply_pdf_container svg{
+    color: red;
+    font-size: 2vw;
+  }
+  .reply_pdf_container p{
+    color: #2F2F2F;
+    font-size: 1vw;
+    font-weight: 600;
+  }
+
+  /* mobile Footer */
+  .mobileFooter{
+    height: 12vw !important;
+  
+    background: white;
+  }
+  .mobileFooter .footer_icon{
+    flex: 0.1 !important;
+    font-size: 7vw !important;
+  }
+  .mobileFooter .footer_input input{
+    font-size: 4vw !important;
+    padding: 15px  7px!important;
+  }
+  .mobileFooter .footer_send_icon{
+    flex: 0.1 !important;
+    font-size: 7vw !important;
+  }
+

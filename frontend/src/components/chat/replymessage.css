@@ -1,0 +1,19 @@
+
+  .reply_message {
+    display: flex;
+    flex-direction: column;
+    max-width: 91%;
+  }
+  
+  .text_reply_message {
+    font-size: 0.9vw;
+    color: #666;
+    font-style: italic;
+    border-left: 2px solid #6169FF;
+    max-width: 100%;
+    background-color: aliceblue !important;
+  }
+  .message p{
+    max-width: 100%;
+  }
+  

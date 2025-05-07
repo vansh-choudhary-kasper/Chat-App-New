@@ -1,0 +1,57 @@
+.avatar-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .avatar {
+    overflow: hidden;
+    width: 1.5vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5vw;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    margin-left: -0.3vw; /* To create the overlap effect */
+  }
+  .first{
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5vw;
+    height: 1.5vw;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+  }
+  .avatar img, .first img{
+    all: unset;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .extra-count {
+    width: 1.4vw;
+    height: 1.4vw;
+    border-radius: 50%;
+    background-color: #d9d9d9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #6169FF;
+    font-size: 0.6vw;
+    font-weight: bold;
+    margin-left: -0.3vw; /* To align with overlapping avatars */
+    cursor: pointer;
+    z-index: 5;
+  }
+  
+  .extra-count:hover {
+    background-color: #cccccc; /* Slightly darker on hover */
+  }
+  

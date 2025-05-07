@@ -1,0 +1,38 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Matemasie&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+
+*{
+padding: 0;
+margin: 0;
+box-sizing: border-box;
+scrollbar-width: thin; /* Firefox: Set the scrollbar width */
+scrollbar-color: #6169FF #f1f1f1;
+font-family: "Open Sans";
+}
+::-webkit-scrollbar {
+    width: 8px; /* Adjust the scrollbar width */
+    height: 8px; /* Adjust the horizontal scrollbar height */
+  }
+  
+  /* Track (Background) Styling */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light background for the track */
+    border-radius: 10px; /* Rounded corners for the track */
+  }
+  
+  /* Thumb (Handle) Styling */
+  ::-webkit-scrollbar-thumb {
+    background: #6c757d; /* Thumb color */
+    border-radius: 10px; /* Rounded corners for the thumb */
+  }
+  
+  /* Thumb Hover Styling */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #495057; /* Darker color when hovered */
+  }
+  
+  /* Optional: Adding a focus state for better accessibility */
+  ::-webkit-scrollbar:focus {
+    outline: none; /* Remove focus outline on scrollbar */
+  }

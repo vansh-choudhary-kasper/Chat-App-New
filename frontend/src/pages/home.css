@@ -1,0 +1,292 @@
+.home{
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+   max-width: 1920px;
+   margin: 0 auto;
+}
+.sideLink{
+    width: 7vw;
+  
+    z-index: 1;
+    overflow: hidden;
+    box-shadow: 10px -1px 40.1px 0px rgba(0, 0, 0, 0.05);
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+align-items: center;
+}
+.sideLink_logo{
+    width: 100%;
+    height: 2.5vw;
+    overflow: hidden;
+    margin-top: 1vw;
+    padding: 0 0.6vw;
+    /* border-bottom: 1px solid #C3C3C3; */
+   
+}
+.sideLink_logo img{
+    width: 100%;
+  
+}
+.sideLink hr{
+    margin-top: 0.5vw;
+    border: none;
+    border-bottom: 1px solid #C3C3C3;
+}
+.sideLink_icons_container{
+     margin-top: 3vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2vw;
+    color: white;
+    padding: 0 1.2vw 0  0;
+
+}
+.sideLink_icons{
+   color: black;
+    height: 4vw;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 1.5vw;
+    border-radius: 0 1.2vw 1.2vw 0;
+    font-size: 2vw; 
+}
+.active{
+    background: #6169FF;
+    color: white;
+    transition: 0.3s;
+}
+.home_profile_container {
+    width: 3.5vw;
+    height: 3.5vw;
+    overflow: hidden;
+    margin-bottom: 1.5vw;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Ensure dropdown is positioned relative to this container */
+}
+
+.home_profile_container img {
+  all: unset;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* .profile_wrapper {
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+} */
+
+.logout_menu {
+    position: absolute;
+    bottom: 4vw;
+    left: 9.5vw;
+    transform: translateX(-50%); 
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 0.4vw;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2vw;
+    min-width: 8vw; 
+}
+
+.logout_menu button {
+    /* background-color: #d32f2f63; */
+    color: #292929;
+    border: none;
+    padding: 0.4vw 0.8vw;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    background-color: white ;
+font-size: 0.8vw;
+    gap: 0.4vw;
+    transition: 0.3s;
+    cursor: pointer;
+    width: 100%; /* Make the button fill the dropdown width */
+}
+.logout_menu button svg{
+    transform: rotate(180deg);
+}
+
+.logout_menu button:hover {
+    background-color: #d32f2f;
+    color: white;
+}
+.bac{
+    background-color: white !important;
+    color: #292929 !important;
+    border: 1px solid #ffffff !important;
+
+   
+}
+.bac svg{
+  transform: rotate(0deg) !important;
+
+}
+
+.bac:hover{
+    border: 1px solid #b1b1b1 !important;
+    color: #292929 !important;
+
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal content box */
+  .modal-content {
+    background: #fff;
+    border-radius: 0.4vw;
+    width: 17vw;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    padding: 0.8vw;
+  }
+  
+  /* Close button (X) */
+  .close-btn {
+    position: absolute;
+    top: 0.2vw;
+    right: 1vw;
+    font-size: 1.4vw;
+    cursor: pointer;
+    color: #888;
+  }
+  
+  .close-btn:hover {
+    color: #000;
+  }
+  
+  /* Modal text */
+  .modal-content p {
+    font-size: 0.8vw;
+    margin:0.4vw 0 0.8vw;
+    color: #555;
+  }
+  .modal-content svg{
+    font-size: 1.2vw;
+    color: #e40000;
+    transform: rotate(180deg);
+  }
+  /* Button container */
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    /* gap: 0.2vw; */
+  }
+  
+  /* Buttons */
+  .btn {
+    width: 48%;
+    padding:0.5vw;
+    border: none;
+    border-radius: 0.2vw;
+    font-size: 0.6vw;
+    cursor: pointer;
+  }
+  
+  .yes {
+    background: #ff6b6b;
+    color: #fff;
+  }
+  
+  .no {
+    background: #d3d3d3;
+    color: #555;
+  }
+  
+  .yes:hover {
+    background: #ff4b4b;
+  }
+  
+  .no:hover {
+    background: #bcbcbc;
+  }
+  /* incoming call */
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 300px;
+  }
+  
+  .modal-content h2 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .modal-content p {
+    margin: 10px 0 20px;
+    color: #666;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .accept-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .reject-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .accept-btn:hover {
+    background-color: #45a049;
+  }
+  
+  .reject-btn:hover {
+    background-color: #e53935;
+  }

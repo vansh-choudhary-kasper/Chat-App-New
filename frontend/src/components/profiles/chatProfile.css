@@ -1,0 +1,34 @@
+.chat_profile{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.089);
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.chat_profile_right{
+    width: 20vw;
+    background-color: white;
+    height: 100%;
+
+}
+.chat_profile_right_top{
+    display: flex;
+    padding: 0 1.2vw;
+    margin-top: 1vw;
+    height: 2.5vw;
+    overflow: hidden;
+    /* background-color: #12D300; */
+    align-items: center;
+    justify-content: space-between;
+}
+.chat_profile_image_container{
+    width: 2.5vw;
+    height: 2.5vw;
+    border-radius: 50%;
+    overflow: hidden;
+}

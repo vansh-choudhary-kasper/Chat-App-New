@@ -1,0 +1,86 @@
+.not-found {
+    margin: 0;
+    padding: 0;
+    font-family: "Tomorrow", sans-serif;
+    height: 100vh;
+    width: 100vw;
+    background-image: linear-gradient(to top, #2e1753, #1f1746, #131537, #0d1028, #050819);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .not-found .text {
+    position: absolute;
+    top: 10%;
+    color: #fff;
+    text-align: center;
+  }
+  
+  .not-found h1 {
+    font-size: 15vw;
+  }
+  
+  .not-found .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    right: 0;
+    animation: starTwinkle 5s infinite linear;
+
+  }
+  
+  .not-found .astronaut img {
+    width: 16vw;
+    position: absolute;
+    top: 55%;
+    animation: astronautFly 10s infinite linear;
+    transition: 0.5s;
+
+  }.not-found-error{
+    font-size: 4vw;
+  }
+  
+  @keyframes astronautFly {
+    0% {
+      left: -15vw;
+    }
+    25% {
+      top: 50%;
+      transform: rotate(30deg);
+    }
+    50% {
+      transform: rotate(45deg);
+      top: 55%;
+    }
+    75% {
+      top: 60%;
+      transform: rotate(30deg);
+    }
+    100% {
+      left: 110%;
+      transform: rotate(45deg);
+    }
+  }
+  
+  @keyframes starTwinkle {
+    0% {
+      background: rgba(255, 255, 255, 0.4);
+    }
+    25% {
+      background: rgba(255, 255, 255, 0.8);
+    }
+    50% {
+      background: rgba(255, 255, 255, 1);
+    }
+    75% {
+      background: rgba(255, 255, 255, 0.8);
+    }
+    100% {
+      background: rgba(255, 255, 255, 0.4);
+    }
+  }
+  
