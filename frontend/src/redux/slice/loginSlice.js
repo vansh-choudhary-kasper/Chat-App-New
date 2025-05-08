@@ -38,8 +38,8 @@ const userSlice = createSlice({
           state.login = action.payload;
           state.loading = false;
           state.error=null;
-          const { userId, token } = action.payload;
-          Cookies.set("user", JSON.stringify({ userId, token }), { expires: 1 }); 
+          const { userId, token, access } = action.payload;
+          Cookies.set("user", JSON.stringify({ userId, token, access }), { expires: 1 }); 
       
         }).addCase(loginHandler.rejected, (state, action) => {
           if(state.error){

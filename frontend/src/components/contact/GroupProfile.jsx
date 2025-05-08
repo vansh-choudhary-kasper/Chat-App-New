@@ -20,10 +20,10 @@ const GroupProfile = ({
   const {
     group_chat: { messages },
   } = useSelector((state) => state.conversation);
-  console.log("current_group", current_group);
   const [openMediaPage, setOpenMediaPage] = useState(false);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
+  const [access, setAccess] = useState(null);
   const dispatch = useDispatch();
   const handleDownload = (fileUrl, fileName = "download") => {
     fetch(fileUrl)
@@ -63,6 +63,7 @@ const GroupProfile = ({
     const parsedData = JSON.parse(userData);
     setUserId(parsedData.userId);
     setToken(parsedData.token);
+    setAccess(parsedData.access);
   }, []);
 
   const handleShowMediaPage = () => {
@@ -147,21 +148,27 @@ const GroupProfile = ({
                     {member.user.firstname} {member.user.lastname}
                   </span>
                 </div>
-                <IoTrash
-                  className="remove-icon"
-                  onClick={() => {try {
-                    dispatch(removeMemberHandler({
-                      member: member.user._id,
-                      groupId: current_group._id,
-                      userId: userId,
-                      token: token,
-                    }));
-                    console.log("removeMemberHandler called from GroupProfile");
-                  } catch (error) {
-                    console.error("error on calling removeMemberHandler", error);
-                  }}
-                }
-                />
+                {access === "admin" ? (
+                  <IoTrash
+                    className="remove-icon"
+                    onClick={() => {
+                      try {
+                        dispatch(
+                          removeMemberHandler({
+                            member: member.user._id,
+                            groupId: current_group._id,
+                            userId: userId,
+                            token: token,
+                          })
+                        );
+                      } catch (error) {
+                        console.error("error on calling removeMemberHandler", error);
+                      }
+                    }}
+                  />
+                ) : (
+                  <></>
+                )}
               </li>
             ))}
           </ul>

@@ -307,8 +307,6 @@ const conversationSlice = createSlice({
       }
     },
     messageEdit: (state, action) => {
-      console.log("state", state);
-      console.log("action", action);
       const { search, messageId, newText } = action.payload;
       if (state.direct_chat.current_conversation === action.payload.search) {
         const index = state.direct_chat.messages.findIndex(
@@ -378,7 +376,6 @@ const conversationSlice = createSlice({
       })
       .addCase(fetchSelectedConversation.fulfilled, (state, action) => {
         const data = action.payload;
-        console.log(data);
 
         // Get the selected user
         const selectedUser = data[0].participants.filter(
@@ -569,7 +566,6 @@ const conversationSlice = createSlice({
         state.loading = false;
       })
       .addCase(addMembersHandler.fulfilled, (state, action) => {
-        console.log("addMembersHandler", action.payload);
         const data = action.payload;
         const { message, status } = data;
         if (message === "Members added successfully") {
@@ -579,11 +575,7 @@ const conversationSlice = createSlice({
           ];
         }
       })
-      .addCase(addMembersHandler.rejected, (state, action) => {
-        state.group_chat.current_group.participants = [];
-      })
       .addCase(removeMemberHandler.fulfilled, (state, action) => {
-        console.log("removeMemberHandler", action.payload);
         const data = action.payload;
         const { message, status } = data;
         if (message === "Member removed successfully") {
@@ -592,9 +584,6 @@ const conversationSlice = createSlice({
           );
         }
       })
-      .addCase(removeMemberHandler.rejected, (state, action) => {
-        state.group_chat.current_group.participants = [];
-      });
   },
 });
 
@@ -639,7 +628,6 @@ export const fetchSelectedConversation = createAsyncThunk(
 export const sendMedia = createAsyncThunk(
   "conversation/sendMedia",
   async ({ formData, obj, token }, { rejectWithValue, getState }) => {
-    console.log("group");
     try {
       const response = await axios.post(
         `${Base_Url}/api/user/fileMessage`,
@@ -772,12 +760,9 @@ export const editMsgHandler = createAsyncThunk(
         }
       );
 
-      console.log("response from edit router", response.data.data);
 
       return response.data.data;
     } catch (error) {
-      console.log("error from edit router", error.response.data.message);
-      console.log("new Text", newText);
       return rejectWithValue(error.response.data.message);
     }
   }
@@ -856,11 +841,8 @@ export const addMembersHandler = createAsyncThunk(
         }
       );
 
-      console.log("response while adding members", response.data);
-      console.log("response added", response);
       return response.data;
     } catch (error) {
-      console.log("error while adding members", error.response.data.message);
       return rejectWithValue(error.response.data.message);
     }
   }
@@ -869,8 +851,6 @@ export const addMembersHandler = createAsyncThunk(
 export const removeMemberHandler = createAsyncThunk(
   "conversation/removeMembersHandler",
   async ({ member, groupId, userId, token }, { rejectWithValue }) => {
-    console.log("Hi man");
-    console.log("this is my token", token);
     const confirmed = window.confirm("Are you sure you want to remove this member?");
     if(!confirmed) return;
     try {
@@ -884,11 +864,8 @@ export const removeMemberHandler = createAsyncThunk(
         }
       );
 
-      console.log("response while removing members", response.data);
-      console.log("response removed", response);
       return response.data;
     } catch (error) {
-      console.log("error while removing members", error.response.data.message);
       return rejectWithValue(error.response.data.message);
     }
   }

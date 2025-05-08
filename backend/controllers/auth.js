@@ -110,7 +110,7 @@ exports.login = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Logged in successfully",
-      data: { token, userId: userDoc._id },
+      data: { token, userId: userDoc._id, access: userDoc.access },
     });
   } catch (error) {
     console.log(error);
