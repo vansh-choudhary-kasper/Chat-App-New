@@ -147,6 +147,9 @@ font-weight: 500;
  
     bottom: -4vw !important;
 }
+.message .options .edit_options{
+    display: none !important;
+}
 .message .options .delete_options{
     display: none !important;
 }

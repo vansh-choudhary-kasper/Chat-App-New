@@ -86,14 +86,6 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible) => {
           Edit
         </p>
       )}
-      {/* <p
-        className="edit_options"
-        onClick={() =>
-          editHandler(search, val._id, token, val.to, val.from, val)
-        }
-      >
-        Edit
-      </p> */}
       <p
         className="delete_options"
         onClick={() =>

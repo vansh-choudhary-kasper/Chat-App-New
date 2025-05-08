@@ -354,11 +354,19 @@ exports.addmembers = async (req, res) => {
       role: "member",
     }));
 
+    // without password
+    let newMembers = await User.find({ _id: { $in: uniqueNewMembers } }).select('-password');
+    newMembers = newMembers.map((user) => ({
+      user,
+      role: "member",
+    }));
+
     group.participants.push(...participantsToAdd);
     await group.save();
     res.status(200).json({
       message: "Members added successfully",
       status: "success",
+      newMembers,
     });
   } catch (error) {
     console.error(error);

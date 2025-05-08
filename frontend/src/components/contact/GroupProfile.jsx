@@ -19,6 +19,7 @@ const GroupProfile = ({
   const {
     group_chat: { messages },
   } = useSelector((state) => state.conversation);
+  console.log("current_group", current_group);
   const [openMediaPage, setOpenMediaPage] = useState(false);
   const handleDownload = (fileUrl, fileName = "download") => {
     fetch(fileUrl)
@@ -127,7 +128,7 @@ const GroupProfile = ({
             {current_group?.participants?.map((member) => (
               <li key={member.id} className="participant-item">
                 <div className="participant-info">
-                  <img src={member.user.profile || profile} alt="Member" />
+                  <img src={member.user?.profile || profile} alt="Member" />
                   <span>
                     {member.user.firstname} {member.user.lastname}
                   </span>

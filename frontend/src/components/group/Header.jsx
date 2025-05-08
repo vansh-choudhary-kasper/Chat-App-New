@@ -706,7 +706,7 @@ const Header = () => {
               </button>
               <button
                 className="group_submit"
-                disabled={selectedUsers.length < 2 ? true : false}
+                disabled={selectedUsers.length < 1 ? true : false}
                 onClick={() => memberHandler()}
               >
                 Add

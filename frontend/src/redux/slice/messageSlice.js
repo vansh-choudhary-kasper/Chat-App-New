@@ -567,6 +567,20 @@ const conversationSlice = createSlice({
         state.group_chat.current_group = null;
         state.group_chat.messages = [];
         state.loading = false;
+      })
+      .addCase(addMembersHandler.fulfilled, (state, action) => {
+        console.log("addMembersHandler", action.payload);
+        const data = action.payload;
+        const { message, status } = data;
+        if (message === "Members added successfully") {
+          state.group_chat.current_group.participants = [
+            ...state.group_chat.current_group.participants,
+            ...action.payload.newMembers,
+          ];
+        }
+      })
+      .addCase(addMembersHandler.rejected, (state, action) => {
+        state.group_chat.current_group.participants = [];
       });
   },
 });
@@ -829,8 +843,11 @@ export const addMembersHandler = createAsyncThunk(
         }
       );
 
-      return response.data.data;
+      console.log("response while adding members", response.data);
+      console.log("response added", response);
+      return response.data;
     } catch (error) {
+      console.log("error while adding members", error.response.data.message);
       return rejectWithValue(error.response.data.message);
     }
   }

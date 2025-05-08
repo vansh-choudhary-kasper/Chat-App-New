@@ -960,6 +960,13 @@ io.on("connection", async (socket) => {
           });
         }
 
+        if(req.user_id != from){
+          return res.status(400).json({
+            status: "failed",
+            message: "You are not authorized to delete this message",
+          });
+        }
+
         const result = await updateMessageStatus(search, messageId, from, "delete");
         console.log(await OneToOneMessage.findById(search));
 
@@ -1013,12 +1020,17 @@ io.on("connection", async (socket) => {
       });
     }
   
-    console.log("new text", newText);
-  
     if (!newText || newText.trim() === "") {
       return res.status(400).json({
         status: "failed",
         message: "New Text is required",
+      });
+    }
+
+    if(req.user_id != from){
+      return res.status(400).json({
+        status: "failed",
+        message: "You are not authorized to edit this message",
       });
     }
   
