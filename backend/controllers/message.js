@@ -376,6 +376,75 @@ exports.addmembers = async (req, res) => {
     });
   }
 };
+exports.removeMember = async (req, res) => {
+  try {
+    const { userId, groupId } = req.query;
+    const { member } = req.body;
+
+    if (
+      !userId ||
+      !groupId ||
+      !member
+    ) {
+      return res.status(400).json({
+        status: "failed",
+        message:
+          "Invalid input. Provide userId, groupId, and a valid member.",
+      });
+    }
+
+    const group = await GroupMessage.findById(groupId);
+    if (!group) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Group not found.",
+      });
+    }
+
+    const requestingUser = group.participants.find(
+      (participant) => participant.user.toString() === userId
+    );
+    
+    if (!requestingUser || requestingUser.role !== "admin") {
+      return res.status(401).json({
+        status: "failed",
+        message: "You are not authorized to remove members from this group.",
+      });
+    }
+
+    const memberToRemove = group.participants.find( // eslint-disable-next-line
+      (participant) => participant.user.toString() === member
+    );
+
+    console.log("memberToRemove", memberToRemove);
+
+    if (!memberToRemove) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Member not found.",
+      });
+    }
+
+    group.participants = group.participants.filter(
+      (participant) => participant._id !== memberToRemove._id
+    );
+
+    await group.save();
+
+    res.status(200).json({
+      message: "Member removed successfully",
+      status: "success",
+      memberId: memberToRemove._id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error",
+    });
+  }
+};
+
 exports.removeMembers = async (req, res) => {
   try {
     const { userId, groupId } = req.query;

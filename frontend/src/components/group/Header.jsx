@@ -329,9 +329,9 @@ const Header = () => {
       // close video track
     });
   };
-  const memberHandler = () => {
+  const memberHandler = async () => {
     const membersList = selectedUsers.map((val) => val._id);
-    dispatch(
+    const addMembers = await dispatch(
       addMembersHandler({
         membersList,
         groupId: current_group._id,
@@ -339,6 +339,12 @@ const Header = () => {
         token,
       })
     );
+    console.log("addMembers", addMembers);
+    if(addMembers?.payload?.message === "Members added successfully") {
+      setSelectedUsers([]);
+      setQuery("");
+      setModalOpen(false);
+    }
   };
   useEffect(() => {
     const userData = Cookies.get("user");

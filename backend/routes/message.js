@@ -9,6 +9,7 @@ router.patch("/status",authorization.protect, messageController.status);
 // router.post("/group",authorization.protect, messageController.group);
 router.get("/group",authorization.protect, messageController.groups);
 router.patch("/members",authorization.protect, messageController.addmembers);
+router.delete("/member",authorization.protect, messageController.removeMember);
 
 router.get("/selectedGroup",authorization.protect, messageController.selectedGroupConversation);
 

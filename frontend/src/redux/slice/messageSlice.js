@@ -581,6 +581,19 @@ const conversationSlice = createSlice({
       })
       .addCase(addMembersHandler.rejected, (state, action) => {
         state.group_chat.current_group.participants = [];
+      })
+      .addCase(removeMemberHandler.fulfilled, (state, action) => {
+        console.log("removeMemberHandler", action.payload);
+        const data = action.payload;
+        const { message, status } = data;
+        if (message === "Member removed successfully") {
+          state.group_chat.current_group.participants = state.group_chat.current_group.participants.filter(
+            (val) => val._id !== action.payload.memberId
+          );
+        }
+      })
+      .addCase(removeMemberHandler.rejected, (state, action) => {
+        state.group_chat.current_group.participants = [];
       });
   },
 });
@@ -852,6 +865,35 @@ export const addMembersHandler = createAsyncThunk(
     }
   }
 );
+
+export const removeMemberHandler = createAsyncThunk(
+  "conversation/removeMembersHandler",
+  async ({ member, groupId, userId, token }, { rejectWithValue }) => {
+    console.log("Hi man");
+    console.log("this is my token", token);
+    const confirmed = window.confirm("Are you sure you want to remove this member?");
+    if(!confirmed) return;
+    try {
+      const response = await axios.delete(
+        `${Base_Url}/api/user/member?groupId=${groupId}&userId=${userId}`,
+        {
+          data: { member },
+          headers: {
+            authorization: token
+          }
+        }
+      );
+
+      console.log("response while removing members", response.data);
+      console.log("response removed", response);
+      return response.data;
+    } catch (error) {
+      console.log("error while removing members", error.response.data.message);
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 export default conversationSlice.reducer;
 export const {
   sendMessage,
