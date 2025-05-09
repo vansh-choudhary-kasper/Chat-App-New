@@ -41,17 +41,26 @@ function formatMessageTime(created_at) {
   return `${day}/${month} ${formatTime(date)}`;
 }
 
-const ReplyOptions = (i, search, val, dispatch, token, setVisible) => {
+const EditVisibility = (val) => {
   const [showEditInput, setShowEditInput] = useState(false);
-  const [editMessage, setEditMessage] = useState(val.text);
+  const [editMessage, setEditMessage] = useState(val.text || "");
 
+  return { showEditInput, setShowEditInput, editMessage, setEditMessage };
+}
+
+const ReplyOptions = (i, search, val, dispatch, token, setVisible, editVisible = true) => {
+  let data;
+  if(editVisible){
+    data = EditVisibility(val);
+  }
+  
   const deleteHandler = (chatId, messageId, token, to, from, val) => {
     dispatch(messageStatus({ chatId, messageId, token, to, from }));
     setVisible(null);
   };
 
   const editHandler = async (chatId, messageId, token, to, from, val) => {
-    await dispatch(editMsgHandler({ search, messageId, token, newText: editMessage, to, from }));
+    await dispatch(editMsgHandler({ search, messageId, token, newText: data?.editMessage, to, from }));
     setVisible(null);
   };
 
@@ -61,17 +70,17 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible) => {
         <TbArrowBackUp />
         Reply
       </p>
-      {showEditInput ? (
+      {editVisible ? data?.showEditInput ? (
         <div className="edit_message">
           <input
             type="text"
             placeholder="Edit Message"
-            value={editMessage}
-            onChange={(e) => setEditMessage(e.target.value)}
+            value={data?.editMessage}
+            onChange={(e) => data?.setEditMessage(e.target.value)}
           />
           <button
             onClick={() => {
-              setShowEditInput(false);
+              data?.setShowEditInput(false);
               editHandler(search, val._id, token, val.to, val.from, val);
             }}
           >
@@ -81,11 +90,12 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible) => {
       ) : (
         <p
           className="edit_options"
-          onClick={() => setShowEditInput(true)}
+          onClick={() => data?.setShowEditInput(true)}
         >
           Edit
         </p>
-      )}
+      ) : <></>}
+      {}
       <p
         className="delete_options"
         onClick={() =>
@@ -148,7 +158,7 @@ export const ImageMessage = ({
               onClick={() => handleImageClick(val.file)}
             />
             {visible === i ? (
-              ReplyOptions(i, search, val, dispatch, token, setVisible)
+              ReplyOptions(i, search, val, dispatch, token, setVisible, false)
             ) : (
               <></>
             )}

@@ -26,11 +26,11 @@ const Chatlist = ({
   const { firstname, lastname, status, _id, profile } = val.participants[0];
 
   const unseen =
-    val.messages.length > 0 &&
+    val.messages?.length > 0 &&
     val.messages.filter((val) => val.seen.length === 0 && val.to === user_id);
   console.log(unseen);
   const timeAgo =
-    val.messages.length > 0 && val.messages[0].created_at
+    val.messages?.length > 0 && val.messages[0].created_at
       ? val.messages[0].created_at
       : null;
 
