@@ -438,7 +438,7 @@ exports.removeMember = async (req, res) => {
     res.status(200).json({
       message: "Member removed successfully",
       status: "success",
-      memberId: memberToRemove._id,
+      memberId: user?._id,
     });
   } catch (error) {
     console.error(error);

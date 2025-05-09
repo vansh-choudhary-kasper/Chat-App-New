@@ -580,7 +580,7 @@ const conversationSlice = createSlice({
         const { message, status } = data;
         if (message === "Member removed successfully") {
           state.group_chat.current_group.participants = state.group_chat.current_group.participants.filter(
-            (val) => val._id !== action.payload.memberId
+            (val) => val?.user?._id !== action.payload.memberId
           );
         }
       })
