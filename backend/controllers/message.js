@@ -362,6 +362,8 @@ exports.addmembers = async (req, res) => {
       role: "member",
     }));
 
+    io.to(newMembers.map(val => val.user.socket_id)).emit("group_added_you", { group });
+
     group.participants.push(...participantsToAdd);
     await group.save();
     res.status(200).json({

@@ -28,7 +28,8 @@ import {
   groupHandler,
   fetchGroups,
   addGroup,
-  removeGroup
+  removeGroup, 
+  addedOnGroup
 } from "../../redux/slice/messageSlice";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -104,6 +105,9 @@ const GroupLayout = () => {
     });
     socket.on("group_removed_you", (data) => {
       dispatch(removeGroup(data));
+    });
+    socket.on("group_added_you", (data) => {
+      dispatch(addedOnGroup(data));
     });
     return () => {
       socket.off("group_message");
@@ -548,7 +552,13 @@ const GroupLayout = () => {
                 <hr />
                 <Chat userId={userId} token={token} />
 
-                <Footer token={token} />
+                { current_group?.isRemoved ? 
+                <div className="group_removed" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
+                  {/* <img src={groupRemoved} alt="group_removed" /> */}
+                  <p style={{fontSize:'20px', color:'#6169FF'}}>You have been removed from this group</p>
+                </div> :
+                <Footer token={token} /> }
+                
               </div>
             ) : (
               <div className="noSelected_group_container">

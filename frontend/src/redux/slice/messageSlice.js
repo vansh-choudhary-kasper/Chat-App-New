@@ -585,11 +585,24 @@ const conversationSlice = createSlice({
         }
       })
       .addCase(removeGroup.fulfilled, (state, action) => {
-        const data = action.payload
-        console.log("data", data)
+        const groupId = action.payload
+        console.log("data", groupId)
+
+        if(state.group_chat.current_group?._id === groupId){
+          state.group_chat.current_group.isRemoved = true;
+        }
         state.group_chat.groups = state.group_chat.groups.filter(
-          (val) => val._id !== action.payload.groupId
+          (val) => val._id !== groupId
         );
+      })
+      .addCase(addedOnGroup.fulfilled, (state, action) => {
+        const group = action.payload
+
+        if(state.group_chat.current_group?._id === group._id){
+          state.group_chat.current_group.isRemoved = false;
+        }
+        
+        state.group_chat.groups.unshift(group);
       })
   },
 });
@@ -860,6 +873,17 @@ export const removeGroup = createAsyncThunk(
   async ({ groupId }, { rejectWithValue }) => {
     try {
       return groupId;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const addedOnGroup = createAsyncThunk(
+  "conversation/addedOnGroup",
+  async ({ group }, { rejectWithValue }) => {
+    try {
+      return group;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
     }
