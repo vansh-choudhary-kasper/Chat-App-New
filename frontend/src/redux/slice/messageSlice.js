@@ -584,6 +584,13 @@ const conversationSlice = createSlice({
           );
         }
       })
+      .addCase(removeGroup.fulfilled, (state, action) => {
+        const data = action.payload
+        console.log("data", data)
+        state.group_chat.groups = state.group_chat.groups.filter(
+          (val) => val._id !== action.payload.groupId
+        );
+      })
   },
 });
 
@@ -842,6 +849,17 @@ export const addMembersHandler = createAsyncThunk(
       );
 
       return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const removeGroup = createAsyncThunk(
+  "conversation/removeGroup",
+  async ({ groupId }, { rejectWithValue }) => {
+    try {
+      return groupId;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
     }

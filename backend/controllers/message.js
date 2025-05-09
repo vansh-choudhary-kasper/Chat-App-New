@@ -5,6 +5,7 @@ const User = require("../models/user");
 const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
+const { io } = require("../utils/socket");
 
 exports.conversations = async (req, res) => {
   try {
@@ -417,19 +418,22 @@ exports.removeMember = async (req, res) => {
     );
 
     console.log("memberToRemove", memberToRemove);
-
+    
     if (!memberToRemove) {
       return res.status(404).json({
         status: "failed",
         message: "Member not found.",
       });
     }
+    const user = await User.findOne({ _id: memberToRemove.user });
 
     group.participants = group.participants.filter(
       (participant) => participant._id !== memberToRemove._id
     );
 
     await group.save();
+
+    io.to(user?.socket_id).emit("group_removed_you", { groupId: group._id });
 
     res.status(200).json({
       message: "Member removed successfully",

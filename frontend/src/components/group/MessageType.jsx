@@ -547,7 +547,7 @@ export const TextMessage = ({
           <div className="group_message_profile">
             <img
               src={
-                messageFrom[0].user.profile
+                messageFrom[0]?.user?.profile
                   ? messageFrom[0].user.profile
                   : profile
               }
@@ -555,7 +555,7 @@ export const TextMessage = ({
             />
           </div>
           <span>
-            {messageFrom[0].user.firstname} {messageFrom[0].user.lastname}
+          {messageFrom[0]?.user?.firstname ? messageFrom[0].user.firstname : "unknown"} {messageFrom[0]?.user?.lastname}
           </span>
         </div>
       ) : (

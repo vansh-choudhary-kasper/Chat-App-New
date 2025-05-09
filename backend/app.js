@@ -1,5 +1,5 @@
 const { config } = require("dotenv");
-const express = require("express");
+// const express = require("express");
 const routes = require("./routes/index");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
@@ -11,6 +11,7 @@ const cors = require("cors");
 const mediasoup = require("mediasoup");
 const dotenv = config();
 
+const { io, httpsServer, app, express } = require("./utils/socket");
 const OneToOneMessage = require("./models/OneToOneMessage");
 const GroupMessage = require("./models/GroupMessage");
 const CallRecord = require("./models/Callrecord");
@@ -18,18 +19,12 @@ const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 const path = require("path");
 
-const fs = require("fs");
 const User = require("./models/user");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const authorization = require("./middleware/authorisation");
 const routers = require("express").Router();
-const app = express();
-
-// Read SSL certificate
-const privateKey = fs.readFileSync('../ssl/server.key', 'utf8');
-const certificate = fs.readFileSync('../ssl/server.cert', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
+// const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10kb" }));
@@ -39,8 +34,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(mongoSanitize());
 app.use(xssClean());
 
-const https = require('https');
-const httpsServer = https.createServer(credentials, app);
+
 
 app.use(
   cors({
@@ -109,18 +103,6 @@ const fetchLinkPreviewData = async (url) => {
     return null;
   }
 };
-
-
-const io = require("socket.io")(httpsServer, {
-  pingTimeout: 60000,
-  maxHttpBufferSize: 100 * 1024 * 1024,
-  cors: {
-    origin: `${process.env.FRONTEND_URL}`,
-    methods: ["GET", "POST"],
-    allowedHeaders: ["my-custom-header"],
-    credentials: true,
-  },
-});
 
 const DB = process.env.DBURI.replace("<password>", process.env.DBPASSWORD);
 

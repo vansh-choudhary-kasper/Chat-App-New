@@ -28,6 +28,7 @@ import {
   groupHandler,
   fetchGroups,
   addGroup,
+  removeGroup
 } from "../../redux/slice/messageSlice";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -100,6 +101,9 @@ const GroupLayout = () => {
       ) {
         navigate("/");
       }
+    });
+    socket.on("group_removed_you", (data) => {
+      dispatch(removeGroup(data));
     });
     return () => {
       socket.off("group_message");
