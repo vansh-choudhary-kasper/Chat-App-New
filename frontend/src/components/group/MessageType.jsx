@@ -236,7 +236,8 @@ export const ImageMessage = ({
                 val,
                 dispatch,
                 token,
-                setVisible
+                setVisible,
+                false
               )}
           </div>
           {val.text !== "null" && <p>{val.text}</p>}
@@ -340,7 +341,8 @@ export const LinkMessage = ({
                 val,
                 dispatch,
                 token,
-                setVisible
+                setVisible, 
+                false
               )}
           </div>
           {val.text && (
@@ -461,7 +463,7 @@ export const VideoMessage = ({
           {val.text !== "null" && <p>{val.text}</p>}
         </div>
         {visible === i &&
-          replyOptions(i, current_group._id, val, dispatch, token, setVisible)}
+          replyOptions(i, current_group._id, val, dispatch, token, setVisible, false)}
         {val.loading ? null : (
           <MdMoreVert
             onClick={(e) => changeVisibility(e, i)}
@@ -569,7 +571,7 @@ export const PdfMessage = ({
         </div>
 
         {visible === i &&
-          replyOptions(i, current_group._id, val, dispatch, token, setVisible)}
+          replyOptions(i, current_group._id, val, dispatch, token, setVisible, false)}
         {val.loading ? null : (
           <MdMoreVert
             onClick={(e) => changeVisibility(e, i)}

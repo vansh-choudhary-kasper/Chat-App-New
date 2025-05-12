@@ -226,7 +226,7 @@ export const LinkMessage = ({
           >
             {val.preview ? <img src={val.preview} alt="man" /> : <></>}
             {visible === i ? (
-              ReplyOptions(i, search, val, dispatch, token, setVisible)
+              ReplyOptions(i, search, val, dispatch, token, setVisible, false)
             ) : (
               <></>
             )}

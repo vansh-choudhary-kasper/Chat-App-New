@@ -62,7 +62,7 @@ const ChatLayout = () => {
         data.conversation_id === current_conversation &&
         data.message.to === parsedData.userId
       ) {
-        data.message.seen.push(parsedData.userId);
+        data.message.seen = "seen";
 
         socket.emit("chat_seen", {
           conversation_id: data.conversation_id,
