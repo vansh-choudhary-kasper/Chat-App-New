@@ -320,7 +320,7 @@ export const VideoMessage = ({
           {val.text !== "null" ? <p>{val.text}</p> : <></>}
         </div>
         {visible === i
-          ? ReplyOptions(i, search, val, dispatch, token, setVisible)
+          ? ReplyOptions(i, search, val, dispatch, token, setVisible, false)
           : null}
         {val.loading ? (
           <></>
@@ -403,7 +403,7 @@ export const PdfMessage = ({
 
       {visible === i
         ? 
-        ReplyOptions(i, search, val, dispatch, token, setVisible)
+        ReplyOptions(i, search, val, dispatch, token, setVisible, false)
         : null}
       {val.loading ? (
         <></>
