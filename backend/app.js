@@ -918,40 +918,63 @@ io.on("connection", async (socket) => {
     );
   }
 
+  async function updateGroupMessageStatus(search, messageId, from, status) {
+    const doc = await GroupMessage.findById(search);
+
+    const index = doc?.messages.findIndex(
+      m => m._id.equals(messageId) && m.from.equals(from)
+    );
+
+    if (index === -1) return {modifiedCount: 0};
+
+    const fieldPath = `messages.${index}.status`;
+
+    return GroupMessage.updateOne(
+      { _id: search },
+      { $set: { [fieldPath]: status } },
+      { runValidators: true }
+    );
+  }
+
   routers.patch(
     "/user/messageStatus",
     authorization.protect,
     async (req, res) => {
       try {
         const { search, messageId } = req.query;
-        const { to, from } = req.body;
-        const to_user = await User.findById({ _id: to });
+        const { to, from, conversation } = req.body;
         const from_user = await User.findById({ _id: from });
-
+        
         if (!search || search.trim() === "") {
           return res.status(400).json({
             status: "failed",
             message: "Conversation ID is required",
           });
         }
-
+        
         if (!messageId || messageId.trim() === "") {
           return res.status(400).json({
             status: "failed",
             message: "Message ID is required",
           });
         }
-
+        
         if(req.user_id != from){
           return res.status(400).json({
             status: "failed",
             message: "You are not authorized to delete this message",
           });
         }
-
-        const result = await updateMessageStatus(search, messageId, from, "delete");
-        console.log(await OneToOneMessage.findById(search));
-
+        
+        let result;
+        if(conversation && conversation === "group"){
+          result = await updateGroupMessageStatus(search, messageId, from, "delete");
+        } else {
+          result = await updateMessageStatus(search, messageId, from, "delete");
+        }
+        // console.log(await OneToOneMessage.findById(search));
+        console.log("result", result);
+        
         if (result.modifiedCount === 0) {
           return res.status(404).json({
             status: "failed",
@@ -959,12 +982,22 @@ io.on("connection", async (socket) => {
             data: [],
           });
         }
-        io.to(to_user.socket_id).emit("delete_message", { search, messageId });
-
-        io.to(from_user.socket_id).emit("delete_message", {
-          search,
-          messageId,
-        });
+        if(conversation && conversation === "group"){
+          let group_participants = await GroupMessage.findById(search).populate(
+            "participants.user",
+            "socket_id"
+          );
+          let socket_ids = group_participants.participants.map(val => val.user.socket_id);
+          io.to(socket_ids).emit("delete_group_message", { search, messageId });
+        } else {
+          const to_user = await User.findById({ _id: to });
+          io.to(to_user.socket_id).emit("delete_message", { search, messageId });
+          
+          io.to(from_user.socket_id).emit("delete_message", {
+            search,
+            messageId,
+          });
+        }
         return res.status(200).json({
           status: "success",
           message: "Message status updated successfully",

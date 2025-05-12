@@ -306,6 +306,44 @@ const conversationSlice = createSlice({
         }
       }
     },
+    groupMessageStatus: (state, action) => {
+      console.log("action.payload = ", action.payload);
+      const obj = {
+        type: "text",
+        text: "This message is deleted",
+        status: "delete",
+      };
+      if (state.group_chat.current_group._id === action.payload.search) {
+        const index = state.group_chat.messages.findIndex(
+          (val) => val._id === action.payload.messageId
+        );
+
+        if (index !== -1) {
+          state.group_chat.messages[index] = {
+            ...state.group_chat.messages[index],
+            ...obj,
+          };
+        }
+        const conversationIndex = state.group_chat.messages.findIndex(
+          (val) => val._id === action.payload.search
+        );
+        if (conversationIndex !== -1) {
+          const indexMessage = state.group_chat.messages[
+            conversationIndex
+          ].messages.findIndex((val) => val._id === action.payload.messageId);
+          if (indexMessage !== -1) {
+            state.group_chat.messages[conversationIndex].messages[
+              indexMessage
+            ] = {
+              ...state.group_chat.messages[conversationIndex].messages[
+              indexMessage
+              ],
+              ...obj,
+            };
+          }
+        }
+      }
+    },
     messageEdit: (state, action) => {
       const { search, messageId, newText } = action.payload;
       if (state.direct_chat.current_conversation === action.payload.search) {
@@ -745,13 +783,13 @@ export const chatStatus = createAsyncThunk(
 export const messageStatus = createAsyncThunk(
   "conversation/messageStatus",
   async (
-    { chatId, messageId, token, to, from },
+    { chatId, messageId, token, to, from, val },
     { rejectWithValue, getState }
   ) => {
     try {
       const response = await axios.patch(
         `${Base_Url}/api/user/messageStatus?search=${chatId}&messageId=${messageId}`,
-        { to, from },
+        { to, from, conversation : val?.conversation },
         {
           headers: {
             authorization: token,
@@ -759,8 +797,10 @@ export const messageStatus = createAsyncThunk(
         }
       );
 
+      console.log("response.data.data = ", response.data.data);
       return response.data.data;
     } catch (error) {
+      console.log("error = ", error);
       return rejectWithValue(error.response.data.message);
     }
   }
@@ -922,4 +962,5 @@ export const {
   setStatus,
   messageStatu,
   messageEdit,
+  groupMessageStatus
 } = conversationSlice.actions;

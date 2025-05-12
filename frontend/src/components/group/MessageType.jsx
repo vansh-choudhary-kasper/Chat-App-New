@@ -86,8 +86,14 @@ function formatMessage(created_at) {
 
 // Options for reply
 const replyOptions = (i, search, val, dispatch, token, setVisible) => {
+  console.log("i = ", i);
+  console.log("search = ", search);
+  console.log("val = ", val);
+  console.log("dispatch = ", dispatch);
+  console.log("token = ", token);
+  console.log("setVisible = ", setVisible);
   const deleteHandler = (chatId, messageId, token, to, from, val) => {
-    dispatch(messageStatus({ chatId, messageId, token, to, from }));
+    dispatch(messageStatus({ chatId, messageId, token, to, from, val }));
     setVisible(null);
   };
 
