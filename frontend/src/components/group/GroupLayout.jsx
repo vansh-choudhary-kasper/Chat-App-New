@@ -30,7 +30,8 @@ import {
   addGroup,
   removeGroup, 
   addedOnGroup,
-  groupMessageStatus
+  groupMessageStatus, 
+  editGroupMessage
 } from "../../redux/slice/messageSlice";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -89,9 +90,12 @@ const GroupLayout = () => {
     socket.on("new_group", (data) => {
       dispatch(addGroup({ data, userId: parsedData.userId }));
     });
-      socket.on("delete_group_message", (data) => {
-        dispatch(groupMessageStatus(data));
-      });
+    socket.on("delete_group_message", (data) => {
+      dispatch(groupMessageStatus(data));
+    });
+    socket.on("edit_group_message", (data) => {
+      dispatch(editGroupMessage(data));
+    });
     socket.on("user_status", (data) => {
       dispatch(setStatus(data));
     });
@@ -113,6 +117,7 @@ const GroupLayout = () => {
     return () => {
       socket.off("group_message");
       socket.off("delete_group_message");
+      socket.off("edit_group_message");
       socket.off("user_status");
       socket.off("connect_error");
     };

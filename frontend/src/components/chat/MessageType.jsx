@@ -95,7 +95,6 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible, editVisible =
           Edit
         </p>
       ) : <></>}
-      {}
       <p
         className="delete_options"
         onClick={() =>

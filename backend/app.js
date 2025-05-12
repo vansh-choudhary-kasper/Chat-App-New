@@ -1013,88 +1013,121 @@ io.on("connection", async (socket) => {
     }
   );
 
-  routers.patch("/user/message",authorization.protect, async (req, res) => {
-    const { search, messageId } = req.query;
-    const { newText, to, from } = req.body;
-    console.log("io seted");
+  async function updateOneToOneMessage(search, messageId, from, newText) {
+    const doc = await OneToOneMessage.findById(search);
 
-    const to_user = await User.findById({ _id: to });
-    const from_user = await User.findById({ _id: from });
-  
-    if (!search || search.trim() === "") {
-      return res.status(400).json({
-        status: "failed",
-        message: "Search is required",
-      });
-    }
-  
-    if (!messageId || messageId.trim() === "") {
-      return res.status(400).json({
-        status: "failed",
-        message: "Message ID is required",
-      });
-    }
-  
-    if (!newText || newText.trim() === "") {
-      return res.status(400).json({
-        status: "failed",
-        message: "New Text is required",
-      });
-    }
+    const index = doc?.messages.findIndex(
+      m => m._id.equals(messageId) && m.from.equals(from)
+    );
 
-    if(req.user_id != from){
-      return res.status(400).json({
-        status: "failed",
-        message: "You are not authorized to edit this message",
-      });
-    }
-  
+    if (index === -1) return { modifiedCount: 0 };
+
+    const fieldPath = `messages.${index}.text`;
+
+    return OneToOneMessage.updateOne(
+      { _id: search },
+      { $set: { [fieldPath]: newText } },
+      { runValidators: true }
+    );
+  }
+
+  async function updateGroupMessage(search, messageId, from, newText) {
+    const doc = await GroupMessage.findById(search);
+
+    const index = doc?.messages.findIndex(
+      m => m._id.equals(messageId) && m.from.equals(from)
+    );
+
+    console.log("your index is = ", index);
+    if (index === -1) return { modifiedCount: 0 };
+
+    const fieldPath = `messages.${index}.text`;
+
+    return GroupMessage.updateOne(
+      { _id: search },
+      { $set: { [fieldPath]: newText } },
+      { runValidators: true }
+    );
+  }
+
+  routers.patch("/user/message", authorization.protect, async (req, res) => {
     try {
-      const conversation = await OneToOneMessage.findOne({
-        _id: search,
-        "messages._id": messageId,
-      }).populate(
-        "participants",
-        "firstname lastname _id status socket_id profile"
-      );
-  
-      if (!conversation) {
+      const { search, messageId } = req.query;
+      const { newText, to, from, conversation } = req.body;
+      console.log("io seted");
+
+      const from_user = await User.findById({ _id: from });
+
+      if (!search || search.trim() === "") {
+        return res.status(400).json({
+          status: "failed",
+          message: "Search is required",
+        });
+      }
+
+      if (!messageId || messageId.trim() === "") {
+        return res.status(400).json({
+          status: "failed",
+          message: "Message ID is required",
+        });
+      }
+
+      if (!newText || newText.trim() === "") {
+        return res.status(400).json({
+          status: "failed",
+          message: "New Text is required",
+        });
+      }
+
+      if (req.user_id != from) {
+        return res.status(400).json({
+          status: "failed",
+          message: "You are not authorized to edit this message",
+        });
+      }
+
+      let result;
+      if (conversation && conversation === "group") {
+        console.log("this is group call");
+        result = await updateGroupMessage(search, messageId, from, newText);
+      } else {
+        console.log("this is user call");
+        result = await updateOneToOneMessage(search, messageId, from, newText);
+      }
+
+      console.log("result", result);
+
+      if (result.modifiedCount === 0) {
         return res.status(404).json({
           status: "failed",
-          message: "No Conversation found",
+          message: "No matching conversation or message found",
           data: [],
         });
       }
-  
-      console.log(messageId);
-      const index = conversation.messages.findIndex(
-        (val) => val._id.toString() === messageId
-      );
-      if (index === -1) return res.status(404).json({
-        status: "failed",
-        message: "No matching conversation or message found",
-        data: [],
-      });
-  
-      conversation.messages[index].text = newText;
-      await conversation.save();
 
-      io.to(to_user.socket_id).emit("edit_message", {
-        search,
-        messageId,
-        newText,
-      });
+      if (conversation && conversation === "group") {
+        console.log("this is group call");
+        let group_participants = await GroupMessage.findById(search).populate(
+          "participants.user",
+          "socket_id"
+        );
+        let socket_ids = group_participants.participants.map(val => val.user.socket_id);
+        io.to(socket_ids).emit("edit_group_message", { search, messageId, newText });
+      } else {
+        const to_user = await User.findById({ _id: to });
+        io.to(to_user.socket_id).emit("edit_message", { search, messageId, newText });
 
-      io.to(from_user.socket_id).emit("edit_message", {
-        search,
-        messageId,
-        newText,
-      });
-  
+        io.to(from_user.socket_id).emit("edit_message", {
+          search,
+          messageId,
+          newText,
+        });
+      }
+
       res.status(200).json({
         status: "success",
         message: "Message updated successfully",
-        data: { index, conversation },
+        data: { search, messageId, newText },
       });
     } catch (error) {
       console.error(error);
@@ -1103,7 +1136,7 @@ io.on("connection", async (socket) => {
         message: "Server error",
       });
     }
-  });
+});
 
   socket.on("join-video-room", async ({ to, roomId, from }) => {
     createOneToOneRoom(roomId, from);

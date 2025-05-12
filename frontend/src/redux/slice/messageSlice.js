@@ -344,6 +344,40 @@ const conversationSlice = createSlice({
         }
       }
     },
+    editGroupMessage: (state, action) => {
+      const { search, messageId, newText } = action.payload;
+      if (state.group_chat.current_group._id === search) {
+        const index = state.group_chat.messages.findIndex(
+          (val) => val._id === action.payload.messageId
+        );
+
+        console.log("index = ", index);
+        if (index !== -1) {
+          state.group_chat.messages[index] = {
+            ...state.group_chat.messages[index],
+            ...{ text: newText },
+          };
+        }
+        const conversationIndex = state.group_chat.messages.findIndex(
+          (val) => val._id === action.payload.search
+        );
+        if (conversationIndex !== -1) {
+          const indexMessage = state.group_chat.messages[
+            conversationIndex
+          ].messages.findIndex((val) => val._id === action.payload.messageId);
+          if (indexMessage !== -1) {
+            state.group_chat.messages[conversationIndex].messages[
+              indexMessage
+            ] = {
+              ...state.group_chat.messages[conversationIndex].messages[
+              indexMessage
+              ],
+              ...{ text: newText },
+            };
+          }
+        }
+      }
+    },
     messageEdit: (state, action) => {
       const { search, messageId, newText } = action.payload;
       if (state.direct_chat.current_conversation === action.payload.search) {
@@ -808,11 +842,11 @@ export const messageStatus = createAsyncThunk(
 
 export const editMsgHandler = createAsyncThunk(
   "conversation/editMsgHandler",
-  async ({ search, messageId, token, newText, to, from }, { rejectWithValue }) => {
+  async ({ search, messageId, token, newText, to, from, val }, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
         `${Base_Url}/api/user/message?search=${search}&messageId=${messageId}`,
-        { newText, to, from },
+        { newText, to, from, conversation : val?.conversation },
         {
           headers: {
             authorization: token,
@@ -962,5 +996,6 @@ export const {
   setStatus,
   messageStatu,
   messageEdit,
-  groupMessageStatus
+  groupMessageStatus, 
+  editGroupMessage
 } = conversationSlice.actions;

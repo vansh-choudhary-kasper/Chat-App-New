@@ -5,8 +5,10 @@ import { MdMoreVert } from "react-icons/md";
 import { AiOutlineFilePdf, AiOutlineFileZip } from "react-icons/ai";
 import { IoPlayCircleSharp } from "react-icons/io5";
 import { useDispatch } from "react-redux";
-import { messageStatus } from "../../redux/slice/messageSlice";
+import { messageStatus, editMsgHandler } from "../../redux/slice/messageSlice";
 import profile from "../../assets/img/manprofile.png";
+import { TbArrowBackUp } from "react-icons/tb";
+import Cookies from "js-cookie";
 
 // Format message time
 function formatMessageTime(created_at) {
@@ -84,16 +86,36 @@ function formatMessage(created_at) {
   return `${day} ${month} ${year}`;
 }
 
+const EditVisibility = (val) => {
+  const [showEditInput, setShowEditInput] = useState(false);
+  const [editMessage, setEditMessage] = useState(val.text || "");
+
+  return { showEditInput, setShowEditInput, editMessage, setEditMessage };
+}
+
+const userData = Cookies.get("user");
+let parsedData;
+let userId;
+if (userData) {
+  parsedData = JSON.parse(userData);
+  userId = parsedData.userId;
+}
+
 // Options for reply
-const replyOptions = (i, search, val, dispatch, token, setVisible) => {
-  console.log("i = ", i);
-  console.log("search = ", search);
-  console.log("val = ", val);
-  console.log("dispatch = ", dispatch);
-  console.log("token = ", token);
-  console.log("setVisible = ", setVisible);
+const replyOptions = (i, search, val, dispatch, token, setVisible, editVisible = true) => {
+  let data;
+  if(editVisible){
+    data = EditVisibility(val);
+  } 
   const deleteHandler = (chatId, messageId, token, to, from, val) => {
+    console.log('val = ', val);
     dispatch(messageStatus({ chatId, messageId, token, to, from, val }));
+    setVisible(null);
+  };
+
+  const editHandler = async (chatId, messageId, token, to, from, val) => {
+    console.log('val = ', val);
+    await dispatch(editMsgHandler({ search, messageId, token, newText: data?.editMessage, to, from, val }));
     setVisible(null);
   };
 
@@ -103,6 +125,36 @@ const replyOptions = (i, search, val, dispatch, token, setVisible) => {
         i === 0 ? "group_options group_first_messages" : "group_options"
       }
     >
+      <p>
+        <TbArrowBackUp />
+        Reply
+      </p>
+      {val?.from === userId ? ( <>
+      {editVisible ? data?.showEditInput ? (
+        <div className="edit_message">
+          <input
+            type="text"
+            placeholder="Edit Message"
+            value={data?.editMessage}
+            onChange={(e) => data?.setEditMessage(e.target.value)}
+          />
+          <button
+            onClick={() => {
+              data?.setShowEditInput(false);
+              editHandler(search, val._id, token, val.to, val.from, val);
+            }}
+          >
+            Save
+          </button>
+        </div>
+      ) : (
+        <p
+          className="edit_options"
+          onClick={() => data?.setShowEditInput(true)}
+        >
+          Edit
+        </p>
+      ) : <></>}
       <p
         onClick={() =>
           deleteHandler(search, val._id, token, val.to, val.from, val)
@@ -110,6 +162,7 @@ const replyOptions = (i, search, val, dispatch, token, setVisible) => {
       >
         Delete
       </p>
+      </>) : (<></>)}
     </span>
   );
 };
@@ -402,7 +455,7 @@ export const VideoMessage = ({
               alt="Preview"
               className="group_video_thumbnail"
               controls={false}
-              // poster={val.preview}
+            // poster={val.preview}
             />
           </div>
           {val.text !== "null" && <p>{val.text}</p>}
@@ -561,7 +614,7 @@ export const TextMessage = ({
             />
           </div>
           <span>
-          {messageFrom[0]?.user?.firstname ? messageFrom[0].user.firstname : "unknown"} {messageFrom[0]?.user?.lastname}
+            {messageFrom[0]?.user?.firstname ? messageFrom[0].user.firstname : "unknown"} {messageFrom[0]?.user?.lastname}
           </span>
         </div>
       ) : (
