@@ -60,7 +60,7 @@ const MediaPage = ({
                     <div
                       key={index}
                       className={`gallery-items ${media.type}`}
-                      onClick={() => handleDownload(media.file)}
+                      onClick={() => handleDownload(media.file, media.filename)}
                     >
                       {media.type === "image" ? (
                         <img src={media.file} alt="Media" />
@@ -127,7 +127,7 @@ const MediaPage = ({
                         <></>
                       )}
                       <button
-                        onClick={() => handleDownload(doc.file, "myfile")}
+                        onClick={() => handleDownload(doc.file, doc.filename)}
                         className="pdf_download_button"
                       >
                         <BsDownload />

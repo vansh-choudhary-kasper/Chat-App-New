@@ -177,18 +177,18 @@ const Footer = () => {
       formData.append('file', fileValue);
       formData.append('msgId', msgId);
       formData.append('loading', true);
-    if(fileTypes==="zip"||fileTypes==="pdf"){
+    // if(fileTypes==="zip"||fileTypes==="pdf" ||fileTypes==="image"){
       formData.append('filename', fileValue.name);
-    }
-      formData.append('text', (fileTypes==="zip"||fileTypes==="pdf")?"null": msg.trim());
+    // }
+      formData.append('text', (fileTypes==="zip"||fileTypes==="pdf"||fileTypes==="image"||fileTypes==="video")?"null": msg.trim());
       const obj = {
         conversation_id: current_group._id,
         from: userId,
         conversation:"group",
         type:fileTypes,
         file:fileValue,
-        filename: (fileTypes==="zip"||fileTypes==="pdf")?fileValue.name:null,
-        text:(fileTypes==="zip"||fileTypes==="pdf")?"null": msg.trim(),
+        filename: fileValue.name,
+        text:(fileTypes==="zip"||fileTypes==="pdf"||fileTypes==="image"||fileTypes==="video")?"null": msg.trim(),
         msgId,
         loading:true,
         created_at: date.toISOString()
@@ -213,7 +213,7 @@ const Footer = () => {
         conversation:"group",
         type: containsUrl(msg) ? "link" : "text",
       };
-console.log(socket)
+      console.log(socket)
       socket.emit("text_message", obj);
        inputRef.current.value=null
    
@@ -230,16 +230,16 @@ console.log(socket)
       formData.append('file', fileValue);
       formData.append('msgId', msgId);
       formData.append('loading', true);
-    if(fileTypes==="zip"||fileTypes==="pdf"){
+    // if(fileTypes==="zip"||fileTypes==="pdf"||fileTypes==="image"){
       formData.append('filename', fileValue.name);
-    }
+    // }
     const obj = {
       conversation_id: current_group._id,
       from: userId,
       conversation:"group",
       type:fileTypes,
       file:fileValue,
-      filename: (fileTypes==="zip"||fileTypes==="pdf")?fileValue.name:null,
+      filename: fileValue.name,
       text: "null",
       msgId,
       created_at: date.toISOString(),

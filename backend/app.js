@@ -682,10 +682,7 @@ io.on("connection", async (socket) => {
           seen: "unseen",
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
-          filename:
-            req.body.type === "pdf" || req.body.type === "zip"
-              ? req.body.filename
-              : null,
+          filename: req.body.filename,  
         };
         let chat;
         const to_user = await User.findById(to);
@@ -804,10 +801,7 @@ io.on("connection", async (socket) => {
           seen: "unseen",
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
-          filename:
-            req.body.type === "pdf" || req.body.type === "zip"
-              ? req.body.filename
-              : null,
+          filename: req.body.filename,
         };
         const from_user = await User.findById(from);
         if (!new_message._id) {

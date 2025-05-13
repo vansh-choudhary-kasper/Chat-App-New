@@ -59,13 +59,12 @@ const ReplyMessages = ({ i, changeVisibility, visible }) => {
           <div className="preview_modal" onClick={closePreview}>
             <div className="preview_modal_content">
               <img src={previewImage} alt="Preview" className="preview_image" />
-              <a
-                href={previewImage}
-                download="image.jpg"
+              <button
+                onClick={() => handleDownload(val.file, val.filename)}
                 className="download_button"
               >
                 <BsDownload />
-              </a>
+              </button>
             </div>
           </div>
         )}

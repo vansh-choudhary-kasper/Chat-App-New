@@ -179,9 +179,7 @@ export const ImageMessage = ({
           <div className="preview_modal_content">
             <img src={previewImage} alt="Preview" className="preview_image" />
             <button
-              onClick={() => handleDownload(val.file, "myfile")}
-              href={previewImage}
-              download="image.jpg"
+              onClick={() => handleDownload(val.file, val.filename)}
               className="download_button"
             >
               <BsDownload />
@@ -257,7 +255,7 @@ export const LinkMessage = ({
           <div className="preview_modal_content">
             <img src={val.preview} alt="Preview" className="preview_image" />
             <button
-              onClick={() => handleDownload(val.file, "myfile")}
+              onClick={() => handleDownload(val.file, val.filename)}
               className="download_button"
             >
               <BsDownload />
@@ -342,7 +340,7 @@ export const VideoMessage = ({
               autoPlay
             />
             <button
-              onClick={() => handleDownload(val.file, "myfile")}
+              onClick={() => handleDownload(val.file, val.filename)}
               className="download_button"
             >
               <BsDownload />
@@ -393,7 +391,7 @@ export const PdfMessage = ({
           <></>
         )}
         <button
-          onClick={() => handleDownload(val.file, "myfile")}
+          onClick={() => handleDownload(val.file, val.filename)}
           className="pdf_download_button"
         >
           <BsDownload />

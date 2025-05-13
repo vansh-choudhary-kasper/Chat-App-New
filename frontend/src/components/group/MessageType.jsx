@@ -9,6 +9,7 @@ import { messageStatus, editMsgHandler } from "../../redux/slice/messageSlice";
 import profile from "../../assets/img/manprofile.png";
 import { TbArrowBackUp } from "react-icons/tb";
 import Cookies from "js-cookie";
+import { handleDownload } from "../../utils/helper";
 
 // Format message time
 function formatMessageTime(created_at) {
@@ -259,13 +260,12 @@ export const ImageMessage = ({
               alt="Preview"
               className="group_preview_image"
             />
-            <a
-              href={previewImage}
-              download="image.jpg"
+            <button
+              onClick={() => handleDownload(val.file, val.filename)}
               className="group_download_button"
             >
               <BsDownload />
-            </a>
+            </button>
           </div>
         </div>
       )}
@@ -371,13 +371,12 @@ export const LinkMessage = ({
               alt="Preview"
               className="group_preview_image"
             />
-            <a
-              href={val.preview}
-              download="image.jpg"
+            <button
+              onClick={() => handleDownload(val.file, val.filename)}
               className="group_download_button"
             >
               <BsDownload />
-            </a>
+            </button>
           </div>
         </div>
       )}
@@ -482,13 +481,12 @@ export const VideoMessage = ({
               className="group_preview_video"
               autoPlay
             />
-            <a
-              href={val.file}
-              download="video.mp4"
+            <button
+              onClick={() => handleDownload(val.file, val.filename)}
               className="group_download_button"
             >
               <BsDownload />
-            </a>
+            </button>
           </div>
         </div>
       )}
@@ -561,13 +559,12 @@ export const PdfMessage = ({
                 : `${val.filename.slice(0, 20)}...`}
             </p>
           )}
-          <a
-            href={val.file}
-            download={val.file}
-            className="group_pdf_download_button"
-          >
-            <BsDownload />
-          </a>
+          <button
+              onClick={() => handleDownload(val.file, val.filename)}
+              className="group_pdf_download_button"
+            >
+              <BsDownload />
+            </button>
         </div>
 
         {visible === i &&

@@ -116,7 +116,7 @@ const GroupProfile = ({
               <div
                 key={index}
                 className={`media-items ${media.type}`}
-                onClick={() => handleDownload(media.file)}
+                onClick={() => handleDownload(media.file, media.filename)}
               >
                 {media.type === "image" ? (
                   <img src={media.file} alt="Media" />

@@ -175,12 +175,12 @@ const Footer = ({ deviceType }) => {
         formData.append("file", fileValue);
         formData.append("msgId", msgId);
         formData.append("loading", true);
-        if (fileTypes === "zip" || fileTypes === "pdf") {
+        // if (fileTypes === "zip" || fileTypes === "pdf") {
           formData.append("filename", fileValue.name);
-        }
+        // }
         formData.append(
           "text",
-          fileTypes === "zip" || fileTypes === "pdf" ? "null" : msg.trim()
+          fileTypes === "zip" || fileTypes === "pdf" || fileTypes === "image" || fileTypes === "video" ? "null" : msg.trim()
         );
         const obj = {
           conversation_id: current_conversation,
@@ -190,10 +190,9 @@ const Footer = ({ deviceType }) => {
           to: current_user._id,
           type: fileTypes,
           file: fileValue,
-          filename:
-            fileTypes === "zip" || fileTypes === "pdf" ? fileValue.name : null,
+          filename: fileValue.name,
           text:
-            fileTypes === "zip" || fileTypes === "pdf" ? "null" : msg.trim(),
+            fileTypes === "zip" || fileTypes === "pdf" || fileTypes === "image" || fileTypes === "video" ? "null" : msg.trim(),
           msgId,
           loading: true,
           created_at: date.toISOString(),
@@ -238,9 +237,9 @@ const Footer = ({ deviceType }) => {
         formData.append("file", fileValue);
         formData.append("msgId", msgId);
         formData.append("loading", true);
-        if (fileTypes === "zip" || fileTypes === "pdf") {
+        // if (fileTypes === "zip" || fileTypes === "pdf") {
           formData.append("filename", fileValue.name);
-        }
+        // }
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",
@@ -249,8 +248,7 @@ const Footer = ({ deviceType }) => {
           to: current_user._id,
           type: fileTypes,
           file: fileValue,
-          filename:
-            fileTypes === "zip" || fileTypes === "pdf" ? fileValue.name : null,
+          filename: fileValue.name,
           text: "null",
           msgId,
           created_at: date.toISOString(),
@@ -258,7 +256,7 @@ const Footer = ({ deviceType }) => {
         };
         formData.append("text", null);
         dispatch(sendMedia({ formData, obj, token }))
-          .unwrap()
+          .unwrap() 
           .then(() => {})
           .catch((error) => {
             console.log(error);
