@@ -288,9 +288,7 @@ exports.profileUpdate = async (req, res) => {
     }
     if (firstname) {
       existingUser.firstname = firstname;
-    }
-    if (lastname) {
-      existingUser.lastname = lastname;
+      existingUser.lastname = lastname || " ";
     }
 
     await existingUser.save();
