@@ -46,10 +46,13 @@ const guestSlice = createSlice({
         state.updateUserError = null;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
+        const { data } = action.payload;
         state.updatingUser = false;
         state.updateUserError = null;
         console.log(action.payload);
-        // state.user = action.payload;
+        state.user.firstname = data.firstname;
+        state.user.lastname = data.lastname;
+        state.user.about = data.about;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.updatingUser = false;

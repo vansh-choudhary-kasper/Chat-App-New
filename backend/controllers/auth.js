@@ -234,7 +234,7 @@ exports.verifyOTP = async (req, res, next) => {
 };
 
 exports.profileUpdate = async (req, res) => {
-  const { user_id, about } = req.body;
+  const { user_id, about, firstname, lastname } = req.body;
   console.log(user_id, req.user_id);
   try {
     if (req.user_id !== user_id) {
@@ -279,6 +279,12 @@ exports.profileUpdate = async (req, res) => {
     if (about) {
       existingUser.about = about;
     }
+    if (firstname) {
+      existingUser.firstname = firstname;
+    }
+    if (lastname) {
+      existingUser.lastname = lastname;
+    }
 
     await existingUser.save();
 
@@ -288,6 +294,8 @@ exports.profileUpdate = async (req, res) => {
       data: {
         profile: existingUser.profile,
         about: existingUser.about,
+        firstname: existingUser.firstname,
+        lastname: existingUser.lastname,
       },
     });
   } catch (error) {
