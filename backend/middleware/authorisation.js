@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 exports.protect = async (req, res, next) => {
   const token = req.headers.authorization;
@@ -7,11 +8,18 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
+    let user = await User.findById(decoded.userId);
+    console.log("user => ", user);
+    console.log(user.activeToken, " <-> ", token);
+    if(user.activeToken !== token){
+      return res.status(401).json({ message: 'Token invalid or expired' });
+    }
+      
     req.user_id = decoded.userId;
 
     next();

@@ -12,8 +12,7 @@ const SelfProfile = ({ user, handleClose, setProfileToggle }) => {
   const [aboutText, setAboutText] = useState(
     user?.about || "Hey! I am using this chat app."
   );
-  const [firstName, setFirstName] = useState(user?.firstname || "");
-  const [lastName, setLastName] = useState(user?.lastname || "");
+  const [name, setName] = useState(user?.firstname + " " + user?.lastname || "");
   const [profilePic, setProfilePic] = useState(user?.profile || null);
   const [profileFile, setProfileFile] = useState(null); // Store file separately for dispatch
 
@@ -25,6 +24,14 @@ const SelfProfile = ({ user, handleClose, setProfileToggle }) => {
     setIsEditing(false);
     const userData = Cookies.get("user");
 
+    let nameText = name.split(" ");
+    let firstName = "";
+    let lastName = "";
+    firstName = nameText[0];
+    if (nameText.length >= 2) {
+      firstName = nameText[0];
+      lastName = nameText.slice(1).join(" ");
+    }
     const formData = new FormData();
     formData.append("about", aboutText);
     formData.append("firstname", firstName);
@@ -70,22 +77,12 @@ const SelfProfile = ({ user, handleClose, setProfileToggle }) => {
         </div>
         {isEditing ? (
           <>
-            <input type="text" value={firstName + " " + lastName} onChange={(e) => {
-              let name = e.target.value.split(" ");
-              let first, last;
-              first = name[0];
-              if(name.length >= 2) {
-                first = name[0];
-                last = name.slice(1).join(" ");
-              }
-              setFirstName(first);
-              setLastName(last);
-            }} />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
           </>
         ) : (
-        <p className="user-name">
-          {user?.firstname} {user?.lastname || "Your Name"}
-        </p> )}
+          <p className="user-name">
+            {user?.firstname} {user?.lastname || "Your Name"}
+          </p>)}
       </div>
 
       <div className="about">

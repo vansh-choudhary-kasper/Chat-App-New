@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     profile: { type: String },
+    activeToken: { type: String },
   },
   {
     timestamps: true,

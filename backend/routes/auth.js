@@ -3,7 +3,7 @@ const authController = require("../controllers/auth");
 const authorization = require("../middleware/authorisation");
 const upload = require("../middleware/multer");
 
-router.post("/register", upload.single("file"), authController.register);
+router.post("/register",authorization.protect, upload.single("file"), authController.register);
 router.post("/login", authController.login);
 router.get("/logout", authController.logout);
 router.post("/send-otp", authController.sendOtp);

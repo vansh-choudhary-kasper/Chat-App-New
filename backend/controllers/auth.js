@@ -12,6 +12,11 @@ exports.register = async (req, res) => {
   console.log(req.body);
 
   try {
+    let user = await User.findById(req.user_id);
+    if (!user || user.access !== "admin") {
+      return res.status(400).json({ message: "You are not authorized to register a new user" });
+    }
+
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -106,6 +111,8 @@ exports.login = async (req, res) => {
       userId: userDoc._id.toString(),
       access: userDoc.access,
     });
+    userDoc.activeToken = token;
+    userDoc.save();
 
     res.status(200).json({
       status: "success",
