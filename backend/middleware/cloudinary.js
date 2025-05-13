@@ -3,7 +3,7 @@ const cloudinary = require('cloudinary').v2;
 
 
 
-const uploadToCloudinary = (filePath, fileType) => {
+const uploadToCloudinary = (file, fileType) => {
 
     return new Promise((resolve, reject) => {
       let uploadOptions = {};
@@ -15,9 +15,11 @@ const uploadToCloudinary = (filePath, fileType) => {
           break;
         case 'zip':
           uploadOptions.resource_type = 'raw'; 
+          uploadOptions.format = 'zip';
           break;
         case 'pdf': 
           uploadOptions.resource_type = 'raw'; 
+          uploadOptions.format = 'pdf';
           break;
         case 'image':
           uploadOptions.resource_type = 'image'; 
@@ -25,17 +27,14 @@ const uploadToCloudinary = (filePath, fileType) => {
         default:
           return reject(new Error('Unsupported file type'));
       }
+
+      const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
  
   
-      cloudinary.uploader.upload(filePath, uploadOptions, (error, result) => {
+      cloudinary.uploader.upload(base64Data, uploadOptions, async (error, result) => {
         if (error) {
           reject(error);
         } else {
-          
-         
-          fs.unlink(filePath, (err) => {
-            if (err) console.log('Error deleting file:', err);
-          });
           resolve(result); 
         }
       });

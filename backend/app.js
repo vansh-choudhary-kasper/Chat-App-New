@@ -600,7 +600,7 @@ io.on("connection", async (socket) => {
       if (req.file) {
         try {
           const cloudinaryRes = await uploadToCloudinary(
-            req.file.path,
+            req.file,
             "image"
           ); // Pass the file path and type
           groupProfile = cloudinaryRes.secure_url; // Get the URL of the uploaded image
@@ -667,7 +667,7 @@ io.on("connection", async (socket) => {
 
       if (conversation === "chat") {
         const cloudinaryRes = await uploadToCloudinary(
-          req.file.path,
+          req.file,
           req.body.type
         );
 
@@ -787,7 +787,7 @@ io.on("connection", async (socket) => {
         }
       } else if (conversation === "group") {
         const cloudinaryRes = await uploadToCloudinary(
-          req.file.path,
+          req.file,
           req.body.type
         );
 

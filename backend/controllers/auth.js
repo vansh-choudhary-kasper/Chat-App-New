@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
       if (req.file) {
         try {
           const cloudinaryRes = await uploadToCloudinary(
-            req.file.path,
+            req.file,
             "image"
           ); // Pass the file path and type
           profileImageUrl = cloudinaryRes.secure_url; // Get the URL of the uploaded image
@@ -271,7 +271,7 @@ exports.profileUpdate = async (req, res) => {
           await cloudinary.uploader.destroy(publicId);
         }
 
-        const cloudinaryRes = await uploadToCloudinary(req.file.path, "image");
+        const cloudinaryRes = await uploadToCloudinary(req.file, "image");
         profileImageUrl = cloudinaryRes.secure_url;
       } catch (error) {
         console.error("Cloudinary Error:", error);
