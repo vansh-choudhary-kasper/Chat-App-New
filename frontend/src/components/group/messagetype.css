@@ -211,7 +211,9 @@ font-weight: 500;
     object-fit: contain;
   }
   .group_link_text{
+    color: blue !important;
     word-break: break-all;
+    cursor: pointer;
   }
   .group_download_button {
     margin-top: 1.5vw;
