@@ -361,10 +361,12 @@ const Home = () => {
     }
 
     return () => {
-      socket.off("incoming_video_call");
-      socket.off("incoming_group_call");
-      socket.off("incoming_voice_call");
-      socket.off("disable_call");
+      if (socket) {
+        socket.off("incoming_video_call");
+        socket.off("incoming_group_call");
+        socket.off("incoming_voice_call");
+        socket.off("disable_call");
+      }
     };
   }, [socket, incomingCall, isVideoCall]);
   useEffect(() => {

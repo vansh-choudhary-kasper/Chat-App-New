@@ -297,6 +297,7 @@ const Header = ({ deviceType }) => {
       }
     });
     return () => {
+      if(socket ) {
       socket.off("user_call_status");
       socket.off("room_video_created");
       socket.off("incoming_video_call");
@@ -306,6 +307,7 @@ const Header = ({ deviceType }) => {
       socket.off("incoming_voice_call");
       socket.off("voice_call_answered");
       socket.off("audio_ice_candidate");
+      }
     };
   }, [socket, myStream]);
 

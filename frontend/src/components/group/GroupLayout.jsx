@@ -115,11 +115,13 @@ const GroupLayout = () => {
       dispatch(addedOnGroup(data));
     });
     return () => {
+      if(socket) {
       socket.off("group_message");
       socket.off("delete_group_message");
       socket.off("edit_group_message");
       socket.off("user_status");
       socket.off("connect_error");
+      }
     };
   }, [socket]);
   useEffect(() => {

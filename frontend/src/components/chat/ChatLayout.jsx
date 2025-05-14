@@ -95,10 +95,12 @@ const ChatLayout = () => {
       }
     });
     return () => {
+      if(socket) {
       socket.off("new_message");
       socket.off("delete_message");
       socket.off("user_status");
       socket.off("connect_error");
+      }
     };
   }, [socket, current_conversation]);
   useEffect(() => {

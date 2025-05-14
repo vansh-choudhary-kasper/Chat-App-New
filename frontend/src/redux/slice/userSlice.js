@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Base_Url } from "../../utils/config";
-import axios from "axios";
+// import axios from "axios";
+import { axios } from "../../utils/apiInterceptor";
 
 const guestSlice = createSlice({
   name: "guest",

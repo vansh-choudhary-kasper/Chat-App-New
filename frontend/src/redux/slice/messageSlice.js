@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Base_Url } from "../../utils/config";
-import axios from "axios";
+// import axios from "axios";
+import { axios } from "../../utils/apiInterceptor";
 import Cookies from "js-cookie";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 
