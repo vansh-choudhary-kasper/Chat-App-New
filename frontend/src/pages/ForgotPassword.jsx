@@ -55,7 +55,7 @@ const navigate=useNavigate()
       setCode(["", "", "", ""]);
       navigate("/")
     }).catch(()=>{
-      toast.error("Please fill in all 4 digits.");
+      toast.error("Invalid PIN. Please enter a valid 4-digit PIN.");
     });
  
   };
