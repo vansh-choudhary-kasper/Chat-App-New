@@ -57,33 +57,37 @@ const ChatLayout = () => {
     if (!userData) return;
 
     const parsedData = JSON.parse(userData);
-    socket.on("new_message", (data) => {
-      if (
-        data.conversation_id === current_conversation &&
-        data.message.to === parsedData.userId
-      ) {
-        data.message.seen = "seen";
+    // const handleNewMessage = (data) => {
+    //   if (
+    //     data.conversation_id === current_conversation &&
+    //     data.message.to === parsedData.userId
+    //   ) {
+    //     data.message.seen = "seen";
 
-        socket.emit("chat_seen", {
-          conversation_id: data.conversation_id,
-          messageId: data.message._id,
-          to: data.message.to,
-        });
-      }
+    //     socket.emit("chat_seen", {
+    //       conversation_id: data.conversation_id,
+    //       messageId: data.message._id,
+    //       to: data.message.to,
+    //     });
+    //   }
 
-      dispatch(sendMessage({ data, userId: parsedData.userId }));
-    });
-    socket.on("delete_message", (data) => {
+    //   dispatch(sendMessage({ data, userId: parsedData.userId }));
+    // };
+    // socket.on("new_message", handleNewMessage);
+    const handleDeleteMessage = (data) => {
       dispatch(messageStatu(data));
-    });
-    socket.on("edit_message", (data) => {
+    };
+    socket.on("delete_message", handleDeleteMessage);
+    const handleEditMessage = (data) => {
       console.log("edit socket called")
       dispatch(messageEdit(data));
-    });
-    socket.on("user_status", (data) => {
+    };
+    socket.on("edit_message", handleEditMessage);
+    const handleUserStatus =  (data) => {
       dispatch(setStatus(data));
-    });
-    socket.on("connect_error", (err) => {
+    };
+    socket.on("user_status", handleUserStatus);
+    const handleConnectError = (err) => {
       console.error("Connection error:", err.message); // Logs the error message sent from the server
       if (
         err.message === "Authentication error" ||
@@ -93,13 +97,14 @@ const ChatLayout = () => {
         Cookies.remove("user");
         navigate("/");
       }
-    });
+    };
+    socket.on("connect_error", handleConnectError);
     return () => {
       if(socket) {
-      socket.off("new_message");
-      socket.off("delete_message");
-      socket.off("user_status");
-      socket.off("connect_error");
+      // socket.off("new_message", handleNewMessage);
+      socket.off("delete_message", handleDeleteMessage);
+      socket.off("user_status", handleUserStatus);
+      socket.off("connect_error", handleConnectError);
       }
     };
   }, [socket, current_conversation]);

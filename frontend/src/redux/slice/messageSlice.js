@@ -4,6 +4,7 @@ import { Base_Url } from "../../utils/config";
 import { axios } from "../../utils/apiInterceptor";
 import Cookies from "js-cookie";
 import { AiOutlineConsoleSql } from "react-icons/ai";
+import { playNotification } from "../../utils/NotificationSound";
 
 let userData = Cookies.get("user");
 let parsedData;
@@ -242,6 +243,13 @@ const conversationSlice = createSlice({
           }
         }
       }
+
+      console.log("msg recieved");
+      if(message.from !== userId) {
+        if(data.conversation_id !== state.direct_chat.current_conversation && data.conversation_id !== state.group_chat.current_group?._id) {
+          playNotification();
+        }
+      }
     },
     setInitial: (state, action) => {
       state.direct_chat.current_conversation = null;
@@ -314,7 +322,7 @@ const conversationSlice = createSlice({
         text: "This message is deleted",
         status: "delete",
       };
-      if (state.group_chat.current_group._id === action.payload.search) {
+      if (state.group_chat.current_group?._id === action.payload.search) {
         const index = state.group_chat.messages.findIndex(
           (val) => val._id === action.payload.messageId
         );

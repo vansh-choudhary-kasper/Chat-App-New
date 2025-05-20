@@ -29,6 +29,7 @@ import * as mediasoupClient from "mediasoup-client";
 import { RESET_STATE } from "../redux/rootReducers";
 import SelfProfile from "../components/contact/SelfProdile";
 import Sidebar from "../components/sidebar/Sidebar";
+import { sendMessage } from "../redux/slice/messageSlice";
 const Home = () => {
   const pathname = useLocation().pathname.split("/")[2];
   const audioRef = useRef(null);
@@ -369,6 +370,45 @@ const Home = () => {
       }
     };
   }, [socket, incomingCall, isVideoCall]);
+
+  const {
+    direct_chat: { conversations, current_conversation },
+  } = useSelector((state) => state.conversation);
+
+  useEffect(() => {
+    const userData = Cookies.get("user");
+    if (!socket) return;
+    if (!userData) return;
+
+    const parsedData = JSON.parse(userData);
+
+    const handleNewMessage = (data) => {
+      if (
+        data.conversation_id === current_conversation &&
+        data.message.to === parsedData.userId
+      ) {
+        data.message.seen = "seen";
+
+        socket.emit("chat_seen", {
+          conversation_id: data.conversation_id,
+          messageId: data.message._id,
+          to: data.message.to,
+        });
+      }
+
+      dispatch(sendMessage({ data, userId: parsedData.userId }));
+    };
+    socket.on("new_message", handleNewMessage);
+    const handleGroupMessage = (data) => {
+      dispatch(sendMessage({ data, userId: parsedData.userId }));
+    };
+    socket.on("group_message", handleGroupMessage);
+
+    return () => {
+      socket.off("new_message", handleNewMessage);
+      socket.off("group_message", handleGroupMessage);
+    };
+  }, []);
   useEffect(() => {
     if (incomingCall?.roomName) {
       const timer = setTimeout(() => {
@@ -499,7 +539,7 @@ const Home = () => {
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
 
-    audioProducer.on("trackended", () => {});
+    audioProducer.on("trackended", () => { });
 
     audioProducer.on("transportclose", () => {
       // close audio track

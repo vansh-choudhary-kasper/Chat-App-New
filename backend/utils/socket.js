@@ -2,13 +2,13 @@ const express = require("express");
 const fs = require("fs");
 const app = express();
 
-// Read SSL certificate
-const privateKey = fs.readFileSync('../ssl/server.key', 'utf8');
-const certificate = fs.readFileSync('../ssl/server.cert', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
+// // Read SSL certificate
+// const privateKey = fs.readFileSync('../ssl/server.key', 'utf8');
+// const certificate = fs.readFileSync('../ssl/server.cert', 'utf8');
+// const credentials = { key: privateKey, cert: certificate };
 
-const https = require('https');
-const httpsServer = https.createServer(credentials, app);
+const https = require('http');
+const httpsServer = https.createServer(app);
 
 const io = require("socket.io")(httpsServer, {
   pingTimeout: 60000,

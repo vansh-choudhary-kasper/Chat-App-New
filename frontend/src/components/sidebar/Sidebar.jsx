@@ -9,6 +9,8 @@ import profile from "../../assets/img/manprofile.png";
 import { contextData } from "../../context/context";
 import { RiCloseLine } from "react-icons/ri";
 import "./sidebar.css";
+import { socket } from "../../context/context";
+
 const Sidebar = ({
   active,
   setActive,

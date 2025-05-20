@@ -84,9 +84,6 @@ const GroupLayout = () => {
     const parsedData = JSON.parse(userData);
 
     if (!socket) return;
-    socket.on("group_message", (data) => {
-      dispatch(sendMessage({ data, userId: parsedData.userId }));
-    });
     socket.on("new_group", (data) => {
       dispatch(addGroup({ data, userId: parsedData.userId }));
     });
@@ -116,7 +113,7 @@ const GroupLayout = () => {
     });
     return () => {
       if(socket) {
-      socket.off("group_message");
+      // socket.off("group_message");
       socket.off("delete_group_message");
       socket.off("edit_group_message");
       socket.off("user_status");
