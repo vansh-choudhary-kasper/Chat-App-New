@@ -259,7 +259,7 @@ io.on("connection", async (socket) => {
   }
 
   socket.on("text_message", async (data) => {
-    let { to, from, message, conversation_id, type, conversation } = data;
+    let { to, from, message, conversation_id, type, conversation, reply } = data;
 
     if (conversation === "chat") {
       try {
@@ -276,6 +276,7 @@ io.on("connection", async (socket) => {
           text: message,
           created_at: new Date().toISOString(),
           conversation,
+          reply
         };
         let chat;
         if (conversation_id === undefined) {
@@ -663,6 +664,7 @@ io.on("connection", async (socket) => {
         msgId,
         loading,
         conversation,
+        reply = {},
       } = req.body;
 
       if (conversation === "chat") {
@@ -683,7 +685,9 @@ io.on("connection", async (socket) => {
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
           filename: req.body.filename,  
+          reply,
         };
+        console.log("index = ", 0);
         let chat;
         const to_user = await User.findById(to);
         const from_user = await User.findById(from);
@@ -696,8 +700,10 @@ io.on("connection", async (socket) => {
           if (!new_message._id) {
             new_message._id = new mongoose.Types.ObjectId();
           }
+          console.log("index = ", 1);
           if (chat) {
             new_message.loading = false;
+            
             chat.messages.push(new_message);
             from_user.status = "Online";
 
@@ -723,6 +729,7 @@ io.on("connection", async (socket) => {
               new_message._id = new mongoose.Types.ObjectId();
             }
             new_message.loading = false;
+            console.log("index = ", 2);
             const newChat = new OneToOneMessage({
               participants: [to, from],
               messages: [new_message],
@@ -764,22 +771,32 @@ io.on("connection", async (socket) => {
           }
           chat = await OneToOneMessage.findById(conversation_id);
 
+          console.log("index = ", 3);
           new_message.loading = false;
           chat.messages.push(new_message);
           from_user.status = "Online";
+          console.log("index = ", 3, "1");
 
-          await chat.save({});
-          await from_user.save({});
+          try {
+            console.log(chat);
+            console.log(from_user);
+            await chat.save({});
+            await from_user.save({});
+          } catch (error) {
+            console.log("error during save", error);
+          }
 
           io.to(to_user.socket_id).emit("new_message", {
             conversation_id,
             message: new_message,
           });
-
+          
+          console.log("index = ", 3, "2");
           io.to(from_user.socket_id).emit("new_message", {
             conversation_id,
             message: new_message,
           });
+          console.log("index = ", 3, "3");
           socket.broadcast.emit("user_status", {
             user_id: from,
             status: "Online",
@@ -802,13 +819,14 @@ io.on("connection", async (socket) => {
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
           filename: req.body.filename,
+          reply
         };
         const from_user = await User.findById(from);
         if (!new_message._id) {
           new_message._id = new mongoose.Types.ObjectId();
         }
         chat = await GroupMessage.findById(conversation_id);
-
+console.log("index = ", 4);
         if (
           chat.messages.length === 0 ||
           isYesterdayOrEarlier(
@@ -821,6 +839,7 @@ io.on("connection", async (socket) => {
             created_at: new Date().toISOString(),
             conversation,
           };
+          console.log("index = ", 5);
           chat.messages.push(dateMessage);
           new_message.loading = false;
           chat.messages.push(new_message);
@@ -838,6 +857,7 @@ io.on("connection", async (socket) => {
             });
           });
         } else {
+          console.log("index = ", 6);
           new_message.loading = false;
           chat.messages.push(new_message);
           from_user.status = "Online";
@@ -1646,7 +1666,7 @@ const port = process.env.PORT || 4000;
 
 
 
-httpsServer.listen(port, () => {
+httpsServer.listen(port, '0.0.0.0', () => {
   console.log(`Express HTTPS server running on https://${process.env.WEBRTC_LISTEN_IP}:${port}`);
 });
 

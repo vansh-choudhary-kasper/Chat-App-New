@@ -35,7 +35,7 @@ const GroupMessageSchema = new mongoose.Schema(
         },
         type: {
           type: String,
-          enum: ["text", "video", "image", "pdf", "zip", "link","date"],
+          enum: ["text", "video", "image", "pdf", "zip", "link", "date"],
         },
         file: {
           type: String,
@@ -54,11 +54,12 @@ const GroupMessageSchema = new mongoose.Schema(
           type: String,
         },
         reply: {
-          type: String,
-        },
-        replyType: {
-          type: String,
-          enum: ["text", "video", "image", "pdf", "zip", "link"],
+          type: new mongoose.Schema({
+            type: { type: String },
+            filename: { type: String },
+            text: { type: String },
+            _id: { type: String }
+          }, { _id: false })
         },
         seen: {
           type: String,

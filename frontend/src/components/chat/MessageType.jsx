@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, createContext} from "react";
 import "./messagetype.css";
 import { BsDownload } from "react-icons/bs";
 import { MdMoreVert } from "react-icons/md";
@@ -9,6 +9,7 @@ import { IoPlayCircleSharp } from "react-icons/io5";
 import { useSelector, useDispatch } from "react-redux";
 import { messageStatus, editMsgHandler } from "../../redux/slice/messageSlice";
 import { TbArrowBackUp } from "react-icons/tb";
+import { SharedContext } from "../../utils/replyContext";
 function formatMessageTime(created_at) {
   const date = new Date(created_at);
   const now = new Date();
@@ -41,18 +42,11 @@ function formatMessageTime(created_at) {
   return `${day}/${month} ${formatTime(date)}`;
 }
 
-const EditVisibility = (val) => {
+const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, editVisible = true }) => {
   const [showEditInput, setShowEditInput] = useState(false);
+  // const SharedContext = createContext();
+  const { replyChat, setReplyChat } = useContext(SharedContext);
   const [editMessage, setEditMessage] = useState(val.text || "");
-
-  return { showEditInput, setShowEditInput, editMessage, setEditMessage };
-}
-
-const ReplyOptions = (i, search, val, dispatch, token, setVisible, editVisible = true) => {
-  let data;
-  if(editVisible){
-    data = EditVisibility(val);
-  }
   
   const deleteHandler = (chatId, messageId, token, to, from, val) => {
     dispatch(messageStatus({ chatId, messageId, token, to, from }));
@@ -60,27 +54,32 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible, editVisible =
   };
 
   const editHandler = async (chatId, messageId, token, to, from, val) => {
-    await dispatch(editMsgHandler({ search, messageId, token, newText: data?.editMessage, to, from }));
+    await dispatch(editMsgHandler({ search, messageId, token, newText: editMessage, to, from }));
     setVisible(null);
+  };
+
+  const handleReply = (e) => {
+    console.log(val);
+    setReplyChat({type: val.type, filename: val.filename, text: val.text, _id: val._id});
   };
 
   return (
     <span className={i === 0 ? "options first_messages" : "options "}>
-      <p>
+      <p onClick={handleReply}>
         <TbArrowBackUp />
         Reply
       </p>
-      {editVisible ? data?.showEditInput ? (
+      {editVisible ? showEditInput ? (
         <div className="edit_message">
           <input
             type="text"
             placeholder="Edit Message"
-            value={data?.editMessage}
-            onChange={(e) => data?.setEditMessage(e.target.value)}
+            value={editMessage}
+            onChange={(e) => setEditMessage(e.target.value)}
           />
           <button
             onClick={() => {
-              data?.setShowEditInput(false);
+              setShowEditInput(false);
               editHandler(search, val._id, token, val.to, val.from, val);
             }}
           >
@@ -90,7 +89,7 @@ const ReplyOptions = (i, search, val, dispatch, token, setVisible, editVisible =
       ) : (
         <p
           className="edit_options"
-          onClick={() => data?.setShowEditInput(true)}
+          onClick={() => setShowEditInput(true)}
         >
           Edit
         </p>
@@ -157,7 +156,8 @@ export const ImageMessage = ({
               onClick={() => handleImageClick(val.file)}
             />
             {visible === i ? (
-              ReplyOptions(i, search, val, dispatch, token, setVisible, false)
+              // ReplyOptions(i, search, val, dispatch, token, setVisible, false)
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
             ) : (
               <></>
             )}
@@ -224,7 +224,8 @@ export const LinkMessage = ({
           >
             {val.preview ? <img src={val.preview} alt="man" /> : <></>}
             {visible === i ? (
-              ReplyOptions(i, search, val, dispatch, token, setVisible, false)
+              // ReplyOptions(i, search, val, dispatch, token, setVisible, false)
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
             ) : (
               <></>
             )}
@@ -317,7 +318,7 @@ export const VideoMessage = ({
           {val.text !== "null" ? <p>{val.text}</p> : <></>}
         </div>
         {visible === i
-          ? ReplyOptions(i, search, val, dispatch, token, setVisible, false)
+          ? <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
           : null}
         {val.loading ? (
           <></>
@@ -400,7 +401,7 @@ export const PdfMessage = ({
 
       {visible === i
         ? 
-        ReplyOptions(i, search, val, dispatch, token, setVisible, false)
+        <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
         : null}
       {val.loading ? (
         <></>
@@ -451,7 +452,8 @@ export const TextMessage = ({
         >
           {val.text}
           {visible === val._id ? (
-            ReplyOptions(i, search, val, dispatch, token, setVisible)
+            // ReplyOptions(i, search, val, dispatch, token, setVisible)
+            <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible}/>
           ) : (
             <></>
           )}

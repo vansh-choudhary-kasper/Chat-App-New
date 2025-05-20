@@ -39,6 +39,7 @@ const conversationSlice = createSlice({
   reducers: {
     sendMessage: (state, action) => {
       const { data, userId } = action.payload;
+      console.log("data = ", data);
 
       const { message, dateMessage } = data;
       if (message.conversation === "chat") {
@@ -719,6 +720,7 @@ export const fetchSelectedConversation = createAsyncThunk(
           },
         }
       );
+      console.log("messageSlice.js 715 = ", response.data.data);
 
       return response.data.data;
     } catch (error) {

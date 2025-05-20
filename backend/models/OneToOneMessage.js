@@ -54,6 +54,14 @@ const OneToOneMessageSchema = new mongoose.Schema(
           default: "msg",
           enum: ["msg", "delete"],
         },
+        reply: {
+          type: new mongoose.Schema({
+            type: { type: String },
+            filename: { type: String },
+            text: { type: String },
+            _id: { type: String }
+          }, { _id: false })
+        },
       },
     ],
     status: { type: [String] },

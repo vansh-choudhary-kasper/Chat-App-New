@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, createContext } from "react";
 import "./footer.css";
 import { IoIosAttach } from "react-icons/io";
 import { IoSend } from "react-icons/io5";
@@ -16,6 +16,7 @@ import { persistor, store } from "../../redux/store";
 import Cookies from "js-cookie";
 import { RESET_STATE } from "../../redux/rootReducers";
 import { useNavigate } from "react-router-dom";
+import { SharedContext } from "../../utils/replyContext";
 
 const createURL = (file) => {
   if (!file) {
@@ -104,6 +105,8 @@ const Footer = ({ deviceType }) => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
+  // const SharedContext = createContext();
+  const { replyChat, setReplyChat } = useContext(SharedContext);
 
   const {
     direct_chat: { conversations, current_conversation, current_user },
@@ -182,6 +185,7 @@ const Footer = ({ deviceType }) => {
           "text",
           fileTypes === "zip" || fileTypes === "pdf" || fileTypes === "image" || fileTypes === "video" ? "null" : msg.trim()
         );
+        formData.append("reply", replyChat);
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",
@@ -197,9 +201,13 @@ const Footer = ({ deviceType }) => {
           loading: true,
           created_at: date.toISOString(),
         };
+        console.log("kya kr rha");
         dispatch(sendMedia({ formData, obj, token }))
-          .unwrap()
-          .then(() => {})
+        .unwrap()
+        .then(() => {
+          console.log("sendMedia success");
+          setReplyChat();
+          })
           .catch((error) => {
             alert(error);
             // store.dispatch({ type: RESET_STATE});
@@ -220,8 +228,10 @@ const Footer = ({ deviceType }) => {
           from: userId,
           to: current_user._id,
           type: containsUrl(msg) ? "link" : "text",
+          reply: replyChat,
         };
 
+        setReplyChat();
         socket.emit("text_message", obj);
         inputRef.current.value = null;
       } else if (fileTypes) {
@@ -240,6 +250,7 @@ const Footer = ({ deviceType }) => {
         // if (fileTypes === "zip" || fileTypes === "pdf") {
           formData.append("filename", fileValue.name);
         // }
+        formData.append("reply", replyChat);
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",
@@ -253,11 +264,14 @@ const Footer = ({ deviceType }) => {
           msgId,
           created_at: date.toISOString(),
           loading: true,
+          reply: replyChat,
         };
         formData.append("text", null);
         dispatch(sendMedia({ formData, obj, token }))
           .unwrap() 
-          .then(() => {})
+          .then(() => {
+            setReplyChat();
+          })
           .catch((error) => {
             console.log(error);
             // store.dispatch({ type: RESET_STATE });
@@ -278,7 +292,31 @@ const Footer = ({ deviceType }) => {
     setFileValue(null);
   };
 
+  const iconChoiceHandler = () => {
+    console.log("replyChat.type = ", replyChat.type);
+    switch (replyChat.type) {
+      case "video":
+        return <HiOutlineVideoCamera />;
+      case "image":
+        return <GoImage />;
+      case "zip":
+        return <AiOutlineFileZip />;
+      case "pdf":
+        return <AiOutlineFilePdf />
+    }
+  }
+
   return (
+    <>
+    <div>
+        {replyChat ?
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+          <p>Reply to {replyChat.type === "text"? replyChat.text : <>{iconChoiceHandler()} {replyChat.filename} </>}</p>
+          {/* cross icon */}
+          <IoCloseCircleOutline onClick={() => setReplyChat()} />
+        </div> : <></>}
+    </div>
+    
     <div
       className={
         deviceType === "mobile"
@@ -338,6 +376,7 @@ const Footer = ({ deviceType }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

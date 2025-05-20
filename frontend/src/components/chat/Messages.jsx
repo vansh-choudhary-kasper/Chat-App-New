@@ -2,6 +2,10 @@ import React from "react";
 import "./chat.css";
 
 import { TbArrowBackUp } from "react-icons/tb";
+import { GoImage } from "react-icons/go";
+import { AiOutlineFilePdf } from "react-icons/ai";
+import { HiOutlineVideoCamera } from "react-icons/hi2";
+import { AiOutlineFileZip } from "react-icons/ai";
 
 import {
   ImageMessage,
@@ -13,7 +17,7 @@ import {
 import { DateSeparator } from "../group/MessageType";
 
 const replyOptions = (i) => {
-  const deleteHandler = () => {};
+  const deleteHandler = () => { };
   return (
     <span className={i === 0 ? "options first_messages" : "options "}>
       <p>
@@ -121,9 +125,37 @@ const Messages = ({
     }
   };
 
+  const iconChoiceHandler = (replyChat) => {
+    console.log("replyChat.type = ", replyChat.type);
+    switch (replyChat.type) {
+      case "video":
+        return <HiOutlineVideoCamera />;
+      case "image":
+        return <GoImage />;
+      case "zip":
+        return <AiOutlineFileZip />;
+      case "pdf":
+        return <AiOutlineFilePdf />
+    }
+  }
+
+  const replyContainer = (replyChat) => {
+    console.log("replyChat = ", replyChat);
+    return (
+      <div>
+        <p>Reply to {replyChat.type === "text" ? replyChat.text : <>{iconChoiceHandler(replyChat)} {replyChat.filename} </>}</p>
+      </div>
+    );
+  };
+
   return (
     <>
-      <div className="message_main_container">{messageHandler(val)}</div>
+      <div className="message_main_container">
+        <div class="reply_container">
+          {val.reply ? replyContainer(val.reply) : <></>}
+        </div>
+        {messageHandler(val)}
+      </div>
     </>
   );
 };

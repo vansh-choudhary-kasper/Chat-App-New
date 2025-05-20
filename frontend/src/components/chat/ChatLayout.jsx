@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import { GoPlusCircle } from "react-icons/go";
 import { PiChatCenteredTextLight } from "react-icons/pi";
 import { RiInboxArchiveLine } from "react-icons/ri";
@@ -30,7 +30,11 @@ import Cookies from "js-cookie";
 import { persistor, store } from "../../redux/store";
 import { setStatus } from "../../redux/slice/messageSlice";
 import { RESET_DIRECT_CHAT } from "../../redux/rootReducers";
+import {SharedContext} from "../../utils/replyContext";
+
 const ChatLayout = () => {
+  // const SharedContext = createContext();
+  const [replyChat, setReplyChat] = useState();
   const [active, setActive] = useState("chat");
   const [query, setQuery] = useState("");
   const [userId, setUserId] = useState(null);
@@ -346,11 +350,13 @@ const ChatLayout = () => {
           <>
             {current_conversation !== null ? (
               <div className="selected_chat_container mobile_chat_container">
-                <Header deviceType={deviceType} />
-                <hr />
-                <Chat userId={userId} token={token} deviceType={deviceType} />
+                <SharedContext.Provider value={{ replyChat, setReplyChat }}>
+                  <Header deviceType={deviceType} />
+                  <hr />
+                  <Chat userId={userId} token={token} deviceType={deviceType} />
 
-                <Footer token={token} deviceType={deviceType} />
+                  <Footer token={token} deviceType={deviceType} />
+                </SharedContext.Provider>
               </div>
             ) : (
               <div className="chat_message_container mobile_chat_container">
@@ -541,13 +547,15 @@ const ChatLayout = () => {
               </div>
             </div>
             {current_conversation !== null ? (
-              <div className="selected_chat_container">
-                <Header />
-                <hr />
-                <Chat userId={userId} token={token} />
+              <SharedContext.Provider value={{ replyChat, setReplyChat }}>
+                  <div className="selected_chat_container">
+                  <Header />
+                  <hr />
+                  <Chat userId={userId} token={token} />
 
-                <Footer token={token} />
-              </div>
+                  <Footer token={token} />
+                  </div>
+              </SharedContext.Provider>
             ) : (
               <div className="noSelected_chat_container">
                 <img src={nochat} alt="nochat" />
