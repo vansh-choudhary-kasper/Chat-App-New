@@ -140,7 +140,7 @@ const Messages = ({
   }
 
   const replyContainer = (replyChat) => {
-    console.log("replyChat = ", replyChat);
+    console.log("replyChat => ", replyChat);
     return (
       <div>
         <p>Reply to {replyChat.type === "text" ? replyChat.text : <>{iconChoiceHandler(replyChat)} {replyChat.filename} </>}</p>
@@ -148,11 +148,12 @@ const Messages = ({
     );
   };
 
+  console.log("val => ", val.reply);
   return (
     <>
       <div className="message_main_container">
         <div class="reply_container">
-          {val.reply ? replyContainer(val.reply) : <></>}
+          {val.reply && Object.keys(val.reply).length !== 0 ? replyContainer(val.reply) : <></>}
         </div>
         {messageHandler(val)}
       </div>

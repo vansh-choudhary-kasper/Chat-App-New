@@ -2,6 +2,10 @@ import React from "react";
 import "./chat.css";
 
 import { TbArrowBackUp } from "react-icons/tb";
+import { GoImage } from "react-icons/go";
+import { AiOutlineFilePdf } from "react-icons/ai";
+import { HiOutlineVideoCamera } from "react-icons/hi2";
+import { AiOutlineFileZip } from "react-icons/ai";
 
 import {
   DateSeparator,
@@ -127,15 +131,36 @@ const Messages = ({
     }
   };
 
+  const iconChoiceHandler = (replyChat) => {
+    console.log("replyChat.type = ", replyChat.type);
+    switch (replyChat.type) {
+      case "video":
+        return <HiOutlineVideoCamera />;
+      case "image":
+        return <GoImage />;
+      case "zip":
+        return <AiOutlineFileZip />;
+      case "pdf":
+        return <AiOutlineFilePdf />
+    }
+  }
+
+  const replyContainer = (replyChat) => {
+    console.log("replyChat = ", replyChat);
+    return (
+      <div>
+        <p>Reply to {replyChat.type === "text" ? replyChat.text : <>{iconChoiceHandler(replyChat)} {replyChat.filename} </>}</p>
+      </div>
+    );
+  };
+
   return (
     <>
-      <div className="group_message_main_container">
+      <div className="message_main_container">
+        <div class="reply_container">
+          {val.reply && Object.keys(val.reply).length !== 0 ? replyContainer(val.reply) : <></>}
+        </div>
         {messageHandler(val)}
-
-        {/* <ReplyMessages  i={i} changeVisibility={changeVisibility} visible={visible}/> */}
-        {/* <ImageMessage i={i} changeVisibility={changeVisibility} visible={visible} /> */}
-        {/* <VideoMessage i={i} changeVisibility={changeVisibility} visible={visible}/> */}
-        {/* <PdfMessage i={i} changeVisibility={changeVisibility} visible={visible}  pdfSrc={pdfsrc} fileName={"abhaydfffffffffffff.pdf"}/> */}
       </div>
     </>
   );

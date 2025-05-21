@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import { GoPlusCircle } from "react-icons/go";
 import { PiChatCenteredTextLight } from "react-icons/pi";
 import { RiInboxArchiveLine } from "react-icons/ri";
@@ -44,6 +44,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import Chat from "./Chat";
 import { RESET_GROUP_CHAT } from "../../redux/rootReducers";
+import {SharedContext} from "../../utils/replyContext";
 
 const GroupLayout = () => {
   const [active, setActive] = useState("chat");
@@ -64,6 +65,7 @@ const GroupLayout = () => {
     group_chat: { groups, current_group },
   } = useSelector((state) => state.conversation);
   const { deviceType } = useContext(contextData);
+  const [replyChat, setReplyChat] = useState();
 
   const navigate = useNavigate();
   const [group, setGroup] = useState([]);
@@ -422,11 +424,13 @@ const GroupLayout = () => {
           <>
             {current_group !== null ? (
               <div className="selected_group_container mobile_chat_container">
-                <Header userId={userId} />
-                <hr />
-                <Chat userId={userId} token={token} />
+                <SharedContext.Provider value={{ replyChat, setReplyChat }}>
+                  <Header userId={userId} />
+                  <hr />
+                  <Chat userId={userId} token={token} />
 
-                <Footer token={token} />
+                  <Footer token={token} />
+                </SharedContext.Provider>
               </div>
             ) : (
               <div className="chat_message_container mobile_chat_container">
@@ -553,17 +557,18 @@ const GroupLayout = () => {
             </div>
             {current_group !== null ? (
               <div className="selected_group_container">
-                <Header userId={userId} />
-                <hr />
-                <Chat userId={userId} token={token} />
-
-                { current_group?.isRemoved ? 
-                <div className="group_removed" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
-                  {/* <img src={groupRemoved} alt="group_removed" /> */}
-                  <p style={{fontSize:'20px', color:'#6169FF'}}>You have been removed from this group</p>
-                </div> :
-                <Footer token={token} /> }
-                
+                <SharedContext.Provider value={{ replyChat, setReplyChat }}>
+                  <Header userId={userId} />
+                  <hr />
+                  <Chat userId={userId} token={token} />
+              
+                  { current_group?.isRemoved ? 
+                  <div className="group_removed" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
+                    {/* <img src={groupRemoved} alt="group_removed" /> */}
+                    <p style={{fontSize:'20px', color:'#6169FF'}}>You have been removed from this group</p>
+                  </div> :
+                  <Footer token={token} /> }
+                </SharedContext.Provider>
               </div>
             ) : (
               <div className="noSelected_group_container">

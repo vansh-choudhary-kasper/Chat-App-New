@@ -185,7 +185,8 @@ const Footer = ({ deviceType }) => {
           "text",
           fileTypes === "zip" || fileTypes === "pdf" || fileTypes === "image" || fileTypes === "video" ? "null" : msg.trim()
         );
-        formData.append("reply", replyChat);
+        formData.append("reply", JSON.stringify(replyChat));
+        console.log("replyChat__", JSON.stringify(replyChat));
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",
@@ -200,6 +201,7 @@ const Footer = ({ deviceType }) => {
           msgId,
           loading: true,
           created_at: date.toISOString(),
+          reply: replyChat,
         };
         console.log("kya kr rha");
         dispatch(sendMedia({ formData, obj, token }))
@@ -250,7 +252,9 @@ const Footer = ({ deviceType }) => {
         // if (fileTypes === "zip" || fileTypes === "pdf") {
           formData.append("filename", fileValue.name);
         // }
-        formData.append("reply", replyChat);
+        formData.append("reply", JSON.stringify(replyChat));
+        console.log("adding reply to formData", replyChat);
+        console.log("adding reply to formData", formData);
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",

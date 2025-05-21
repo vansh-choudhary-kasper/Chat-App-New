@@ -479,6 +479,7 @@ io.on("connection", async (socket) => {
           text: message,
           created_at: new Date().toISOString(),
           conversation,
+          reply
         };
         if (!from) return;
         const from_user = await User.findOne({ _id: from });
@@ -666,6 +667,7 @@ io.on("connection", async (socket) => {
         conversation,
         reply = {},
       } = req.body;
+      reply = reply && reply !== null && reply !== 'undefined' ? JSON.parse(reply) : {};
 
       if (conversation === "chat") {
         const cloudinaryRes = await uploadToCloudinary(
@@ -687,6 +689,8 @@ io.on("connection", async (socket) => {
           filename: req.body.filename,  
           reply,
         };
+        console.log("new_message ==== ", reply);
+        console.log("new_message ==== ", new_message.reply);
         console.log("index = ", 0);
         let chat;
         const to_user = await User.findById(to);
@@ -773,13 +777,12 @@ io.on("connection", async (socket) => {
 
           console.log("index = ", 3);
           new_message.loading = false;
+          console.log("new_message.reply = ", new_message.reply);
           chat.messages.push(new_message);
           from_user.status = "Online";
           console.log("index = ", 3, "1");
 
           try {
-            console.log(chat);
-            console.log(from_user);
             await chat.save({});
             await from_user.save({});
           } catch (error) {

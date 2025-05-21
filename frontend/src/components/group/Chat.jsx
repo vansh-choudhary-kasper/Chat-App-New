@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "./chat.css";
 import { MdMoreVert } from "react-icons/md";
 import { TbArrowBackUp } from "react-icons/tb";
 import Messages from "./Messages";
 import { useSelector } from "react-redux";
+import { SharedContext } from "../../utils/replyContext";
 
 const Chat = ({ userId, token }) => {
   const {
     group_chat: { messages, current_group },
   } = useSelector((state) => state.conversation);
+  const { replyChat, setReplyChat } = useContext(SharedContext);
 
-  useEffect(() => {}, [messages]);
+  useEffect(() => {
+    return () => {
+      setReplyChat();
+    };
+  }, [messages]);
 
   const [visible, setVisible] = useState(null);
   const changeVisibility = (e, i) => {

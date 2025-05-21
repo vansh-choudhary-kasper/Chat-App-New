@@ -16,6 +16,7 @@ import { persistor, store } from "../../redux/store";
 import Cookies from "js-cookie";
 import { RESET_STATE } from "../../redux/rootReducers";
 import { useNavigate } from "react-router-dom";
+import { SharedContext } from "../../utils/replyContext";
 const createURL= (file)=>{
   if (!file) {
     console.error("No file provided");
@@ -105,6 +106,7 @@ const Footer = () => {
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
   const [preview, setPreview] = useState(null);
+  const { replyChat, setReplyChat } = useContext(SharedContext);
  
   const {group_chat:{current_group}} = useSelector((state)=>state.conversation);
  
@@ -181,6 +183,7 @@ const Footer = () => {
       formData.append('filename', fileValue.name);
     // }
       formData.append('text', (fileTypes==="zip"||fileTypes==="pdf"||fileTypes==="image"||fileTypes==="video")?"null": msg.trim());
+      formData.append("reply", JSON.stringify(replyChat));
       const obj = {
         conversation_id: current_group._id,
         from: userId,
@@ -191,10 +194,11 @@ const Footer = () => {
         text:(fileTypes==="zip"||fileTypes==="pdf"||fileTypes==="image"||fileTypes==="video")?"null": msg.trim(),
         msgId,
         loading:true,
-        created_at: date.toISOString()
+        created_at: date.toISOString(),
+        reply: replyChat,
       }
       dispatch(sendMedia({ formData, obj ,token})).unwrap().then(()=>{
-
+        setReplyChat();
       }).catch(()=>{
         store.dispatch({ type: RESET_STATE});
         persistor.purge();
@@ -212,6 +216,7 @@ const Footer = () => {
         from: userId,
         conversation:"group",
         type: containsUrl(msg) ? "link" : "text",
+        reply: replyChat,
       };
       console.log(socket)
       socket.emit("text_message", obj);
@@ -233,6 +238,7 @@ const Footer = () => {
     // if(fileTypes==="zip"||fileTypes==="pdf"||fileTypes==="image"){
       formData.append('filename', fileValue.name);
     // }
+    formData.append("reply", JSON.stringify(replyChat));
     const obj = {
       conversation_id: current_group._id,
       from: userId,
@@ -243,12 +249,13 @@ const Footer = () => {
       text: "null",
       msgId,
       created_at: date.toISOString(),
-      loading:true
+      loading:true,
+      reply: replyChat,
     }
       formData.append('text', null);
     
       dispatch(sendMedia({ formData, obj,token})).unwrap().then(()=>{
-
+        setReplyChat();
       }).catch(()=>{
         store.dispatch({ type: RESET_STATE});
         persistor.purge();
@@ -271,39 +278,64 @@ setFileTypes(null)
 setFileValue(null)
 }
 
+  const iconChoiceHandler = () => {
+    console.log("replyChat.type = ", replyChat.type);
+    switch (replyChat.type) {
+      case "video":
+        return <HiOutlineVideoCamera />;
+      case "image":
+        return <GoImage />;
+      case "zip":
+        return <AiOutlineFileZip />;
+      case "pdf":
+        return <AiOutlineFilePdf />
+    }
+  }
+
   return (
-    <div className="footer_main_container">
-       {/* {reply ? textMessageReply("rtrrt", setReply) : imageMessageReply(profile,setReply)} */}
-       {fileTypes==="video" &&  videoMessage(preview,removeHandler)}
-       {fileTypes==="image" &&  imageMessageReply(preview,removeHandler)}
-       {(fileTypes==="pdf" || fileTypes==="zip") && pdfMessage(fileValue,fileTypes,removeHandler)}
-      <div className="footer_container">
-        <div className="footer_icon">
-          <IoIosAttach onClick={attachmentHandler} /> 
-          <div className={showAttach ? "footer_icon_child hidden" : "footer_icon_child"}>
-            <div className="footer_select_icon" onClick={() => handleFileSelect("image")}>
-              <GoImage />
-            </div>
-            <div className="footer_select_icon" onClick={() => handleFileSelect("pdf")}>
-              <AiOutlineFilePdf />
-            </div>
-            <div className="footer_select_icon" onClick={() => handleFileSelect("zip")}>
-              <AiOutlineFileZip />
-            </div>
-            <div className="footer_select_icon" onClick={() => handleFileSelect("video")}>
-              <HiOutlineVideoCamera />
+    <>
+      <div>
+        {replyChat ?
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+          <p>Reply to {replyChat.type === "text"? replyChat.text : <>{iconChoiceHandler()} {replyChat.filename} </>}</p>
+          {/* cross icon */}
+          <IoCloseCircleOutline onClick={() => setReplyChat()} />
+        </div> : <></>}
+      </div>
+
+      <div className="footer_main_container">
+         {/* {reply ? textMessageReply("rtrrt", setReply) : imageMessageReply(profile,setReply)} */}
+         {fileTypes==="video" &&  videoMessage(preview,removeHandler)}
+         {fileTypes==="image" &&  imageMessageReply(preview,removeHandler)}
+         {(fileTypes==="pdf" || fileTypes==="zip") && pdfMessage(fileValue,fileTypes,removeHandler)}
+        <div className="footer_container">
+          <div className="footer_icon">
+            <IoIosAttach onClick={attachmentHandler} /> 
+            <div className={showAttach ? "footer_icon_child hidden" : "footer_icon_child"}>
+              <div className="footer_select_icon" onClick={() => handleFileSelect("image")}>
+                <GoImage />
+              </div>
+              <div className="footer_select_icon" onClick={() => handleFileSelect("pdf")}>
+                <AiOutlineFilePdf />
+              </div>
+              <div className="footer_select_icon" onClick={() => handleFileSelect("zip")}>
+                <AiOutlineFileZip />
+              </div>
+              <div className="footer_select_icon" onClick={() => handleFileSelect("video")}>
+                <HiOutlineVideoCamera />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="footer_input">
-          <input placeholder="Send messages" disabled={fileTypes==="zip"||fileTypes==="pdf"?true:false} ref={inputRef} onKeyDown={sendHandler}/>
-        
-        </div>
-        <div className="footer_send_icon">
-          <IoSend onClick={sendHandler}/>
+          <div className="footer_input">
+            <input placeholder="Send messages" disabled={fileTypes==="zip"||fileTypes==="pdf"?true:false} ref={inputRef} onKeyDown={sendHandler}/>
+          
+          </div>
+          <div className="footer_send_icon">
+            <IoSend onClick={sendHandler}/>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

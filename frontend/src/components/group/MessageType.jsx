@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import "./messagetype.css";
 import { BsDownload } from "react-icons/bs";
 import { MdMoreVert } from "react-icons/md";
@@ -10,6 +10,7 @@ import profile from "../../assets/img/manprofile.png";
 import { TbArrowBackUp } from "react-icons/tb";
 import Cookies from "js-cookie";
 import { handleDownload } from "../../utils/helper";
+import { SharedContext } from "../../utils/replyContext";
 
 // Format message time
 function formatMessageTime(created_at) {
@@ -87,13 +88,6 @@ function formatMessage(created_at) {
   return `${day} ${month} ${year}`;
 }
 
-const EditVisibility = (val) => {
-  const [showEditInput, setShowEditInput] = useState(false);
-  const [editMessage, setEditMessage] = useState(val.text || "");
-
-  return { showEditInput, setShowEditInput, editMessage, setEditMessage };
-}
-
 const userData = Cookies.get("user");
 let parsedData;
 let userId;
@@ -103,11 +97,11 @@ if (userData) {
 }
 
 // Options for reply
-const replyOptions = (i, search, val, dispatch, token, setVisible, editVisible = true) => {
-  let data;
-  if(editVisible){
-    data = EditVisibility(val);
-  } 
+const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, editVisible = true }) => {
+  const [showEditInput, setShowEditInput] = useState(false);
+  const { replyChat, setReplyChat } = useContext(SharedContext);
+  const [editMessage, setEditMessage] = useState(val.text || "");
+
   const deleteHandler = (chatId, messageId, token, to, from, val) => {
     console.log('val = ', val);
     dispatch(messageStatus({ chatId, messageId, token, to, from, val }));
@@ -115,9 +109,13 @@ const replyOptions = (i, search, val, dispatch, token, setVisible, editVisible =
   };
 
   const editHandler = async (chatId, messageId, token, to, from, val) => {
-    console.log('val = ', val);
-    await dispatch(editMsgHandler({ search, messageId, token, newText: data?.editMessage, to, from, val }));
+    await dispatch(editMsgHandler({ search, messageId, token, newText: editMessage, to, from, val }));
     setVisible(null);
+  };
+
+  const handleReply = (e) => {
+    console.log(val);
+    setReplyChat({type: val.type, filename: val.filename, text: val.text, _id: val._id});
   };
 
   return (
@@ -126,22 +124,22 @@ const replyOptions = (i, search, val, dispatch, token, setVisible, editVisible =
         i === 0 ? "group_options group_first_messages" : "group_options"
       }
     >
-      <p>
+      <p  onClick={handleReply}>
         <TbArrowBackUp />
         Reply
       </p>
       {val?.from === userId ? ( <>
-      {editVisible ? data?.showEditInput ? (
+      {editVisible ? showEditInput ? (
         <div className="edit_message">
           <input
             type="text"
             placeholder="Edit Message"
-            value={data?.editMessage}
-            onChange={(e) => data?.setEditMessage(e.target.value)}
+            value={editMessage}
+            onChange={(e) => setEditMessage(e.target.value)}
           />
           <button
             onClick={() => {
-              data?.setShowEditInput(false);
+              setShowEditInput(false);
               editHandler(search, val._id, token, val.to, val.from, val);
             }}
           >
@@ -151,7 +149,7 @@ const replyOptions = (i, search, val, dispatch, token, setVisible, editVisible =
       ) : (
         <p
           className="edit_options"
-          onClick={() => data?.setShowEditInput(true)}
+          onClick={() => setShowEditInput(true)}
         >
           Edit
         </p>
@@ -178,6 +176,7 @@ export const ImageMessage = ({
   current_group,
   token,
   setVisible,
+  search,
 }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const dispatch = useDispatch();
@@ -231,15 +230,7 @@ export const ImageMessage = ({
           >
             <img src={val.file} alt="man" />
             {visible === i &&
-              replyOptions(
-                i,
-                current_group._id,
-                val,
-                dispatch,
-                token,
-                setVisible,
-                false
-              )}
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
           </div>
           {val.text !== "null" && <p>{val.text}</p>}
         </div>
@@ -283,6 +274,7 @@ export const LinkMessage = ({
   current_group,
   token,
   setVisible,
+  search,
 }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const dispatch = useDispatch();
@@ -335,15 +327,7 @@ export const LinkMessage = ({
           >
             {val.preview && <img src={val.preview} alt="man" />}
             {visible === i &&
-              replyOptions(
-                i,
-                current_group._id,
-                val,
-                dispatch,
-                token,
-                setVisible, 
-                false
-              )}
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
           </div>
           {val.text && (
             <p
@@ -394,6 +378,7 @@ export const VideoMessage = ({
   current_group,
   token,
   setVisible,
+  search,
 }) => {
   const [previewVideo, setPreviewVideo] = useState(null);
   const videoRef = useRef(null);
@@ -462,7 +447,7 @@ export const VideoMessage = ({
           {val.text !== "null" && <p>{val.text}</p>}
         </div>
         {visible === i &&
-          replyOptions(i, current_group._id, val, dispatch, token, setVisible, false)}
+          <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
         {val.loading ? null : (
           <MdMoreVert
             onClick={(e) => changeVisibility(e, i)}
@@ -504,6 +489,7 @@ export const PdfMessage = ({
   current_group,
   token,
   setVisible,
+  search,
 }) => {
   const dispatch = useDispatch();
   const messageFrom = current_group.participants.filter(
@@ -568,7 +554,7 @@ export const PdfMessage = ({
         </div>
 
         {visible === i &&
-          replyOptions(i, current_group._id, val, dispatch, token, setVisible, false)}
+          <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
         {val.loading ? null : (
           <MdMoreVert
             onClick={(e) => changeVisibility(e, i)}
@@ -591,6 +577,7 @@ export const TextMessage = ({
   current_group,
   token,
   setVisible,
+  search,
 }) => {
   const dispatch = useDispatch();
 
@@ -640,14 +627,8 @@ export const TextMessage = ({
           >
             {val.text}
             {visible === val._id &&
-              replyOptions(
-                i,
-                current_group._id,
-                val,
-                dispatch,
-                token,
-                setVisible
-              )}
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible}/>
+}
           </p>
         </div>
         {val.text !== "This message is deleted" && (
