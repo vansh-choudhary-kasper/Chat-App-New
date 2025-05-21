@@ -689,9 +689,6 @@ io.on("connection", async (socket) => {
           filename: req.body.filename,  
           reply,
         };
-        console.log("new_message ==== ", reply);
-        console.log("new_message ==== ", new_message.reply);
-        console.log("index = ", 0);
         let chat;
         const to_user = await User.findById(to);
         const from_user = await User.findById(from);
@@ -704,7 +701,6 @@ io.on("connection", async (socket) => {
           if (!new_message._id) {
             new_message._id = new mongoose.Types.ObjectId();
           }
-          console.log("index = ", 1);
           if (chat) {
             new_message.loading = false;
             
@@ -733,7 +729,6 @@ io.on("connection", async (socket) => {
               new_message._id = new mongoose.Types.ObjectId();
             }
             new_message.loading = false;
-            console.log("index = ", 2);
             const newChat = new OneToOneMessage({
               participants: [to, from],
               messages: [new_message],
@@ -775,12 +770,9 @@ io.on("connection", async (socket) => {
           }
           chat = await OneToOneMessage.findById(conversation_id);
 
-          console.log("index = ", 3);
           new_message.loading = false;
-          console.log("new_message.reply = ", new_message.reply);
           chat.messages.push(new_message);
           from_user.status = "Online";
-          console.log("index = ", 3, "1");
 
           try {
             await chat.save({});
@@ -794,12 +786,10 @@ io.on("connection", async (socket) => {
             message: new_message,
           });
           
-          console.log("index = ", 3, "2");
           io.to(from_user.socket_id).emit("new_message", {
             conversation_id,
             message: new_message,
           });
-          console.log("index = ", 3, "3");
           socket.broadcast.emit("user_status", {
             user_id: from,
             status: "Online",
@@ -829,7 +819,6 @@ io.on("connection", async (socket) => {
           new_message._id = new mongoose.Types.ObjectId();
         }
         chat = await GroupMessage.findById(conversation_id);
-console.log("index = ", 4);
         if (
           chat.messages.length === 0 ||
           isYesterdayOrEarlier(
@@ -842,7 +831,6 @@ console.log("index = ", 4);
             created_at: new Date().toISOString(),
             conversation,
           };
-          console.log("index = ", 5);
           chat.messages.push(dateMessage);
           new_message.loading = false;
           chat.messages.push(new_message);
@@ -860,7 +848,6 @@ console.log("index = ", 4);
             });
           });
         } else {
-          console.log("index = ", 6);
           new_message.loading = false;
           chat.messages.push(new_message);
           from_user.status = "Online";
@@ -989,8 +976,6 @@ console.log("index = ", 4);
         } else {
           result = await updateMessageStatus(search, messageId, from, "delete");
         }
-        // console.log(await OneToOneMessage.findById(search));
-        console.log("result", result);
         
         if (result.modifiedCount === 0) {
           return res.status(404).json({
@@ -1055,7 +1040,6 @@ console.log("index = ", 4);
       m => m._id.equals(messageId) && m.from.equals(from)
     );
 
-    console.log("your index is = ", index);
     if (index === -1) return { modifiedCount: 0 };
 
     const fieldPath = `messages.${index}.text`;
@@ -1105,14 +1089,11 @@ console.log("index = ", 4);
 
       let result;
       if (conversation && conversation === "group") {
-        console.log("this is group call");
         result = await updateGroupMessage(search, messageId, from, newText);
       } else {
-        console.log("this is user call");
         result = await updateOneToOneMessage(search, messageId, from, newText);
       }
 
-      console.log("result", result);
 
       if (result.modifiedCount === 0) {
         return res.status(404).json({
@@ -1123,7 +1104,6 @@ console.log("index = ", 4);
       }
 
       if (conversation && conversation === "group") {
-        console.log("this is group call");
         let group_participants = await GroupMessage.findById(search).populate(
           "participants.user",
           "socket_id"
@@ -1244,7 +1224,6 @@ console.log("index = ", 4);
       callback({ call: false });
     } else {
       callback({ call: true });
-      console.log(true);
     }
   });
   socket.on("joinGroupCall", async ({ chat, roomName, producer }, callback) => {

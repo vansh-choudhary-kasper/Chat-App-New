@@ -59,7 +59,6 @@ const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, editVisible
   };
 
   const handleReply = (e) => {
-    console.log(val);
     setReplyChat({type: val.type, filename: val.filename, text: val.text, _id: val._id});
   };
 

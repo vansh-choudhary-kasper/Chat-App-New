@@ -132,7 +132,6 @@ const Messages = ({
   };
 
   const iconChoiceHandler = (replyChat) => {
-    console.log("replyChat.type = ", replyChat.type);
     switch (replyChat.type) {
       case "video":
         return <HiOutlineVideoCamera />;
@@ -146,7 +145,6 @@ const Messages = ({
   }
 
   const replyContainer = (replyChat) => {
-    console.log("replyChat = ", replyChat);
     return (
       <div>
         <p>Reply to {replyChat.type === "text" ? replyChat.text : <>{iconChoiceHandler(replyChat)} {replyChat.filename} </>}</p>

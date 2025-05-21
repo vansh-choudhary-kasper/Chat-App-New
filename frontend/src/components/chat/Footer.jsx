@@ -186,7 +186,6 @@ const Footer = ({ deviceType }) => {
           fileTypes === "zip" || fileTypes === "pdf" || fileTypes === "image" || fileTypes === "video" ? "null" : msg.trim()
         );
         formData.append("reply", JSON.stringify(replyChat));
-        console.log("replyChat__", JSON.stringify(replyChat));
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",
@@ -203,11 +202,9 @@ const Footer = ({ deviceType }) => {
           created_at: date.toISOString(),
           reply: replyChat,
         };
-        console.log("kya kr rha");
         dispatch(sendMedia({ formData, obj, token }))
         .unwrap()
         .then(() => {
-          console.log("sendMedia success");
           setReplyChat();
           })
           .catch((error) => {
@@ -253,8 +250,6 @@ const Footer = ({ deviceType }) => {
           formData.append("filename", fileValue.name);
         // }
         formData.append("reply", JSON.stringify(replyChat));
-        console.log("adding reply to formData", replyChat);
-        console.log("adding reply to formData", formData);
         const obj = {
           conversation_id: current_conversation,
           conversation: "chat",
@@ -297,7 +292,6 @@ const Footer = ({ deviceType }) => {
   };
 
   const iconChoiceHandler = () => {
-    console.log("replyChat.type = ", replyChat.type);
     switch (replyChat.type) {
       case "video":
         return <HiOutlineVideoCamera />;

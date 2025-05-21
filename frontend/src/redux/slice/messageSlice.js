@@ -39,7 +39,6 @@ const conversationSlice = createSlice({
   reducers: {
     sendMessage: (state, action) => {
       const { data, userId } = action.payload;
-      console.log("data = ", data);
 
       const { message, dateMessage } = data;
       if (message.conversation === "chat") {
@@ -245,7 +244,6 @@ const conversationSlice = createSlice({
         }
       }
 
-      console.log("msg recieved");
       if(message.from !== userId) {
         if(data.conversation_id !== state.direct_chat.current_conversation && data.conversation_id !== state.group_chat.current_group?._id) {
           playNotification();
@@ -317,7 +315,6 @@ const conversationSlice = createSlice({
       }
     },
     groupMessageStatus: (state, action) => {
-      console.log("action.payload = ", action.payload);
       const obj = {
         type: "text",
         text: "This message is deleted",
@@ -361,7 +358,6 @@ const conversationSlice = createSlice({
           (val) => val._id === action.payload.messageId
         );
 
-        console.log("index = ", index);
         if (index !== -1) {
           state.group_chat.messages[index] = {
             ...state.group_chat.messages[index],
@@ -668,7 +664,6 @@ const conversationSlice = createSlice({
       })
       .addCase(removeGroup.fulfilled, (state, action) => {
         const groupId = action.payload
-        console.log("data", groupId)
 
         if(state.group_chat.current_group?._id === groupId){
           state.group_chat.current_group.isRemoved = true;
@@ -720,7 +715,6 @@ export const fetchSelectedConversation = createAsyncThunk(
           },
         }
       );
-      console.log("messageSlice.js 715 = ", response.data.data);
 
       return response.data.data;
     } catch (error) {
@@ -842,7 +836,6 @@ export const messageStatus = createAsyncThunk(
         }
       );
 
-      console.log("response.data.data = ", response.data.data);
       return response.data.data;
     } catch (error) {
       console.log("error = ", error);

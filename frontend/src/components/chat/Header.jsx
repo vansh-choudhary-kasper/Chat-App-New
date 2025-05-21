@@ -86,7 +86,7 @@ const Header = ({ deviceType }) => {
 
   const processBufferedCandidates = () => {
     if (peerConnectionRef.current && iceCandidateBuffer.length > 0) {
-      iceCandidateBuffer.forEach( async(candidate) => {
+      iceCandidateBuffer.forEach(async (candidate) => {
         await peerConnectionRef.current.addIceCandidate(
           new RTCIceCandidate(candidate)
         );
@@ -101,6 +101,10 @@ const Header = ({ deviceType }) => {
       remoteVideoRef.current.srcObject = event.streams[0];
     };
 
+    localStreamRef.current.getTracks().forEach(async (track) => {
+      await peerConnection.addTrack(track, localStreamRef.current);
+    });
+
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         socket.emit("video_ice_candidate", {
@@ -109,10 +113,6 @@ const Header = ({ deviceType }) => {
         });
       }
     };
-
-    localStreamRef.current.getTracks().forEach(async(track) => {
-      await peerConnection.addTrack(track, localStreamRef.current);
-    });
 
     processBufferedCandidates();
 
@@ -136,7 +136,7 @@ const Header = ({ deviceType }) => {
 
     console.log("local stream", localStreamRef.current);
 
-    localStreamRef.current.getTracks().forEach( async (track) => {
+    localStreamRef.current.getTracks().forEach(async (track) => {
       await peerConnection.addTrack(track, localStreamRef.current);
     });
 
@@ -239,8 +239,41 @@ const Header = ({ deviceType }) => {
       }
     });
     // socket.on("incoming_video_call", async ({ from, offer }) => {
-    //   setIncomingCall({ from, offer }); // Save incoming call details
+    //   try {
+    //     const stream = await navigator.mediaDevices.getUserMedia({
+    //       video: true,
+    //       audio: true,
+    //     });
+    //     localStreamRef.current = stream;
+    //     setIsVideoEnabled(true);
+    //     setMyStream(stream);
+    //     setTimeout(() => {
+    //       if (localVideoRef.current) {
+    //         localVideoRef.current.srcObject = stream;
+    //         localVideoRef.current.muted = true;
+    //       }
+    //     }, 500);
+
+    //     // 1. Create Peer Connection
+    //     peerConnectionRef.current = await createPeerConnection(from);
+
+    //     // 2. Set Remote Description
+    //     await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+    //     // 3. Create Answer
+    //     const answer = await peerConnectionRef.current.createAnswer();
+    //     await peerConnectionRef.current.setLocalDescription(answer);
+
+    //     // 4. Send Answer to Caller
+    //     socket.emit("video_call_answered", { to: from, answer });
+
+    //     // 5. Flush Buffered ICE Candidates
+    //     processBufferedCandidates();
+    //   } catch (error) {
+    //     console.error("Error handling incoming video call:", error);
+    //   }
     // });
+
     // socket.on("disable_call", (data) => {
     //   if (current_user.to === data.from) {
     //     myStream.getTracks().forEach((track) => track.stop());
@@ -297,16 +330,16 @@ const Header = ({ deviceType }) => {
       }
     });
     return () => {
-      if(socket ) {
-      socket.off("user_call_status");
-      socket.off("room_video_created");
-      socket.off("incoming_video_call");
-      socket.off("video_call_answered");
-      socket.off("video_ice_candidate");
-      socket.off("room_voice_created");
-      socket.off("incoming_voice_call");
-      socket.off("voice_call_answered");
-      socket.off("audio_ice_candidate");
+      if (socket) {
+        socket.off("user_call_status");
+        socket.off("room_video_created");
+        // socket.off("incoming_video_call");
+        socket.off("video_call_answered");
+        socket.off("video_ice_candidate");
+        socket.off("room_voice_created");
+        socket.off("incoming_voice_call");
+        socket.off("voice_call_answered");
+        socket.off("audio_ice_candidate");
       }
     };
   }, [socket, myStream]);

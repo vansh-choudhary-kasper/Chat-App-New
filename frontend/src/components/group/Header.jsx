@@ -63,7 +63,6 @@ const Header = () => {
   const {
     group_chat: { current_group },
   } = useSelector((state) => state.conversation);
-  console.log(current_group);
   const { guests } = useSelector((state) => state.guests);
 
   const [query, setQuery] = useState("");
@@ -339,7 +338,6 @@ const Header = () => {
         token,
       })
     );
-    console.log("addMembers", addMembers);
     if(addMembers?.payload?.message === "Members added successfully") {
       setSelectedUsers([]);
       setQuery("");

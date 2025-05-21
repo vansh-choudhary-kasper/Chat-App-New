@@ -419,8 +419,6 @@ exports.removeMember = async (req, res) => {
       (participant) => participant.user.toString() === member
     );
 
-    console.log("memberToRemove", memberToRemove);
-    
     if (!memberToRemove) {
       return res.status(404).json({
         status: "failed",

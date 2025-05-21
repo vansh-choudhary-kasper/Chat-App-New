@@ -218,7 +218,6 @@ const Footer = () => {
         type: containsUrl(msg) ? "link" : "text",
         reply: replyChat,
       };
-      console.log(socket)
       socket.emit("text_message", obj);
        inputRef.current.value=null
    
@@ -279,7 +278,6 @@ setFileValue(null)
 }
 
   const iconChoiceHandler = () => {
-    console.log("replyChat.type = ", replyChat.type);
     switch (replyChat.type) {
       case "video":
         return <HiOutlineVideoCamera />;

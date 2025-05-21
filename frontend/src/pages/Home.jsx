@@ -329,6 +329,21 @@ const Home = () => {
         console.log("incoming_video_call", isVideoCall);
       });
 
+      socket.on("video_ice_candidate", async ({ from, candidate }) => {
+        if (peerConnectionRef.current) {
+          try {
+            await peerConnectionRef.current.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+          } catch (err) {
+            console.error("Failed to add ICE candidate:", err);
+          }
+        } else {
+          console.warn("PeerConnection is not ready. Buffering candidate.");
+          iceCandidateBuffer.push(candidate);
+        }
+      });
+
       socket.on("incoming_group_call", (data) => {
         console.log("incoming_group_call", data);
         setIncomingCall(data);
@@ -363,6 +378,7 @@ const Home = () => {
 
     return () => {
       if (socket) {
+        socket.off("video_ice_candidate");
         socket.off("incoming_video_call");
         socket.off("incoming_group_call");
         socket.off("incoming_voice_call");
@@ -580,6 +596,9 @@ const Home = () => {
         await peerConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(offer)
         );
+
+        // FLUSH buffered candidates here
+        processBufferedCandidates();
 
         const answer = await peerConnectionRef.current.createAnswer();
         await peerConnectionRef.current.setLocalDescription(

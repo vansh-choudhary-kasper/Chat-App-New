@@ -103,7 +103,6 @@ const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, editVisible
   const [editMessage, setEditMessage] = useState(val.text || "");
 
   const deleteHandler = (chatId, messageId, token, to, from, val) => {
-    console.log('val = ', val);
     dispatch(messageStatus({ chatId, messageId, token, to, from, val }));
     setVisible(null);
   };
@@ -114,7 +113,6 @@ const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, editVisible
   };
 
   const handleReply = (e) => {
-    console.log(val);
     setReplyChat({type: val.type, filename: val.filename, text: val.text, _id: val._id});
   };
 

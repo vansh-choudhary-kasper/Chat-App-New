@@ -23,7 +23,6 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const { deviceType, sideToggle, setSideToggle } = useContext(contextData);
-  console.log(deviceType);
   return deviceType === "mobile" ? (
     <div
       className={

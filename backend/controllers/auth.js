@@ -9,7 +9,6 @@ const signToken = ({ userId, access }) => {
 };
 exports.register = async (req, res) => {
   const { email } = req.body;
-  console.log(req.body);
 
   try {
     let user = await User.findById(req.user_id);
@@ -242,7 +241,6 @@ exports.verifyOTP = async (req, res, next) => {
 
 exports.profileUpdate = async (req, res) => {
   const { user_id, about, firstname, lastname } = req.body;
-  console.log(user_id, req.user_id);
   try {
     if (req.user_id !== user_id) {
       return res.status(401).json({

@@ -14,8 +14,6 @@ exports.protect = async (req, res, next) => {
     }
 
     let user = await User.findById(decoded.userId);
-    console.log("user => ", user);
-    console.log(user.activeToken, " <-> ", token);
     if(user.activeToken !== token){
       return res.status(401).json({ message: 'Token invalid or expired' });
     }

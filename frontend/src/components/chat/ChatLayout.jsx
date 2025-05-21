@@ -83,7 +83,6 @@ const ChatLayout = () => {
     };
     socket.on("delete_message", handleDeleteMessage);
     const handleEditMessage = (data) => {
-      console.log("edit socket called")
       dispatch(messageEdit(data));
     };
     socket.on("edit_message", handleEditMessage);
@@ -119,7 +118,6 @@ const ChatLayout = () => {
 
     if (userData) {
       const parsedData = JSON.parse(userData);
-      console.log(conversations);
       conversations.forEach((val) => {
         if (val.status.includes(parsedData.userId)) {
           archive.push(val);

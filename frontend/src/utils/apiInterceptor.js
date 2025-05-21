@@ -9,7 +9,6 @@ import axios from "axios";
 
 
 const LogoutUser = () => {
-    console.log("logouting....................................");
     try {
         const userData = Cookies.get("user");
         if (userData) {

@@ -50,7 +50,6 @@ const guestSlice = createSlice({
         const { data } = action.payload;
         state.updatingUser = false;
         state.updateUserError = null;
-        console.log(action.payload);
         state.user.firstname = data.firstname;
         state.user.lastname = data.lastname;
         state.user.about = data.about;

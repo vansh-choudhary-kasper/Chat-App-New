@@ -1,5 +1,4 @@
 const handleDownload = (fileUrl, fileName = "download") => {
-    console.log("fileName = ", fileName);
     fetch(fileUrl)
         .then((response) => response.blob())
         .then((blob) => {
