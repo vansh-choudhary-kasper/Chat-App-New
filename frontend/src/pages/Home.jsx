@@ -319,8 +319,8 @@ const Home = () => {
   console.log(incomingCall);
   useEffect(() => {
     if (socket) {
-      socket.on("incoming_video_call", async ({ from, offer }) => {
-        setIncomingCall({ from, offer });
+      socket.on("incoming_video_call", async ({ from, user_id, offer }) => {
+        setIncomingCall({ from, user_id, offer });
         setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.play();
@@ -362,18 +362,38 @@ const Home = () => {
           }
         }, 500);
       });
-      // socket.on("disable_call", (data) => {
-      //   console.log(incomingCall, data.from);
-      //   if (incomingCall.from === data.from) {
-      //     myStream.getTracks().forEach((track) => track.stop());
-      //     setMyStream(null);
-      //     if (incomingCall) {
-      //       setIncomingCall(null);
-      //     } else if (isVideoEnabled) {
-      //       setIsVideoEnabled(false);
-      //     }
-      //   }
-      // });
+      socket.on("disable_call", (data) => {
+        try {
+        console.log(incomingCall);
+        console.log(data.from);
+        if (incomingCall && incomingCall.user_id === data.from) {
+          // Stop all tracks
+          if (myStream) {
+            myStream.getTracks().forEach((track) => track.stop());
+            setMyStream(null);
+          }
+          // Close peer connection
+          if (peerConnectionRef.current) {
+            peerConnectionRef.current.close();
+            peerConnectionRef.current = null;
+          }
+          // Clear video elements
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = null;
+          }
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = null;
+          }
+          // Reset state
+          setIncomingCall(null);
+          setIsVideoEnabled(false);
+          setIsVideoCall(false);
+          setIsVoiceCallModalOpen(false);
+        }
+      } catch (error) {
+        console.error("Error in disable_call handler:", error);
+      }
+      });
     }
 
     return () => {
@@ -606,7 +626,7 @@ const Home = () => {
         );
 
         socket.emit("answer_video_call", { to: from, answer });
-        setIncomingCall(null);
+        // setIncomingCall(null);
       } catch (error) {
         console.log(error);
       }
@@ -618,7 +638,7 @@ const Home = () => {
             video: true,
           })
           .then((stream) => {
-            setIncomingCall(null);
+            // setIncomingCall(null);
             setIsVideoCall(true);
             localVideoRef.current = stream;
             setTimeout(() => {
@@ -663,6 +683,7 @@ const Home = () => {
         } else if (incomingVoiceCall) {
           setIncomingVoiceCall(null);
         }
+        socket.emit("leaveCall", { to: incomingCall.user_id });
       }
     } catch (error) {
       console.error("Error pausing audio:", error);
@@ -754,18 +775,32 @@ const Home = () => {
     }
   };
   const leaveCallHandler = () => {
-    // socket.emit("leaveCall", { to: incomingCall.from });
-    socket.emit("leave_call");
-    myStream.getTracks().forEach((track) => track.stop());
+    socket.emit("leaveCall", { to: incomingCall.user_id });
+    // Stop all tracks
+    if (myStream) {
+      myStream.getTracks().forEach((track) => track.stop());
+      setMyStream(null);
+    }
+    // Close peer connection
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+    // Clear video elements
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+    // Reset state
     setIsMicOn(true);
     setIsVideoOn(true);
-    if (isVoiceCallModalOpen) {
-      setIsVoiceCallModalOpen(false);
-    } else if (isVideoCall) {
-      setIsVideoCall(false);
-    } else if (isVideoEnabled) {
-      setIsVideoEnabled(false);
-    }
+    setIsVideoEnabled(false);
+    setIsVideoCall(false);
+    setIsVoiceCallModalOpen(false);
+    setIncomingCall(null);
+    setIncomingVoiceCall(null);
   };
   const { deviceType } = useContext(contextData);
   return (

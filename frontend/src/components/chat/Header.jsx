@@ -274,17 +274,35 @@ const Header = ({ deviceType }) => {
     //   }
     // });
 
-    // socket.on("disable_call", (data) => {
-    //   if (current_user.to === data.from) {
-    //     myStream.getTracks().forEach((track) => track.stop());
-    //     setMyStream(null);
-    //     if (isVoiceCallModalOpen) {
-    //       setIsVoiceCallModalOpen(false);
-    //     } else if (isVideoEnabled) {
-    //       setIsVideoEnabled(false);
-    //     }
-    //   }
-    // });
+    socket.on("disable_call", (data) => {
+      console.log("current_user", current_user._id);
+      console.log("data.from", data.from);
+      if (current_user._id === data.from) {
+        // Stop all tracks
+        if (myStream) {
+          myStream.getTracks().forEach((track) => track.stop());
+          setMyStream(null);
+        }
+
+        // Close peer connection
+        if (peerConnectionRef.current) {
+          peerConnectionRef.current.close();
+          peerConnectionRef.current = null;
+        }
+
+        // Clear video elements
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = null;
+        }
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = null;
+        }
+
+        // Reset state
+        setIsVoiceCallModalOpen(false);
+        setIsVideoEnabled(false);
+      }
+    });
     socket.on("video_call_answered", async ({ from, answer }) => {
       console.log("video_call_sockit_answered", answer);
       if (peerConnectionRef.current) {
@@ -373,14 +391,36 @@ const Header = ({ deviceType }) => {
   //   setIncomingCall(null);
   // };
 
+  useEffect(() => {
+    console.error("Socket_id = ", socket.id);
+  }, [socket, socket.id]);
+
   const leaveCallHandler = () => {
     socket.emit("leaveCall", { to: current_user._id });
-    myStream.getTracks().forEach((track) => track.stop());
-    if (isVoiceCallModalOpen) {
-      setIsVoiceCallModalOpen(false);
-    } else if (isVideoEnabled) {
-      setIsVideoEnabled(false);
+
+    // Stop all tracks
+    if (myStream) {
+      myStream.getTracks().forEach((track) => track.stop());
+      setMyStream(null);
     }
+
+    // Close peer connection
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+
+    // Clear video elements
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+
+    // Reset state
+    setIsVideoEnabled(false);
+    setIsVoiceCallModalOpen(false);
   };
   const backHandler = () => {
     dispatch(setInitial());

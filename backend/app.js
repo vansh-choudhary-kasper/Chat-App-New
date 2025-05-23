@@ -1162,13 +1162,13 @@ io.on("connection", async (socket) => {
     }
   });
   socket.on("video_call_user", ({ to, offer }) => {
-    io.to(to).emit("incoming_video_call", { from: socket.id, offer });
+    io.to(to).emit("incoming_video_call", { from: socket.id, user_id: user_id, offer });
   });
   socket.on("answer_video_call", ({ to, answer }) => {
-    io.to(to).emit("video_call_answered", { from: socket.id, answer });
+    io.to(to).emit("video_call_answered", { from: socket.id, user_id: user_id, answer });
   });
   socket.on("video_ice_candidate", ({ to, candidate }) => {
-    io.to(to).emit("video_ice_candidate", { from: socket.id, candidate });
+    io.to(to).emit("video_ice_candidate", { from: socket.id, user_id: user_id, candidate });
   });
   socket.on("join-voice-room", async ({ to, roomId }) => {
     const to_user = await User.findOne({ _id: to });
@@ -1597,6 +1597,12 @@ io.on("connection", async (socket) => {
         ),
       };
     }
+  });
+  socket.on("leaveCall", async (data) => {
+    console.log(user_id, data);
+    const to_user = await User.findOne({ _id: data.to });
+    console.log("to_user", to_user.socket_id);
+    io.to(to_user.socket_id).emit("disable_call", { from: user_id }); 
   });
   socket.on("disconnect", async () => {
     if (Boolean(user_id)) {
