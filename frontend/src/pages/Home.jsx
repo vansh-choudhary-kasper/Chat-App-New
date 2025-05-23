@@ -128,14 +128,25 @@ const Home = () => {
             consumer,
           },
         ];
-        setRemoteVideos((prev) => [
-          ...prev,
-          {
-            id: remoteProducerId,
-            stream: new MediaStream([consumer.track]),
-            kind: params.kind,
-          },
-        ]);
+        
+        setRemoteVideos((prev) => {
+          const existingIds = new Set(prev.map((video) => video.id));
+          const filteredRemoteVideos = prev.filter((video) => {
+            if (existingIds.has(video.id) && video.id !== remoteProducerId) {
+              existingIds.delete(video.id);
+              return true;
+            }
+            return false;
+          });
+          return [
+            ...filteredRemoteVideos,
+            {
+              id: remoteProducerId,
+              stream: new MediaStream([consumer.track]),
+              kind: consumer.kind,
+            },
+          ];
+        });
 
         socket.emit("consumer-resume", {
           serverConsumerId: params.serverConsumerId,
@@ -144,6 +155,7 @@ const Home = () => {
     );
   };
   const signalNewConsumerTransport = async (remoteProducerId) => {
+    console.error("new running.................");
     if (consumingTransports.includes(remoteProducerId)) return;
     consumingTransports.push(remoteProducerId);
 
@@ -317,13 +329,22 @@ const Home = () => {
     errorAudio.play();
   };
   console.log(incomingCall);
+
+  const handleProducerClosed = (remoteProducerId) => {
+    setRemoteVideos((prev) =>
+      prev.filter((video) => video.id !== remoteProducerId)
+    );
+  };
+
   useEffect(() => {
     if (socket) {
       socket.on("incoming_video_call", async ({ from, user_id, offer }) => {
         setIncomingCall({ from, user_id, offer });
         setTimeout(() => {
           if (audioRef.current) {
-            audioRef.current.play();
+            audioRef.current.play().catch((error) => {
+              console.error("Error playing audio:", error);
+            });
           }
         }, 500);
         console.log("incoming_video_call", isVideoCall);
@@ -349,7 +370,9 @@ const Home = () => {
         setIncomingCall(data);
         setTimeout(() => {
           if (audioRef.current) {
-            audioRef.current.play();
+            audioRef.current.play().catch((error) => {
+              console.error("Error playing audio:", error);
+            });
           }
         }, 500);
         console.log(isVideoCall);
@@ -358,10 +381,18 @@ const Home = () => {
         setIncomingVoiceCall({ from, offer });
         setTimeout(() => {
           if (audioRef.current) {
-            audioRef.current.play();
+            audioRef.current.play().catch((error) => {
+              console.error("Error playing audio:", error);
+            });
           }
         }, 500);
       });
+      socket.on("new-producer", ({ producerId }) =>
+        signalNewConsumerTransport(producerId)
+      );
+      socket.on("producer-closed", ({ remoteProducerId }) =>
+        handleProducerClosed(remoteProducerId)
+      );
       socket.on("disable_call", (data) => {
         try {
         console.log(incomingCall);
@@ -410,6 +441,22 @@ const Home = () => {
   const {
     direct_chat: { conversations, current_conversation },
   } = useSelector((state) => state.conversation);
+
+  // useEffect(() => {
+  //   setRemoteVideos((prev) => {
+  //     const newVideos = remoteVideos;
+  //     const existingIds = new Set(newVideos.map((video) => video.id));
+  //     const filteredRemoteVideos = remoteVideos.filter(
+  //       (video) => {
+  //         if(existingIds.has(video.id)) {
+  //           existingIds.delete(video.id);
+  //           return true;
+  //         }
+  //       }
+  //     );
+  //     return [...filteredRemoteVideos];
+  //   });
+  // }, []);
 
   useEffect(() => {
     const userData = Cookies.get("user");
@@ -592,7 +639,7 @@ const Home = () => {
   const acceptCall = async () => {
     if (!incomingCall) return;
     if (audioRef.current) {
-      audioRef.current.play();
+      audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
     if (incomingCall.from) {
@@ -775,7 +822,13 @@ const Home = () => {
     }
   };
   const leaveCallHandler = () => {
-    socket.emit("leaveCall", { to: incomingCall.user_id });
+    if (isVideoCall) {
+      socket.emit("leave_call");
+      setRemoteVideos([]);
+    } else {
+      socket.emit("leaveCall", { to: incomingCall.user_id });
+    }
+      
     // Stop all tracks
     if (myStream) {
       myStream.getTracks().forEach((track) => track.stop());

@@ -1601,6 +1601,9 @@ io.on("connection", async (socket) => {
   socket.on("leaveCall", async (data) => {
     console.log(user_id, data);
     const to_user = await User.findOne({ _id: data.to });
+    if(!to_user) {
+      return;
+    }
     console.log("to_user", to_user.socket_id);
     io.to(to_user.socket_id).emit("disable_call", { from: user_id }); 
   });

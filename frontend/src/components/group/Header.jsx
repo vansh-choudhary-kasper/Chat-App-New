@@ -141,6 +141,7 @@ const Header = () => {
     );
   };
   const signalNewConsumerTransport = async (remoteProducerId) => {
+    console.error("new running.................");
     //check if we are already consuming the remoteProducerId
     if (consumingTransports.includes(remoteProducerId)) return;
     consumingTransports.push(remoteProducerId);
@@ -531,12 +532,23 @@ const Header = () => {
   }, [myStream, isAudioEnabled]);
   const leaveCallHandler = () => {
     socket.emit("leave_call");
-    myStream.getTracks().forEach((track) => track.stop());
+
+    // Stop all tracks and clear stream
+    if (myStream) {
+      myStream.getTracks().forEach((track) => track.stop());
+      setMyStream(null);
+    }
+
+    // Clear local video element
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+
+    // Reset state
     setIsAudioEnabled(true);
     setIsVideoEnabled(true);
-    if (isVideoCall) {
-      setIsVideoCall(false);
-    }
+    setIsVideoCall(false);
+    setRemoteVideos([]);
   };
   return (
     <>
