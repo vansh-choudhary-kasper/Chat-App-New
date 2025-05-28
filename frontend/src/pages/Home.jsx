@@ -339,6 +339,10 @@ const Home = () => {
   useEffect(() => {
     if (socket) {
       socket.on("incoming_video_call", async ({ from, user_id, offer }) => {
+        // if(incomingCall !== null) {
+        //   return;
+        // }
+        // console.log("user = ", user);
         setIncomingCall({ from, user_id, offer });
         setTimeout(() => {
           if (audioRef.current) {
@@ -725,13 +729,13 @@ const Home = () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
+      }
         if (incomingCall) {
           setIncomingCall(null);
         } else if (incomingVoiceCall) {
           setIncomingVoiceCall(null);
         }
-        socket.emit("leaveCall", { to: incomingCall.user_id });
-      }
+      socket.emit("leaveCall", { to: incomingCall.user_id });
     } catch (error) {
       console.error("Error pausing audio:", error);
     }

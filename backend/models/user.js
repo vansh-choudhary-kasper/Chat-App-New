@@ -25,7 +25,6 @@ const userSchema = new mongoose.Schema(
     lastname: { type: String, require: [true, "lastname is required"] },
     firstname: { type: String, require: [true, "firstname is required"] },
     password: { type: String, require: [true, "Password is required"] },
-    passwordConfirm: { type: String },
     access: { type: String, enum: ["user", "admin"], default: "user" },
     otp: { type: String },
     otp_expiry_time: { type: Date },

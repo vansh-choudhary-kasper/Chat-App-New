@@ -1161,8 +1161,14 @@ io.on("connection", async (socket) => {
       });
     }
   });
-  socket.on("video_call_user", ({ to, offer }) => {
-    io.to(to).emit("incoming_video_call", { from: socket.id, user_id: user_id, offer });
+  socket.on("video_call_user", async ({ to, offer }) => {
+    try {
+      io.to(to).emit("incoming_video_call", { from: socket.id, user_id, offer });
+      await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
+      await User.findOneAndUpdate({ socket_id: to }, { $set: { inCall: true } });
+    } catch (error) {
+      console.log(error);
+    }
   });
   socket.on("answer_video_call", ({ to, answer }) => {
     io.to(to).emit("video_call_answered", { from: socket.id, user_id: user_id, answer });
@@ -1195,8 +1201,10 @@ io.on("connection", async (socket) => {
       });
     }
   });
-  socket.on("voice_call_user", ({ to, offer }) => {
+  socket.on("voice_call_user", async ({ to, offer }) => {
     io.to(to).emit("incoming_voice_call", { from: socket.id, offer });
+    await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
+    await User.findOneAndUpdate({ socket_id: to }, { $set: { inCall: true } });
   });
   socket.on("answer_voice_call", ({ to, answer }) => {
     io.to(to).emit("voice_call_answered", { from: socket.id, answer });
@@ -1270,15 +1278,18 @@ io.on("connection", async (socket) => {
       }
 
       if (userActive.length === 0) {
+        console.log("no user Active or not available to pick up the call");
         io.to(socket.id).emit("group_call_failed", {
-          status: "no user Active",
+          status: "no user Active or not available to pick up the call",
         });
         return;
       } else {
-        userActive.forEach((val) => {
-          io.to(val).emit("incoming_group_call", { roomName });
+        userActive.forEach(async (val) => {
+          io.to(val).emit("incoming_group_call", { roomName })
+          await User.findOneAndUpdate({ socket_id: val }, { $set: { inCall: true } });
         });
 
+        await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
         const router1 = await createRoom(roomName, socket.id, user_id);
 
         peers[socket.id] = {
@@ -1335,7 +1346,10 @@ io.on("connection", async (socket) => {
 
   socket.on("call_users", async ({ chat, roomName, producer }, callback) => {
     if (producer)
-      userActive.map((val) => io.to(val).emit("incoming_group_call"));
+      userActive.map(async (val) => {
+        io.to(val).emit("incoming_group_call")
+        await User.findOneAndUpdate({ socket_id: val }, { $set: { inCall: true } });
+      });
   });
   socket.on("createWebRtcTransport", async ({ consumer }, callback) => {
     const roomName = peers[socket.id].roomName;
@@ -1581,7 +1595,7 @@ io.on("connection", async (socket) => {
     );
     await consumer.resume();
   });
-  socket.on("leave_call", () => {
+  socket.on("leave_call", async() => {
     consumers = removeItems(consumers, socket.id, "consumer");
     producers = removeItems(producers, socket.id, "producer");
     transports = removeItems(transports, socket.id, "transport");
@@ -1597,15 +1611,21 @@ io.on("connection", async (socket) => {
         ),
       };
     }
+    await User.findByIdAndUpdate(user_id, { $set: { inCall: false } });
   });
   socket.on("leaveCall", async (data) => {
-    console.log(user_id, data);
-    const to_user = await User.findOne({ _id: data.to });
-    if(!to_user) {
-      return;
+    try {
+      console.log(user_id, data);
+      await User.findByIdAndUpdate(user_id, { $set: { inCall: false } });
+      const to_user = await User.findOne({ _id: data.to });
+      if(!to_user) {
+        return;
+      }
+      io.to(to_user.socket_id).emit("disable_call", { from: user_id }); 
+      await User.findByIdAndUpdate(to_user._id, { $set: { inCall: false } });
+    } catch (error) { 
+      console.log(error);
     }
-    console.log("to_user", to_user.socket_id);
-    io.to(to_user.socket_id).emit("disable_call", { from: user_id }); 
   });
   socket.on("disconnect", async () => {
     if (Boolean(user_id)) {
