@@ -5,7 +5,6 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
-const bodyParser = require("body-parser");
 const xssClean = require("xss-clean");
 const cors = require("cors");
 const mediasoup = require("mediasoup");
@@ -27,9 +26,7 @@ const routers = require("express").Router();
 // const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: "10kb" }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: "100mb" }));
 
 app.use(mongoSanitize());
 app.use(xssClean());

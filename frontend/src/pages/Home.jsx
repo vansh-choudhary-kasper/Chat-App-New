@@ -694,6 +694,7 @@ const Home = () => {
             localVideoRef.current = stream;
             setTimeout(() => {
               localVideoRef.current.srcObject = stream;
+              localVideoRef.current.muted = true;
             }, 500);
             setMyStream(stream);
             setIsMicOn(true);
@@ -748,6 +749,11 @@ const Home = () => {
           .map((video) => (
             <VideoComponent key={video.id} video={video} />
           ))}
+        {remoteVideos
+          .filter((item) => item.kind === "audio")
+          .map((audio) => (
+            <AudioComponent key={audio.id} audio={audio} />
+          ))}   
       </>
     );
   };
@@ -764,6 +770,19 @@ const Home = () => {
       <div className="group-video-call-modal__user-card">
         <video ref={videoRef} autoPlay playsInline className="remote-video" />
       </div>
+    );
+  };
+  const AudioComponent = ({ audio }) => {
+    const audioRef = useRef(null);
+
+    useEffect(() => {
+      if (audioRef.current && audio.stream) {
+        audioRef.current.srcObject = audio.stream;
+      }
+    }, [audio.stream]);
+
+    return (
+      <audio ref={audioRef} autoPlay playsInline/>
     );
   };
   const profileHandler = () => {

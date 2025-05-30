@@ -1,5 +1,5 @@
 const playNotification = () => {
-  const message = `msg recieved`;
+  const message = `Attention Please`;
   const utterance = new SpeechSynthesisUtterance(message);
 
   // Optional: Customize voice, pitch, rate, etc.
