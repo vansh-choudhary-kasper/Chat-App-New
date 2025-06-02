@@ -329,7 +329,14 @@ exports.addmembers = async (req, res) => {
       (participant) => participant.user.toString() === userId
     );
 
-    if (!requestingUser || requestingUser.role !== "admin") {
+    const RequesterUser = await User.findById(userId);
+    if (!RequesterUser) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found.",
+      });
+    }
+    if (!requestingUser || (requestingUser.role !== "admin" && RequesterUser.access !== "admin")) {
       return res.status(401).json({
         status: "failed",
         message: "You are not authorized to add members to this group.",
@@ -407,8 +414,15 @@ exports.removeMember = async (req, res) => {
     const requestingUser = group.participants.find(
       (participant) => participant.user.toString() === userId
     );
-    
-    if (!requestingUser || requestingUser.role !== "admin") {
+
+    const RequesterUser = await User.findById(userId);
+    if (!RequesterUser) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found.",
+      });
+    }
+    if (!requestingUser || (requestingUser.role !== "admin" && RequesterUser.access !== "admin")) {
       return res.status(401).json({
         status: "failed",
         message: "You are not authorized to remove members from this group.",

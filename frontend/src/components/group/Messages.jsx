@@ -155,7 +155,7 @@ const Messages = ({
   return (
     <>
       <div className="message_main_container">
-        <div class="reply_container">
+        <div className="message_container">
           {val.reply && Object.keys(val.reply).length !== 0 ? replyContainer(val.reply) : <></>}
         </div>
         {messageHandler(val)}

@@ -125,6 +125,10 @@ const Header = ({ deviceType }) => {
       remoteAudioRef.current.srcObject = event.streams[0];
     };
 
+    localStreamRef.current.getTracks().forEach(async (track) => {
+      await peerConnection.addTrack(track, localStreamRef.current);
+    });
+
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         socket.emit("audio_ice_candidate", {
@@ -136,9 +140,7 @@ const Header = ({ deviceType }) => {
 
     console.log("local stream", localStreamRef.current);
 
-    localStreamRef.current.getTracks().forEach(async (track) => {
-      await peerConnection.addTrack(track, localStreamRef.current);
-    });
+    processBufferedCandidates();
 
     return peerConnection;
   };
@@ -149,10 +151,15 @@ const Header = ({ deviceType }) => {
         audio: true,
       });
       localStreamRef.current = stream;
-      localStreamRef.current.muted = true;
       setMyStream(stream);
       setIsAudioEnabled(true);
       setIsVoiceCallModalOpen(true);
+      setTimeout(() => {
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+          localVideoRef.current.muted = true;
+        }
+      }, 500);
       socket.emit("join-voice-room", {
         to: current_user._id,
         roomId,
@@ -298,6 +305,14 @@ const Header = ({ deviceType }) => {
           remoteVideoRef.current.srcObject = null;
         }
 
+        // Clear audio elements
+        if (localStreamRef.current) {
+          localStreamRef.current.srcObject = null;
+        }
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.srcObject = null;
+        }
+
         // Reset state
         setIsVoiceCallModalOpen(false);
         setIsVideoEnabled(false);
@@ -331,20 +346,34 @@ const Header = ({ deviceType }) => {
       peerConnectionRef.current = await createVoicePeerConnection(id);
 
       const offer = await peerConnectionRef.current.createOffer();
-      await peerConnectionRef.current.setLocalDescription(offer);
+      await peerConnectionRef.current.setLocalDescription(
+        new RTCSessionDescription(offer)
+      );
 
       socket.emit("voice_call_user", { to: id, offer });
     });
 
     socket.on("voice_call_answered", async ({ from, answer }) => {
       if (peerConnectionRef.current) {
-        await peerConnectionRef.current.setRemoteDescription(answer);
+        await peerConnectionRef.current.setRemoteDescription(
+          new RTCSessionDescription(answer)
+        ).then(() => {
+          console.log("Remote description set successfully");
+        }).catch(error => {
+          console.error("Error setting remote description:", error);
+        });
       }
+      console.log("voice_call_answered", peerConnectionRef.current);
     });
 
     socket.on("audio_ice_candidate", async ({ from, candidate }) => {
       if (peerConnectionRef.current) {
-        await peerConnectionRef.current.addIceCandidate(candidate);
+        await peerConnectionRef.current.addIceCandidate(
+          new RTCIceCandidate(candidate)
+        );
+      } else {
+        console.warn("PeerConnection is not ready. Buffering candidate.");
+        iceCandidateBuffer.push(candidate);
       }
     });
     return () => {
@@ -355,7 +384,6 @@ const Header = ({ deviceType }) => {
         socket.off("video_call_answered");
         socket.off("video_ice_candidate");
         socket.off("room_voice_created");
-        socket.off("incoming_voice_call");
         socket.off("voice_call_answered");
         socket.off("audio_ice_candidate");
       }
@@ -416,6 +444,14 @@ const Header = ({ deviceType }) => {
     }
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
+    }
+
+    // Clear audio elements
+    if (localStreamRef.current) {
+      localStreamRef.current.srcObject = null;
+    }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
     }
 
     // Reset state

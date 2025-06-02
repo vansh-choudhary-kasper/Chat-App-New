@@ -369,6 +369,23 @@ const Home = () => {
         }
       });
 
+      socket.on("audio_ice_candidate", async ({ to, candidate }) => {
+        console.log(
+          "audio_ice_candidate"
+        )
+        if (peerConnectionRef.current) {
+          try {
+            await peerConnectionRef.current.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+          } catch (err) {
+            console.error("Failed to add ICE candidate:", err);
+          }
+        } else {
+          console.warn("PeerConnection is not ready. Buffering candidate.");
+          iceCandidateBuffer.push(candidate);
+        }
+      });
       socket.on("incoming_group_call", (data) => {
         console.log("incoming_group_call", data);
         setIncomingCall(data);
@@ -381,8 +398,10 @@ const Home = () => {
         }, 500);
         console.log(isVideoCall);
       });
-      socket.on("incoming_voice_call", async ({ from, offer }) => {
-        setIncomingVoiceCall({ from, offer });
+      socket.on("incoming_voice_call", async ({ from, offer, user_id }) => {
+        console.log("incoming voice call");
+        setIncomingVoiceCall({ from, user_id, offer });
+        // setIncomingCall({from, user_id, offer});
         setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.play().catch((error) => {
@@ -401,7 +420,7 @@ const Home = () => {
         try {
         console.log(incomingCall);
         console.log(data.from);
-        if (incomingCall && incomingCall.user_id === data.from) {
+        if ((incomingCall && incomingCall.user_id === data.from) || (incomingVoiceCall && incomingVoiceCall.user_id === data.from)) {
           // Stop all tracks
           if (myStream) {
             myStream.getTracks().forEach((track) => track.stop());
@@ -419,12 +438,21 @@ const Home = () => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = null;
           }
+
+          // Clear audio elements
+          if (localStreamRef.current) {
+            localStreamRef.current.srcObject = null;
+          }
+          if (remoteAudioRef.current) {
+            remoteAudioRef.current.srcObject = null;
+          }
           // Reset state
           setIncomingCall(null);
+          setIncomingVoiceCall(null);
           setIsVideoEnabled(false);
           setIsVideoCall(false);
           setIsVoiceCallModalOpen(false);
-        }
+      }
       } catch (error) {
         console.error("Error in disable_call handler:", error);
       }
@@ -434,13 +462,14 @@ const Home = () => {
     return () => {
       if (socket) {
         socket.off("video_ice_candidate");
+        socket.off("audio_ice_candidate");
         socket.off("incoming_video_call");
         socket.off("incoming_group_call");
         socket.off("incoming_voice_call");
         socket.off("disable_call");
       }
     };
-  }, [socket, incomingCall, isVideoCall]);
+  }, [socket, incomingCall, isVideoCall, incomingVoiceCall]);
 
   const {
     direct_chat: { conversations, current_conversation },
@@ -822,8 +851,14 @@ const Home = () => {
         audio: true,
       });
       localStreamRef.current = stream;
+      localStreamRef.current.muted = true;
+
       setMyStream(stream);
       setIsAudioEnabled(true);
+      setTimeout(() => {
+        localStreamRef.current.srcObject = stream;
+        localStreamRef.current.muted = true;
+      }, 500);
       setIsVoiceCallModalOpen(true);
       const { from, offer } = incomingVoiceCall;
       peerConnectionRef.current = await createVoicePeerConnection(from);
@@ -832,6 +867,8 @@ const Home = () => {
         new RTCSessionDescription(offer)
       );
 
+      processBufferedCandidates();
+
       const answer = await peerConnectionRef.current.createAnswer();
       await peerConnectionRef.current.setLocalDescription(
         new RTCSessionDescription(answer)
@@ -839,7 +876,7 @@ const Home = () => {
 
       socket.emit("answer_voice_call", { to: from, answer });
 
-      setIncomingVoiceCall(null);
+      // setIncomingVoiceCall(null);
     } catch (error) {
       console.log(error);
     }
@@ -849,7 +886,11 @@ const Home = () => {
       socket.emit("leave_call");
       setRemoteVideos([]);
     } else {
-      socket.emit("leaveCall", { to: incomingCall.user_id });
+      if (incomingCall) {
+        socket.emit("leaveCall", { to: incomingCall.user_id });
+      } else if (incomingVoiceCall) {
+        socket.emit("leaveCall", { to: incomingVoiceCall.user_id });
+      }
     }
       
     // Stop all tracks
@@ -868,6 +909,14 @@ const Home = () => {
     }
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
+    }
+
+    // Clear audio elements
+    if (localStreamRef.current) {
+      localStreamRef.current.srcObject = null;
+    }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
     }
     // Reset state
     setIsMicOn(true);
@@ -920,7 +969,7 @@ const Home = () => {
             </div>
           </div>
         )}
-        {incomingCall && (
+        {incomingCall && !isVideoEnabled && (
           <div className="modal-overlay">
             <div className="modal-content">
               <h2>Incoming video Call</h2>
@@ -956,7 +1005,7 @@ const Home = () => {
             </div>
           </div>
         )}
-        {incomingVoiceCall && (
+        {incomingVoiceCall && !isVoiceCallModalOpen && (
           <div className="modal-overlay">
             <audio
               ref={audioRef}

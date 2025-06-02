@@ -1173,8 +1173,10 @@ io.on("connection", async (socket) => {
   socket.on("video_ice_candidate", ({ to, candidate }) => {
     io.to(to).emit("video_ice_candidate", { from: socket.id, user_id: user_id, candidate });
   });
-  socket.on("join-voice-room", async ({ to, roomId }) => {
+  socket.on("join-voice-room", async ({ to, roomId, from }) => {
+    createOneToOneRoom(roomId, from);
     const to_user = await User.findOne({ _id: to });
+    createOneToOneRoom(roomId, to);
 
     if (!to_user) {
       io.to(socket.id).emit("user_voice_call_status", { status: "not found" });
@@ -1199,15 +1201,19 @@ io.on("connection", async (socket) => {
     }
   });
   socket.on("voice_call_user", async ({ to, offer }) => {
-    io.to(to).emit("incoming_voice_call", { from: socket.id, offer });
-    await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
-    await User.findOneAndUpdate({ socket_id: to }, { $set: { inCall: true } });
+    try {
+      io.to(to).emit("incoming_voice_call", { from: socket.id, user_id, offer });
+      await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
+      await User.findOneAndUpdate({ socket_id: to }, { $set: { inCall: true } });
+    } catch (error) {
+      console.log(error);
+    }
   });
   socket.on("answer_voice_call", ({ to, answer }) => {
-    io.to(to).emit("voice_call_answered", { from: socket.id, answer });
+    io.to(to).emit("voice_call_answered", { from: socket.id, user_id, answer });
   });
   socket.on("audio_ice_candidate", ({ to, candidate }) => {
-    io.to(to).emit("audio_ice_candidate", { from: socket.id, candidate });
+    io.to(to).emit("audio_ice_candidate", { from: socket.id, user_id, candidate });
   });
 
   //group video calll
