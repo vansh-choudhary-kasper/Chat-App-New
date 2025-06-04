@@ -258,6 +258,7 @@ io.on("connection", async (socket) => {
   socket.on("text_message", async (data) => {
     let { to, from, message, conversation_id, type, conversation, reply } = data;
 
+    let chat;
     if (conversation === "chat") {
       try {
         if (to === from) return;
@@ -275,7 +276,6 @@ io.on("connection", async (socket) => {
           conversation,
           reply
         };
-        let chat;
         if (conversation_id === undefined) {
           let newChats;
           chat = await OneToOneMessage.findOne({

@@ -6,8 +6,8 @@ class PeerService {
           {
             urls: [
               "stun:stun.l.google.com:19302",
-              // "stun:global.stun.twilio.com:3478",
-              // "stun:bn-turn1.xirsys.com"
+              "stun:global.stun.twilio.com:3478",
+              "stun:bn-turn1.xirsys.com"
             ],
           },
         ],

@@ -64,23 +64,23 @@ const Header = ({ deviceType }) => {
   }, [myStream, isAudioEnabled]);
 
   const ICE_SERVERS = {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-      // {
-      //   urls: "turn:relay1.expressturn.com:3478", // TURN server URL
-      //   username: "ef9MSYZ85EEMNS1CAS", // Username for authentication
-      //   credential: "pUnwxTF548KOW80Z", // Password for authentication
-      // },
-    ],
     // iceServers: [
-    //   { urls: ['stun:stun.l.google.com:19302', 'stun:bn-turn1.xirsys.com'] },
-    //   {
-    //     username: "GPGALnFu1elMv2Mjo5S9nrZfoZ-MDkfJzSPq-7C99LY5KKn39w6EZvpK5y_7ZkBaAAAAAGgUdaZ2YW5zaGNob3VkaGF5",
-    //     credential: "f5c15896-2727-11f0-a058-0242ac140004",
-    //     urls: ["turn:bn-turn1.xirsys.com:80?transport=udp", "turn:bn-turn1.xirsys.com:3478?transport=udp", "turn:bn-turn1.xirsys.com:80?transport=tcp", "turn:bn-turn1.xirsys.com:3478?transport=tcp", "turns:bn-turn1.xirsys.com:443?transport=tcp", "turns:bn-turn1.xirsys.com:5349?transport=tcp"]
-    //   }
-    // ]
+    //   { urls: "stun:stun.l.google.com:19302" },
+    //   { urls: "stun:stun1.l.google.com:19302" },
+    //   // {
+    //   //   urls: "turn:relay1.expressturn.com:3478", // TURN server URL
+    //   //   username: "ef9MSYZ85EEMNS1CAS", // Username for authentication
+    //   //   credential: "pUnwxTF548KOW80Z", // Password for authentication
+    //   // },
+    // ],
+    iceServers: [
+      { urls: ['stun:stun.l.google.com:19302', 'stun:bn-turn1.xirsys.com'] },
+      {
+        username: "GPGALnFu1elMv2Mjo5S9nrZfoZ-MDkfJzSPq-7C99LY5KKn39w6EZvpK5y_7ZkBaAAAAAGgUdaZ2YW5zaGNob3VkaGF5",
+        credential: "f5c15896-2727-11f0-a058-0242ac140004",
+        urls: ["turn:bn-turn1.xirsys.com:80?transport=udp", "turn:bn-turn1.xirsys.com:3478?transport=udp", "turn:bn-turn1.xirsys.com:80?transport=tcp", "turn:bn-turn1.xirsys.com:3478?transport=tcp", "turns:bn-turn1.xirsys.com:443?transport=tcp", "turns:bn-turn1.xirsys.com:5349?transport=tcp"]
+      }
+    ]
   };
   const iceCandidateBuffer = [];
 
