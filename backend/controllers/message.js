@@ -2,10 +2,12 @@ const uploadToCloudinary = require("../middleware/cloudinary");
 const OneToOneMessage = require("../models/OneToOneMessage");
 const GroupMessage = require("../models/GroupMessage");
 const User = require("../models/user");
+const Group = require("../models/GroupMessage");
 const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const { io } = require("../utils/socket");
+const upload = require("../middleware/multer");
 
 exports.conversations = async (req, res) => {
   try {
@@ -297,6 +299,93 @@ exports.groups = async (req, res) => {
     });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  const { group_name, group_id, user_id} = req.body;
+  try{
+    if (req.user_id !== user_id) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorised",
+      })
+    }
+    const group = await Group.findOne({ _id: group_id });
+    if (!group) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Group not found.",
+      });
+    }
+    const requestingUser = group.participants.find(
+      (participant) => participant.user.toString() === user_id
+    );
+    const RequesterUser = await User.findById(user_id); 
+    if (!RequesterUser) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found.",
+      });
+    }
+    if (!requestingUser || (requestingUser.role !== "admin" && RequesterUser.access !== "admin")) {
+      return res.status(401).json({
+        status: "failed",
+        message: "You are not authorized to update this group.",
+      });
+    }
+
+    if(req.file){
+      try {
+        if(group.group_image){
+          const urlParts = group.group_image.split("/");
+          const filename = urlParts[urlParts.length - 1];
+          const publicId = filename.split(".")[0];
+
+          await cloudinary.uploader.destroy(publicId);
+        }
+
+        const cloudinaryRes = await uploadToCloudinary(req.file, "image");
+        group.groupProfile = cloudinaryRes.secure_url;
+      } catch (error) {
+        console.error("Cloudinary Error:", error);
+        return res.status(500).json({
+          status: "error",
+          message: "File upload failed",
+        });
+      }
+    }
+    if(group_name){
+      group.groupName = group_name;
+    }
+    await group.save();
+
+    const membersIds = group.participants.map(val => val.user._id);
+    const members = await User.find({ _id: { $in: membersIds } });
+    const socketIds = members.map(val => val.socket_id);
+
+    io.to(socketIds).emit("group_updated", { data: {
+        group_id: group._id,
+        group_name: group.groupName,
+        group_image: group.groupProfile,
+      } });
+
+    res.status(200).json({
+      message: "Group updated successfully",
+      status: "success",
+      data: {
+        group_id: group._id,
+        group_name: group.groupName,
+        group_image: group.groupProfile,
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error",
+    });
+  }
+}
+
 exports.addmembers = async (req, res) => {
   try {
     const { userId, groupId } = req.query;

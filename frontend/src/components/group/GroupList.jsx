@@ -61,11 +61,12 @@ const GroupList = ({ val, user_id, token,handleClick,}) => {
       dispatch(fetchSelectedGroup({ search: val, user_id, token }))
         .unwrap()
         .then(() => {})
-        .catch(() => {
-          store.dispatch({ type: RESET_STATE });
-          persistor.purge();
-          Cookies.remove("user");
-          navigate("/");
+        .catch((error) => {
+          console.error("Error fetching selected group :", error);
+          // store.dispatch({ type: RESET_STATE });
+          // persistor.purge();
+          // Cookies.remove("user");
+          // navigate("/");
         });
       return;
     }

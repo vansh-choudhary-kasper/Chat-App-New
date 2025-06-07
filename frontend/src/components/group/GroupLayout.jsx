@@ -30,6 +30,7 @@ import {
   addGroup,
   removeGroup, 
   addedOnGroup,
+  groupUpdated,
   groupMessageStatus, 
   editGroupMessage
 } from "../../redux/slice/messageSlice";
@@ -113,6 +114,10 @@ const GroupLayout = () => {
     socket.on("group_added_you", (data) => {
       dispatch(addedOnGroup(data));
     });
+    socket.on("group_updated", (data) => {
+      console.log("data => ", data);
+      dispatch(groupUpdated(data));
+    });
     return () => {
       if(socket) {
       // socket.off("group_message");
@@ -120,6 +125,7 @@ const GroupLayout = () => {
       socket.off("edit_group_message");
       socket.off("user_status");
       socket.off("connect_error");
+      socket.off("group_updated");
       }
     };
   }, [socket]);

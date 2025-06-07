@@ -22,6 +22,9 @@ const LogoutUser = () => {
             } catch (error) {
                 alert("Error logging out -> " + error);
             };
+        } else {
+            window.location = "/";
+            alert("Logged on another device, please log in again");
         }
     } catch (error) {
         console.log("error = ", error);

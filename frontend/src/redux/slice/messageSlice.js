@@ -681,8 +681,55 @@ const conversationSlice = createSlice({
         
         state.group_chat.groups.unshift(group);
       })
+      .addCase(groupUpdated.fulfilled, (state, action) => {
+        const group = action.payload
+        console.log(action);
+        console.log("group => ", group);
+
+        if(state.group_chat.current_group?._id === group.group_id){
+          state.group_chat.current_group.groupName = group.group_name;
+          state.group_chat.current_group.groupProfile = group.group_image;
+        }
+        
+        state.group_chat.groups = state.group_chat.groups.map((val) => {
+          if (val._id === group.group_id) {
+            val.groupName = group.group_name;
+            val.groupProfile = group.group_image;
+          }
+          return val;
+        });
+      })
   },
 });
+
+export const updateGroupProfile = createAsyncThunk(
+  "group_chat/updateGroupProfile",
+  async ({ formData, token, groupId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${Base_Url}/api/user/group/update-group-profile`,
+        formData,
+        {
+          headers: {
+            authorization: token,
+          },
+        }
+      );
+      // if (response.status === 200) {
+      //   const group = response.data.group;
+      //   state.group_chat.groups = state.group_chat.groups.map((val) => {
+      //     if (val._id === groupId) {
+      //       val.groupName = group.groupName;
+      //       val.groupProfile = group.groupProfile;
+      //     }
+      //     return val;
+      //   });
+      // }
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
 
 export const fetchConversations = createAsyncThunk(
   "conversation/fetchConversations",
@@ -962,6 +1009,18 @@ export const addedOnGroup = createAsyncThunk(
   async ({ group }, { rejectWithValue }) => {
     try {
       return group;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const groupUpdated = createAsyncThunk(
+  "conversation/groupUpdated",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      console.log("group in function" , data);
+      return data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
     }

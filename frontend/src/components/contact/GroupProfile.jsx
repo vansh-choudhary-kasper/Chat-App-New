@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { IoClose, IoCallOutline, IoTrash } from "react-icons/io5";
+import { IoClose, IoCallOutline, IoTrash, IoCamera } from "react-icons/io5";
 import { HiOutlineVideoCamera } from "react-icons/hi";
-import { GrNext } from "react-icons/gr";
+import { GrEdit, GrNext } from "react-icons/gr";
 import { BsImage } from "react-icons/bs";
-import { FaPlayCircle, FaFileAlt } from "react-icons/fa";
+import { FaPlayCircle, FaFileAlt, FaEdit } from "react-icons/fa";
 import "./groupProfile.css";
 import { useSelector } from "react-redux";
 import MediaPage from "./MediaPage";
 import Cookies from "js-cookie";
-import {removeMemberHandler} from "../../redux/slice/messageSlice";
-import {useDispatch} from "react-redux";
+import { removeMemberHandler, updateGroupProfile } from "../../redux/slice/messageSlice";
+import { useDispatch } from "react-redux";
 
 const GroupProfile = ({
   setGroupProfile,
   profile,
   groupCallHandler,
-  current_group, 
+  current_group,
 }) => {
   const {
     group_chat: { messages },
@@ -24,6 +24,12 @@ const GroupProfile = ({
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
   const [access, setAccess] = useState(null);
+  const [editGroup, setEditGroup] = useState(false);
+  const [groupImage, setGroupImage] = useState(
+    current_group?.groupProfile || profile
+  );
+  const [profileFile, setProfileFile] = useState(null); // Store file separately for dispatch
+  const [groupName, setGroupName] = useState(current_group?.groupName);
   const dispatch = useDispatch();
   const handleDownload = (fileUrl, fileName = "download") => {
     fetch(fileUrl)
@@ -69,6 +75,34 @@ const GroupProfile = ({
   const handleShowMediaPage = () => {
     setOpenMediaPage(!openMediaPage);
   };
+
+  const handleEditGroup = () => {
+    setEditGroup(!editGroup);
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setGroupImage(URL.createObjectURL(file)); // Show preview
+      setProfileFile(file);
+    }
+  };    
+
+  const handleSaveGroup = () => {
+    const userData = Cookies.get("user");
+    if (!userData) return;
+    const parsedData = JSON.parse(userData);
+    const token = parsedData.token;
+    const formData = new FormData();
+    formData.append("group_name", groupName);
+    formData.append("group_id", current_group._id);
+    formData.append("user_id", parsedData.userId);
+    if (profileFile) {
+      formData.append("file", profileFile);
+    }
+    dispatch(updateGroupProfile({ formData, token, groupId: current_group._id }));
+    setEditGroup(false);
+  };
   return (
     <>
       <div className="group-profile">
@@ -81,20 +115,46 @@ const GroupProfile = ({
         <hr />
         <div className="group-details">
           <div className="dp-bx">
+            {editGroup && (
+              <label className="camera-icon">
+                <IoCamera />
+                <input type="file" accept="image/*" onChange={handleImageChange} />
+              </label>
+            )}
             <img
-              src={current_group?.groupProfile || profile}
+              src={groupImage}
               alt="Group Profile"
             />
           </div>
+        {editGroup ? (
+          <div className="group-name-edit">
+            <input
+              type="text"
+              className="group-name-input"
+              defaultValue={groupName || "Group Name"}
+              onChange={(e) => {
+                setGroupName(e.target.value);
+              }}
+            />
+
+            <button className="save-btn" onClick={handleSaveGroup}>
+              Save
+            </button>
+          </div>
+        ) : (
           <p className="group-name">
             {current_group?.groupName || "Group Name"}
           </p>
+        )}
           <div className="group-calls">
             <button onClick={groupCallHandler}>
               <HiOutlineVideoCamera />
             </button>
             <button onClick={groupCallHandler}>
               <IoCallOutline />
+            </button>
+            <button onClick={handleEditGroup}>
+              <GrEdit />
             </button>
           </div>
         </div>

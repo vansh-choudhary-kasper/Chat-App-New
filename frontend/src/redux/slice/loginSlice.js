@@ -57,7 +57,7 @@ const userSlice = createSlice({
           state.loading = false;
           state.error=null;
 
-      
+          Cookies.remove("user"); // Clear user data from cookies
       
         }).addCase(logoutHandler.rejected, (state, action) => {
           state.error = action.payload; 

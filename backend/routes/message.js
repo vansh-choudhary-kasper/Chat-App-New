@@ -8,6 +8,7 @@ router.patch("/status",authorization.protect, messageController.status);
 // router.patch("/message",authorization.protect, messageController.message);
 // router.post("/group",authorization.protect, messageController.group);
 router.get("/group",authorization.protect, messageController.groups);
+router.post("/group/update-group-profile", authorization.protect, upload.single("file"), messageController.updateProfile);
 router.patch("/members",authorization.protect, messageController.addmembers);
 router.delete("/member",authorization.protect, messageController.removeMember);
 

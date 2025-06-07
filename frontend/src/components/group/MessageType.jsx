@@ -88,16 +88,8 @@ function formatMessage(created_at) {
   return `${day} ${month} ${year}`;
 }
 
-const userData = Cookies.get("user");
-let parsedData;
-let userId;
-if (userData) {
-  parsedData = JSON.parse(userData);
-  userId = parsedData.userId;
-}
-
 // Options for reply
-const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, editVisible = true }) => {
+const ReplyOptions = ({ i, search, val, dispatch, token, setVisible, userId, editVisible = true }) => {
   const [showEditInput, setShowEditInput] = useState(false);
   const { replyChat, setReplyChat } = useContext(SharedContext);
   const [editMessage, setEditMessage] = useState(val.text || "");
@@ -228,7 +220,7 @@ export const ImageMessage = ({
           >
             <img src={val.file} alt="man" />
             {visible === i &&
-              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} userId={user_id} editVisible={false}/>}
           </div>
           {val.text !== "null" && <p>{val.text}</p>}
         </div>
@@ -325,7 +317,7 @@ export const LinkMessage = ({
           >
             {val.preview && <img src={val.preview} alt="man" />}
             {visible === i &&
-              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} userId={user_id} editVisible={false}/>}
           </div>
           {val.text && (
             <p
@@ -445,7 +437,7 @@ export const VideoMessage = ({
           {val.text !== "null" && <p>{val.text}</p>}
         </div>
         {visible === i &&
-          <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
+          <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} userId={user_id} editVisible={false}/>}
         {val.loading ? null : (
           <MdMoreVert
             onClick={(e) => changeVisibility(e, i)}
@@ -552,7 +544,7 @@ export const PdfMessage = ({
         </div>
 
         {visible === i &&
-          <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>}
+          <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} userId={user_id} editVisible={false}/>}
         {val.loading ? null : (
           <MdMoreVert
             onClick={(e) => changeVisibility(e, i)}
@@ -625,7 +617,7 @@ export const TextMessage = ({
           >
             {val.text}
             {visible === val._id &&
-              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible}/>
+              <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} userId={user_id} setVisible={setVisible}/>
 }
           </p>
         </div>
