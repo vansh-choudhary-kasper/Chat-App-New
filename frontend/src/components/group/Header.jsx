@@ -367,8 +367,9 @@ const Header = () => {
       )
         .unwrap()
         .then((response) => {
-          const currentGroupParticipantIds =
-            current_group?.participants?.map(
+          const currentGroupParticipantIds = current_group?.participants?.filter((user) => 
+              user.status !== 'left'
+            ).map(
               (participant) => participant.user._id
             ) || [];
 
@@ -699,10 +700,15 @@ const Header = () => {
                       if (!selectedUsers.find((u) => u._id === user._id)) {
                         setSelectedUsers((prev) => [...prev, user]);
 
-                        const currentGroupParticipantIds =
-                          current_group?.participants?.map(
-                            (participant) => participant.user._id
-                          ) || [];
+                        // const currentGroupParticipantIds =
+                        //   current_group?.participants?.map(
+                        //     (participant) => participant.user._id
+                        //   ) || [];
+                        const currentGroupParticipantIds = current_group?.participants?.filter((user) => 
+                          user.status !== 'left'
+                        ).map(
+                          (participant) => participant.user._id
+                        ) || [];
 
                         const remaining = guests.filter(
                           (guest) =>
@@ -776,7 +782,7 @@ const Header = () => {
           <div className="selected_group_name_container">
             <h5>{current_group.groupName.slice(0, 20)}</h5>
             <div className="group_status_container">
-              <AvatarGroup users={current_group?.participants} />
+              <AvatarGroup users={current_group?.participants.filter((user) => user.status !== 'left')} />
             </div>
           </div>
         </div>

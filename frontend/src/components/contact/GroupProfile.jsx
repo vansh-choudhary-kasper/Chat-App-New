@@ -69,8 +69,18 @@ const GroupProfile = ({
     const parsedData = JSON.parse(userData);
     setUserId(parsedData.userId);
     setToken(parsedData.token);
-    setAccess(parsedData.access);
   }, []);
+
+  useEffect(() => {
+    if(current_group) {
+      const user = current_group.participants.find((member) => 
+        member.user._id === userId
+      );
+      setAccess(user?.role);
+      console.log(user);
+      console.log(current_group.participants);
+    }
+  }, [current_group, userId]);
 
   const handleShowMediaPage = () => {
     setOpenMediaPage(!openMediaPage);
@@ -200,7 +210,7 @@ const GroupProfile = ({
           </div>
 
           <ul>
-            {current_group?.participants?.map((member) => (
+            {current_group?.participants?.filter((member) => member.status !== 'left').map((member) => (
               <li key={member.id} className="participant-item">
                 <div className="participant-info">
                   <img src={member.user?.profile || profile} alt="Member" />

@@ -568,7 +568,7 @@ const GroupLayout = () => {
                   <hr />
                   <Chat userId={userId} token={token} />
               
-                  { current_group?.isRemoved ? 
+                  { current_group.participants.find((member) => member?.user?._id?.toString() === userId)?.status === 'left' ? 
                   <div className="group_removed" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
                     {/* <img src={groupRemoved} alt="group_removed" /> */}
                     <p style={{fontSize:'20px', color:'#6169FF'}}>You have been removed from this group</p>

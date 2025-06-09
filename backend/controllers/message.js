@@ -326,7 +326,7 @@ exports.updateProfile = async (req, res) => {
         message: "User not found.",
       });
     }
-    if (!requestingUser || (requestingUser.role !== "admin" && RequesterUser.access !== "admin")) {
+    if (!requestingUser || requestingUser.role !== "admin") {
       return res.status(401).json({
         status: "failed",
         message: "You are not authorized to update this group.",
@@ -425,26 +425,31 @@ exports.addmembers = async (req, res) => {
         message: "User not found.",
       });
     }
-    if (!requestingUser || (requestingUser.role !== "admin" && RequesterUser.access !== "admin")) {
+    if (!requestingUser || requestingUser.role !== "admin") {
       return res.status(401).json({
         status: "failed",
         message: "You are not authorized to add members to this group.",
       });
     }
 
-    const existingMemberIds = group.participants.map((participant) =>
-      participant.user.toString()
-    );
+    const existingMemberIds = group.participants.map((participant, i) => {
+      const userIdStr = participant.user.toString();
+      if (membersList.includes(userIdStr)) {
+          group.participants[i].status = "offline";
+          group.participants[i].joinedAt.push(new Date(Date.now()));
+      }
+      return userIdStr;
+    });
     const uniqueNewMembers = membersList.filter(
       (memberId) => !existingMemberIds.includes(memberId)
     );
 
-    if (uniqueNewMembers.length === 0) {
-      return res.status(400).json({
-        status: "failed",
-        message: "All members are already in the group.",
-      });
-    }
+    // if (uniqueNewMembers.length === 0) {
+    //   return res.status(400).json({
+    //     status: "failed",
+    //     message: "All members are already in the group.",
+    //   });
+    // }
 
     const participantsToAdd = uniqueNewMembers.map((memberId) => ({
       user: new mongoose.Types.ObjectId(memberId),
@@ -452,7 +457,7 @@ exports.addmembers = async (req, res) => {
     }));
 
     // without password
-    let newMembers = await User.find({ _id: { $in: uniqueNewMembers } }).select('-password');
+    let newMembers = await User.find({ _id: { $in: membersList } }).select('-password');
     newMembers = newMembers.map((user) => ({
       user,
       role: "member",
@@ -511,7 +516,7 @@ exports.removeMember = async (req, res) => {
         message: "User not found.",
       });
     }
-    if (!requestingUser || (requestingUser.role !== "admin" && RequesterUser.access !== "admin")) {
+    if (!requestingUser || requestingUser.role !== "admin") {
       return res.status(401).json({
         status: "failed",
         message: "You are not authorized to remove members from this group.",
@@ -530,8 +535,15 @@ exports.removeMember = async (req, res) => {
     }
     const user = await User.findOne({ _id: memberToRemove.user });
 
-    group.participants = group.participants.filter(
-      (participant) => participant._id !== memberToRemove._id
+    group.participants = group.participants.map(
+      (participant) => {
+        if(participant._id === memberToRemove._id) {
+          participant.status = "left";
+          participant.leftAt.push(new Date(Date.now()));
+        }
+
+        return participant;
+      } 
     );
 
     await group.save();
@@ -618,6 +630,45 @@ exports.removeMembers = async (req, res) => {
   }
 };
 
+function BSfirstMsg(array, joinedAt, leftAt) {
+  if(array.length == 0) return {
+    startingPoint : -1,
+    endingPoint : -1
+  };
+  let first = 0;
+  let last = array.length - 1;
+  console.log("length => ", last);
+  console.log("joinedAt => ", joinedAt);
+  console.log("lastMessage => ", array[last].created_at);
+  while (first <= last) {
+    const mid = Math.floor((first + last) / 2);
+    if (joinedAt > array[mid].created_at) {
+      first = mid + 1;
+    } else {
+      last = mid - 1;
+    }
+  }
+
+  let obj = {
+    startingPoint : first
+  }
+
+  first = 0;
+  last = array.length - 1;
+  while (first <= last) {
+    const mid = Math.floor((first + last) / 2);
+    if (leftAt > array[mid].created_at) {
+      first = mid + 1;
+    } else {
+      last = mid - 1;
+    }
+  }
+
+  obj.endingPoint = first;
+
+  return obj;
+}
+
 exports.selectedGroupConversation = async (req, res) => {
   try {
     const { search, userid } = req.query;
@@ -647,11 +698,15 @@ exports.selectedGroupConversation = async (req, res) => {
       });
     }
 
-    // Reverse messages for response
-    const reversedMessages = conversation.messages
-      .map((message) => {
+    const AccessMsgs = [];
+    const user = conversation.participants.find((per) => per?.user?._id.toString() === userid);
+    user?.joinedAt.map((date, i) => {
+      const limitedMsgs = BSfirstMsg(conversation.messages, date, user.leftAt[i] ? user.leftAt[i] : Date.now());
+      console.log(limitedMsgs);
+      for(let i = limitedMsgs.startingPoint; i < conversation.messages.length && i < limitedMsgs.endingPoint; i++) {
+        let message = conversation.messages[i];
         if (message.status === "delete") {
-          return {
+          AccessMsgs.push({
             seen: message.seen || "unseen",
             to: message.to,
             from: message.from,
@@ -660,11 +715,15 @@ exports.selectedGroupConversation = async (req, res) => {
             text: "This message is deleted",
             _id: message._id,
             status: "delete",
-          };
+          });
+        } else {
+          AccessMsgs.push(message);
         }
-        return message;
-      })
-      .reverse();
+      }
+    })
+
+    // Reverse messages for response
+    const reversedMessages = AccessMsgs.reverse();
 
     const reversedConversation = {
       ...conversation.toObject(),

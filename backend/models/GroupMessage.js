@@ -14,19 +14,38 @@ const GroupMessageSchema = new mongoose.Schema(
           enum: ["admin", "member"],
           default: "member",
         },
+        status: {
+          type: String,
+          enum: ["online", "offline", "left"],
+          default: "offline",
+        },
+        joinedAt: {
+          type: [Date],
+          default: () => [Date.now()],
+        },
+        leftAt: [
+          {
+            type: Date,
+            default: Date.now,
+          }
+        ]
       },
     ],
-    removed: [
-      {
-        people: {
-          type: mongoose.Schema.ObjectId,
-          ref: "User",
-        },
-        date: {
-          type: Date,
-        },
-      },
-    ],
+    // removed: [
+    //   {
+    //     people: {
+    //       type: mongoose.Schema.ObjectId,
+    //       ref: "User",
+    //     },
+    //     joinedAt: {
+    //       type: Date,
+    //     },
+    //     leftAt: {
+    //       type: Date,
+    //       default: Date.now,
+    //     },
+    //   },
+    // ],
     messages: [
       {
         from: {

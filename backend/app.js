@@ -485,6 +485,13 @@ io.on("connection", async (socket) => {
         if (!new_message._id) {
           new_message._id = new mongoose.Types.ObjectId();
         }
+
+        const user = chat.participants.find((member) => member.user.toString() == from);
+        if(user) {
+          if(user.status === 'left') return;
+        } else {
+          return;
+        }
         if (type === "text") {
           if (
             chat.messages.length === 0 ||
@@ -500,12 +507,14 @@ io.on("connection", async (socket) => {
             };
             chat.messages.push(dateMessage);
             chat.participants.forEach(async (val) => {
-              const emp = await User.findOne({ _id: val.user.toString() });
+              if(val.status !== 'left') {
+                const emp = await User.findOne({ _id: val.user.toString() });
 
-              io.to(emp?.socket_id).emit("group_message", {
-                conversation_id,
-                message: dateMessage,
-              });
+                io.to(emp?.socket_id).emit("group_message", {
+                  conversation_id,
+                  message: dateMessage,
+                });
+              }
             });
           }
           chat.messages.push(new_message);
@@ -530,12 +539,14 @@ io.on("connection", async (socket) => {
             };
             chat.messages.push(dateMessage);
             chat.participants.forEach(async (val) => {
-              const emp = await User.findOne({ _id: val.user.toString() });
+              if(val.status !== 'left') {
+                const emp = await User.findOne({ _id: val.user.toString() });
 
-              io.to(emp?.socket_id).emit("group_message", {
-                conversation_id,
-                message: new_message,
-              });
+                io.to(emp?.socket_id).emit("group_message", {
+                  conversation_id,
+                  message: new_message,
+                });
+              }
             });
           }
           chat.messages.push(new_message);
@@ -545,12 +556,14 @@ io.on("connection", async (socket) => {
         }
 
         chat.participants.forEach(async (val) => {
-          const emp = await User.findOne({ _id: val.user.toString() });
+          if(val.status !== 'left') {
+            const emp = await User.findOne({ _id: val.user.toString() });
 
-          io.to(emp?.socket_id).emit("group_message", {
-            conversation_id,
-            message: new_message,
-          });
+            io.to(emp?.socket_id).emit("group_message", {
+              conversation_id,
+              message: new_message,
+            });
+          }
         });
 
         socket.broadcast.emit("user_status", { user_id, status: "Online" });
@@ -836,13 +849,15 @@ io.on("connection", async (socket) => {
           await chat.save({});
           await from_user.save({});
           chat.participants.forEach(async (val) => {
-            const emp = await User.findOne({ _id: val.user.toString() });
+            if(val.status !== 'left') {
+              const emp = await User.findOne({ _id: val.user.toString() });
 
-            io.to(emp?.socket_id).emit("group_message", {
-              conversation_id,
-              message: new_message,
-              dateMessage,
-            });
+              io.to(emp?.socket_id).emit("group_message", {
+                conversation_id,
+                message: new_message,
+                dateMessage,
+              });
+            }
           });
         } else {
           new_message.loading = false;
@@ -852,12 +867,14 @@ io.on("connection", async (socket) => {
           await chat.save({});
           await from_user.save({});
           chat.participants.forEach(async (val) => {
-            const emp = await User.findOne({ _id: val.user.toString() });
+            if(val.status !== 'left') {
+              const emp = await User.findOne({ _id: val.user.toString() });
 
-            io.to(emp?.socket_id).emit("group_message", {
-              conversation_id,
-              message: new_message,
-            });
+              io.to(emp?.socket_id).emit("group_message", {
+                conversation_id,
+                message: new_message,
+              });
+            }
           });
         }
       }
