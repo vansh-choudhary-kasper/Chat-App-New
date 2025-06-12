@@ -9,6 +9,7 @@ import { AiOutlineFileZip } from "react-icons/ai";
 
 import {
   DateSeparator,
+  MemberSeparator,
   ImageMessage,
   LinkMessage,
   PdfMessage,
@@ -128,6 +129,20 @@ const Messages = ({
         );
       case "date":
         return <DateSeparator val={val} />;
+      case "addMember":
+        return <MemberSeparator 
+          current_group={current_group}
+          val={val} 
+          user_id={userId}
+          type="add"
+        />;
+      case "removeMember":
+        return <MemberSeparator 
+          current_group={current_group}
+          val={val} 
+          user_id={userId}
+          type="remove"
+        />;
     }
   };
 

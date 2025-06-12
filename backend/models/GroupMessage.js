@@ -54,7 +54,15 @@ const GroupMessageSchema = new mongoose.Schema(
         },
         type: {
           type: String,
-          enum: ["text", "video", "image", "pdf", "zip", "link", "date"],
+          enum: ["text", "video", "image", "pdf", "zip", "link", "date", "addMember", "removeMember"],
+        },
+        removedMember: {
+          type: mongoose.Schema.ObjectId,
+          ref: "User",
+        },
+        addedMember: {
+          type: mongoose.Schema.ObjectId,
+          ref: "User",
         },
         file: {
           type: String,

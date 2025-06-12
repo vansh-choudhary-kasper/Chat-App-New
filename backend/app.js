@@ -629,6 +629,8 @@ io.on("connection", async (socket) => {
         role: index === members.length - 1 ? "admin" : "member",
       }));
 
+      const adminId = participants.find((participant) => participant.role === "admin").user;
+
       // Create the group in the database
       const group = await GroupMessage.create({
         participants,
@@ -641,6 +643,27 @@ io.on("connection", async (socket) => {
         "participants.user",
         "firstname lastname _id status socket_id profile"
       );
+
+      const firstMsg = {
+        conversation : "group",
+        from: adminId.toString(),
+        type: "date",
+        created_at: new Date(Date.now()),
+        status: "msg",
+      };
+      groupInfo.messages.push(firstMsg);
+      groupInfo.participants.forEach(async (participant) => {
+        if(participant.user?._id?.toString() === adminId.toString()) return;
+        const sendMessage = {
+          conversation : "group",
+          from: adminId.toString(),
+          type: "addMember",
+          addedMember: participant.user?._id?.toString(),
+          created_at: new Date(Date.now() + 1000),
+        }
+        groupInfo.messages.push(sendMessage);
+      });
+      await groupInfo.save();
 
       // Broadcast the new group to all participants
       groupInfo.participants.forEach(async (participant) => {

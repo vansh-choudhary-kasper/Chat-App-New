@@ -456,14 +456,49 @@ exports.addmembers = async (req, res) => {
       role: "member",
     }));
 
+    const sendMessages = [];
     // without password
     let newMembers = await User.find({ _id: { $in: membersList } }).select('-password');
-    newMembers = newMembers.map((user) => ({
-      user,
-      role: "member",
-    }));
+    newMembers = newMembers.map((user) => {
+      console.log(user);
+      const sendMessage = {
+        conversation : "group",
+        from: userId,
+        type: "addMember",
+        addedMember: user?._id?.toString(),
+        created_at: new Date(Date.now() + 1000),
+      }
+      sendMessages.push(sendMessage);
+      group.messages.push(sendMessage);
+
+      return {
+        user,
+        role: "member",
+      };
+    });
 
     io.to(newMembers.map(val => val.user.socket_id)).emit("group_added_you", { group });
+    // io.to(group.participants.map(val => val.user.socket_id)).emit("group_added_member", { groupId, newMembers });
+    group.participants.forEach(async (val) => {
+      if(val.status !== 'left') {
+        const emp = await User.findOne({ _id: val.user.toString() });
+        io.to(emp?.socket_id).emit("group_added_member", { groupId, newMembers : newMembers.filter((member) =>  uniqueNewMembers.includes(member.user?._id.toString())), oldMembers : membersList.filter((member) => !uniqueNewMembers.includes(member)) });
+        sendMessages.forEach(async (sendMessage) => {
+          io.to(emp?.socket_id).emit("group_message", {
+            conversation_id : groupId,
+            message: sendMessage,
+          });
+        })
+      }
+    });
+    newMembers.forEach(async (emp) => {
+      sendMessages.forEach(async (sendMessage) => {
+        io.to(emp?.socket_id).emit("group_message", {
+          conversation_id : groupId,
+          message: sendMessage,
+        });
+      })
+    });
 
     group.participants.push(...participantsToAdd);
     await group.save();
@@ -535,6 +570,15 @@ exports.removeMember = async (req, res) => {
     }
     const user = await User.findOne({ _id: memberToRemove.user });
 
+    const sendMessage = {
+      conversation : "group",
+      from: userId,
+      type: "removeMember",
+      removedMember: member,
+      created_at: new Date(Date.now() - 1000),
+    }
+    group.messages.push(sendMessage);
+
     group.participants = group.participants.map(
       (participant) => {
         if(participant._id === memberToRemove._id) {
@@ -548,6 +592,16 @@ exports.removeMember = async (req, res) => {
 
     await group.save();
 
+    group.participants.forEach(async (val) => {
+      if(val.user.toString() === user._id.toString() || val.status !== 'left') {
+        const emp = await User.findOne({ _id: val.user.toString() });
+        io.to(emp?.socket_id).emit("group_removed_member", { groupId: group._id, member });
+        io.to(emp?.socket_id).emit("group_message", {
+          conversation_id : groupId,
+          message: sendMessage,
+        });
+      }
+    });
     io.to(user?.socket_id).emit("group_removed_you", { groupId: group._id });
 
     res.status(200).json({

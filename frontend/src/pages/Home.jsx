@@ -491,9 +491,9 @@ const Home = () => {
   //   });
   // }, []);
 
+  const userData = Cookies.get("user");
   useEffect(() => {
-    const userData = Cookies.get("user");
-    if (!socket) return;
+    if (!socket) return; 
     if (!userData) return;
 
     const parsedData = JSON.parse(userData);
@@ -524,7 +524,7 @@ const Home = () => {
       socket.off("new_message", handleNewMessage);
       socket.off("group_message", handleGroupMessage);
     };
-  }, []);
+  }, [userData]);
   useEffect(() => {
     if (incomingCall?.roomName) {
       const timer = setTimeout(() => {

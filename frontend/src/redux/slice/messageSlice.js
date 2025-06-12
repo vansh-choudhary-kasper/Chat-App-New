@@ -39,6 +39,7 @@ const conversationSlice = createSlice({
   reducers: {
     sendMessage: (state, action) => {
       const { data, userId } = action.payload;
+      console.log("data in conversationSlice => ", data);
 
       const { message, dateMessage } = data;
       if (message.conversation === "chat") {
@@ -202,7 +203,9 @@ const conversationSlice = createSlice({
             if (
               message.from === userId &&
               message.type !== "link" &&
-              message.type !== "text"
+              message.type !== "text" &&
+              message.type !== "addMember" &&
+              message.type !== "removeMember"
             ) {
               const index = messages.findIndex(
                 (val) => val.msgId === message.msgId
@@ -636,6 +639,7 @@ const conversationSlice = createSlice({
           groupProfile,
         };
         state.group_chat.messages = messages;
+        console.log("messages on slice => ", messages);
         state.loading = false;
       })
       .addCase(fetchSelectedGroup.rejected, (state, action) => {
@@ -647,39 +651,82 @@ const conversationSlice = createSlice({
         const data = action.payload;
         const { message, status } = data;
         if (message === "Members added successfully") {
-          state.group_chat.current_group.participants = [
-            ...state.group_chat.current_group.participants,
-            ...action.payload.newMembers,
-          ];
+          // state.group_chat.current_group.participants = [
+          //   ...state.group_chat.current_group.participants,
+          //   ...action.payload.newMembers,
+          // ];
         }
       })
       .addCase(removeMemberHandler.fulfilled, (state, action) => {
         const data = action.payload;
         const { message, status } = data;
         if (message === "Member removed successfully") {
-          state.group_chat.current_group.participants = state.group_chat.current_group.participants.filter(
-            (val) => val?.user?._id !== action.payload.memberId
-          );
+          // state.group_chat.current_group.participants = state.group_chat.current_group.participants.filter(
+          //   (val) => val?.user?._id !== action.payload.memberId
+          // );
         }
       })
       .addCase(removeGroup.fulfilled, (state, action) => {
-        const groupId = action.payload
+        const groupId = action.payload;
+        let userData = Cookies.get("user");
+        let user_id;
+        if (userData) {
+          user_id = JSON.parse(userData).userId;
+        }
+        console.warn("current user_id => ", user_id);
 
         if(state.group_chat.current_group?._id === groupId){
-          state.group_chat.current_group.isRemoved = true;
+          state.group_chat.current_group.participants.forEach((member, i) => {
+            if(member.user._id.toString() === user_id) {
+              state.group_chat.current_group.participants[i].status = "left";
+            }
+          })
         }
-        state.group_chat.groups = state.group_chat.groups.filter(
-          (val) => val._id !== groupId
-        );
       })
       .addCase(addedOnGroup.fulfilled, (state, action) => {
         const group = action.payload
+        let userData = Cookies.get("user");
+        let user_id;
+        if (userData) {
+          user_id = JSON.parse(userData).userId;
+        }
 
         if(state.group_chat.current_group?._id === group._id){
-          state.group_chat.current_group.isRemoved = false;
+          state.group_chat.current_group.participants.forEach((member, i) => {
+            if(member.user._id.toString() === user_id) {
+              state.group_chat.current_group.participants[i].status = "online";
+            }
+          })
         }
-        
-        state.group_chat.groups.unshift(group);
+
+        if(!state.group_chat.groups.some((gr) => gr._id === group._id)) {
+          state.group_chat.groups.unshift(group);
+        }
+      })
+      .addCase(addMembersSocket.fulfilled, (state, action) => {
+        const { groupId, newMembers, oldMembers} = action.payload;
+
+        if(state.group_chat.current_group?._id === groupId) {
+          state.group_chat.current_group.participants.forEach((member, i) => {
+            if(oldMembers.includes(member.user._id.toString())) {
+              state.group_chat.current_group.participants[i].status = "offline";
+            }
+          })
+          newMembers.forEach((member) => {
+            state.group_chat.current_group.participants.push(member);
+          })
+        }
+      })
+      .addCase(removeMemberSocket.fulfilled, (state, action) => {
+        const { groupId, member } = action.payload;
+
+        if(state.group_chat.current_group?._id === groupId) {
+          state.group_chat.current_group.participants.forEach((emp, i) => {
+            if(emp.user._id.toString() === member) {
+              state.group_chat.current_group.participants[i].status = "left";
+            }
+          })
+        }
       })
       .addCase(groupUpdated.fulfilled, (state, action) => {
         const group = action.payload
@@ -965,6 +1012,7 @@ export const fetchSelectedGroup = createAsyncThunk(
           },
         }
       );
+      console.log("fetchedGroup => ", response.data.data);
 
       return response.data.data;
     } catch (error) {
@@ -1009,6 +1057,28 @@ export const addedOnGroup = createAsyncThunk(
   async ({ group }, { rejectWithValue }) => {
     try {
       return group;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const addMembersSocket = createAsyncThunk(
+  "conversation/addMembersSocket", 
+  async (data, { rejectWithValue }) => {
+    try {
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const removeMemberSocket = createAsyncThunk(
+  "conversation/removeMemberSocket", 
+  async (data, { rejectWithValue }) => {
+    try {
+      return data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import "./messagetype.css";
 import { BsDownload } from "react-icons/bs";
 import { MdMoreVert } from "react-icons/md";
@@ -11,6 +11,7 @@ import { TbArrowBackUp } from "react-icons/tb";
 import Cookies from "js-cookie";
 import { handleDownload } from "../../utils/helper";
 import { SharedContext } from "../../utils/replyContext";
+import { current } from "@reduxjs/toolkit";
 
 // Format message time
 function formatMessageTime(created_at) {
@@ -636,6 +637,58 @@ export const DateSeparator = ({ val }) => {
     <div className="date-separator">
       <hr className="date-line" />
       <span className="date-text">{formatMessage(val.created_at)}</span>
+      <hr className="date-line" />
+    </div>
+  );
+};
+export const MemberSeparator = ({ val, current_group, type }) => {
+  const [from, setFrom] = useState("");
+  const [removedMember, setRemovedMember] = useState("");
+  const [user_id, setUserId] = useState(null);
+
+  useEffect(() => {
+    const user = Cookies.get("user");
+    if (!user) return;
+
+    const parsed = JSON.parse(user);
+    // console.warn("parsed", parsed);
+    const uid = parsed.userId;
+    setUserId(uid);
+
+    if (!current_group?.participants?.length) return;
+
+    let tempFrom = "";
+    let tempRemoved = "";
+
+    current_group.participants.forEach((member) => {
+      const memberId = member.user._id.toString();
+      if (memberId === val.from) {
+        tempFrom = memberId === uid ? "You" : member.user.firstname;
+      } 
+      else if (val.removedMember && memberId === val.removedMember) {
+        // console.error("memberId => ", memberId);
+        // console.error("val.removedMember => ", val.removedMember);
+        tempRemoved = memberId === uid ? "You" : member.user.firstname;
+      } 
+      else if (val.addedMember && memberId === val.addedMember) {
+        tempRemoved = memberId === uid ? "You" : member.user.firstname;
+      }
+    });
+
+    setFrom(tempFrom);
+    setRemovedMember(tempRemoved);
+  }, [current_group, val.from, val.removedMember, val.addedMember]);
+
+  return (
+    <div className="date-separator">
+      <hr className="date-line" />
+      <div className="date-text">
+        {type === "add" ? (
+          <span>{from} added {removedMember}</span>
+        ) : (
+          <span>{from} removed {removedMember}</span>
+        )}
+      </div>
       <hr className="date-line" />
     </div>
   );
