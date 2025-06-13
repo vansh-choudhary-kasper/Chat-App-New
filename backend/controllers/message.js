@@ -200,31 +200,168 @@ exports.status = async (req, res) => {
   }
 };
 
-exports.group = async (req, res) => {
-  const { groupName, groupMember } = req.body;
-  if (!groupName || groupMember.length < 3) {
-    res.status(400).json({
-      status: "fail",
-      message: "minimum members or group name is missing",
-    });
-    return;
-  }
+// Make a member an admin
+exports.makeAdmin = async (req, res) => {
   try {
-    const members = groupMember.map((val) => {
-      return val._id;
+    const { groupId, memberId, requesterId } = req.body;
+
+    const group = await GroupMessage.findById(groupId);
+    if (!group) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Group not found"
+      });
+    }
+
+    // Check if requester is an admin
+    const requester = group.participants.find(p => p.user.toString() === requesterId);
+    if (!requester || requester.role !== "admin") {
+      return res.status(403).json({
+        status: "failed",
+        message: "Only admins can promote members to admin"
+      });
+    }
+
+    // Update member's role to admin
+    const memberIndex = group.participants.findIndex(p => p.user.toString() === memberId);
+    if (memberIndex === -1) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Member not found in group"
+      });
+    }
+
+    group.participants[memberIndex].role = "admin";
+    await group.save();
+
+    // Notify group members about new admin
+    const newAdminUser = await User.findById(memberId);
+    group.participants.forEach(async (participant) => {
+      if (participant.status !== 'left') {
+        const user = await User.findById(participant.user);
+        io.to(user?.socket_id).emit("admin_promoted", {
+          groupId,
+          newAdmin: {
+            _id: newAdminUser._id,
+            firstname: newAdminUser.firstname,
+            lastname: newAdminUser.lastname
+          }
+        });
+      }
     });
-    const group = await GroupMessage.create({
-      participants: [...members],
-      groupName,
-    });
+
     res.status(200).json({
-      message: "Group Created",
       status: "success",
+      message: "Member promoted to admin successfully"
     });
   } catch (error) {
-    return res.status(500).json({
+    console.error(error);
+    res.status(500).json({
       status: "failed",
-      message: "Server error",
+      message: "Server error"
+    });
+  }
+};
+
+// Handle group creator leaving
+exports.leaveGroup = async (req, res) => {
+  try {
+    const { groupId, userId, newAdminId, assignmentType } = req.body;
+
+    const group = await GroupMessage.findById(groupId);
+    if (!group) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Group not found"
+      });
+    }
+
+    const leavingMember = group.participants.find(p => p.user.toString() === userId);
+    if (!leavingMember) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Member not found in group"
+      });
+    }
+
+    let newAdmin;
+    // Handle creator leaving
+    if (leavingMember.role === "admin") {
+      if (assignmentType === "manual" && newAdminId) {
+        // Manual assignment to specific member
+        newAdmin = group.participants.find(p => p.user.toString() === newAdminId);
+        if (!newAdmin || newAdmin.status === "left") {
+          return res.status(400).json({
+            status: "failed",
+            message: "Invalid new admin specified"
+          });
+        }
+
+        newAdmin.role = "admin";
+      } else {
+        // Random assignment
+        const activeMembers = group.participants.filter(p => 
+          p.user.toString() !== userId && 
+          p.status !== "left"
+        );
+
+        if (activeMembers.length === 0) {
+          return res.status(400).json({
+            status: "failed",
+            message: "Cannot leave group - no active members to transfer ownership to"
+          });
+        }
+
+        // pick random member
+        const selectedMember = activeMembers[Math.floor(Math.random() * activeMembers.length)];
+        if(selectedMember) {
+          selectedMember.role = "admin";
+          newAdmin = selectedMember;
+        }
+      }
+
+      // // Update leaving creator's status
+      // leavingMember.isCreator = false;
+    }
+
+    // Update leaving member's status
+    leavingMember.status = "left";
+    leavingMember.role = "member";
+    leavingMember.leftAt.push(new Date(Date.now()));
+
+    await group.save();
+
+    // Notify group members
+    group.participants.forEach(async (participant) => {
+      if (participant.status !== 'left' || participant.user.toString() === userId) {
+        const user = await User.findById(participant.user);
+        if(newAdmin) {
+          console.log("newAdmin => ", newAdmin);
+          io.to(user?.socket_id).emit("admin_promoted", {
+            groupId,
+            newAdmin: {
+              _id: newAdmin.user,
+              firstname: newAdmin.user.firstname,
+              lastname: newAdmin.user.lastname
+            }
+          });
+        }
+        io.to(user?.socket_id).emit("group_removed_member", {
+          groupId,
+          member: userId
+        });
+      }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: leavingMember.isCreator || leavingMember.role === "admin" ? "Group ownership transferred successfully" : "Left group successfully"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error"
     });
   }
 };
@@ -551,14 +688,8 @@ exports.removeMember = async (req, res) => {
         message: "User not found.",
       });
     }
-    if (!requestingUser || requestingUser.role !== "admin") {
-      return res.status(401).json({
-        status: "failed",
-        message: "You are not authorized to remove members from this group.",
-      });
-    }
 
-    const memberToRemove = group.participants.find( // eslint-disable-next-line
+    const memberToRemove = group.participants.find(
       (participant) => participant.user.toString() === member
     );
 
@@ -568,6 +699,23 @@ exports.removeMember = async (req, res) => {
         message: "Member not found.",
       });
     }
+
+    // Check permissions: Only admins can remove members, but admins cannot remove creator
+    if (!requestingUser || requestingUser.role !== "admin") {
+      return res.status(401).json({
+        status: "failed",
+        message: "You are not authorized to remove members from this group.",
+      });
+    }
+
+    // Prevent admins from removing creator (only creator can remove anyone)
+    if (memberToRemove.isCreator && memberToRemove.role === "admin") {
+      return res.status(403).json({
+        status: "failed",
+        message: "Cannot remove group creator. Only the creator can remove members.",
+      });
+    }
+
     const user = await User.findOne({ _id: memberToRemove.user });
 
     const sendMessage = {
@@ -793,6 +941,87 @@ exports.selectedGroupConversation = async (req, res) => {
     return res.status(500).json({
       status: "failed",
       message: "Server error",
+    });
+  }
+};
+
+// Remove admin privileges from a member
+exports.removeAdmin = async (req, res) => {
+  try {
+    const { groupId, memberId, requesterId } = req.body;
+
+    const group = await GroupMessage.findById(groupId);
+    if (!group) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Group not found"
+      });
+    }
+
+    // Find requester and target member
+    const requester = group.participants.find(p => p.user.toString() === requesterId);
+    const targetMember = group.participants.find(p => p.user.toString() === memberId);
+
+    if (!requester || !targetMember) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found in group"
+      });
+    }
+
+    // Check permissions: only admin can remove admin privileges
+    if (requester.role !== "admin") {
+      return res.status(403).json({
+        status: "failed",
+        message: "Insufficient permissions"
+      });
+    }
+
+    // Allow removing admin privileges from creator as well, so remove this check
+    if (targetMember.isCreator && targetMember.role === "admin") {
+      return res.status(403).json({
+        status: "failed",
+        message: "Admin cannot modify creator's role"
+      });
+    }
+
+    // Cannot remove admin privileges from non-admin
+    if (targetMember.role !== "admin") {
+      return res.status(400).json({
+        status: "failed",
+        message: "User is not an admin"
+      });
+    }
+
+    // Update the member's role to "member"
+    targetMember.role = "member";
+    await group.save();
+
+    // Notify group members about admin removal
+    const demotedUser = await User.findById(memberId);
+    group.participants.forEach(async (participant) => {
+      if (participant.status !== 'left') {
+        const user = await User.findById(participant.user);
+        io.to(user?.socket_id).emit("admin_removed", {
+          groupId,
+          demotedAdmin: {
+            _id: demotedUser._id,
+            firstname: demotedUser.firstname,
+            lastname: demotedUser.lastname
+          }
+        });
+      }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Admin privileges removed successfully"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error"
     });
   }
 };

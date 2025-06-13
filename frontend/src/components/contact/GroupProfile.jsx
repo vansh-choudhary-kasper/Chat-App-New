@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { IoClose, IoCallOutline, IoTrash, IoCamera } from "react-icons/io5";
+import { IoClose, IoCallOutline, IoTrash, IoCamera, IoExitOutline } from "react-icons/io5";
 import { HiOutlineVideoCamera } from "react-icons/hi";
 import { GrEdit, GrNext } from "react-icons/gr";
 import { BsImage } from "react-icons/bs";
-import { FaPlayCircle, FaFileAlt, FaEdit } from "react-icons/fa";
+import { FaPlayCircle, FaFileAlt, FaCrown } from "react-icons/fa";
 import "./groupProfile.css";
 import { useSelector } from "react-redux";
 import MediaPage from "./MediaPage";
 import Cookies from "js-cookie";
-import { removeMemberHandler, updateGroupProfile } from "../../redux/slice/messageSlice";
+import { removeMemberHandler, updateGroupProfile, makeAdminHandler, removeAdminHandler, leaveGroupHandler } from "../../redux/slice/messageSlice";
 import { useDispatch } from "react-redux";
 
 const GroupProfile = ({
@@ -30,6 +30,9 @@ const GroupProfile = ({
   );
   const [profileFile, setProfileFile] = useState(null); // Store file separately for dispatch
   const [groupName, setGroupName] = useState(current_group?.groupName);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [selectedNewAdmin, setSelectedNewAdmin] = useState("");
+  const [assignmentType, setAssignmentType] = useState("random");
   const dispatch = useDispatch();
   const handleDownload = (fileUrl, fileName = "download") => {
     fetch(fileUrl)
@@ -113,13 +116,67 @@ const GroupProfile = ({
     dispatch(updateGroupProfile({ formData, token, groupId: current_group._id }));
     setEditGroup(false);
   };
+
+  const handleLeaveGroup = () => {
+    const currentUser = current_group.participants.find(
+      member => member.user._id === userId
+    );
+    const activeAdmins = current_group.participants.filter(member => member.role === "admin" && member.user._id !== userId);
+    console.error("activeAdmins => ", activeAdmins);
+    
+    if (currentUser?.role === "admin" && activeAdmins.length === 0) {
+      setShowLeaveModal(true);
+    } else {
+      const confirmed = window.confirm("Are you sure you want to leave this group?");
+      if (confirmed) {
+        dispatch(
+          leaveGroupHandler({
+            groupId: current_group._id,
+            userId: userId,
+            assignmentType: "random",
+            token: token
+          })
+        );
+      }
+    }
+  };
+
+  const handleConfirmLeave = () => {
+    const newAdminId = assignmentType === "manual" ? selectedNewAdmin : null;
+    
+    dispatch(
+      leaveGroupHandler({
+        groupId: current_group._id,
+        userId: userId,
+        newAdminId,
+        assignmentType,
+        token: token
+      })
+    );
+    setShowLeaveModal(false);
+  };
+
+  const getEligibleMembers = () => {
+    return current_group?.participants?.filter(
+      member => member.user._id !== userId && member.status !== 'left'
+    ) || [];
+  };
   return (
     <>
       <div className="group-profile">
         <div className="group-header">
           <h3>Group Info</h3>
-          <div className="cross-icon" onClick={() => setGroupProfile(false)}>
-            <IoClose />
+          <div className="header-actions">
+            {userId && (
+              <IoExitOutline
+                className="leave-icon"
+                title="Leave Group"
+                onClick={handleLeaveGroup}
+              />
+            )}
+            <div className="cross-icon" onClick={() => setGroupProfile(false)}>
+              <IoClose />
+            </div>
           </div>
         </div>
         <hr />
@@ -218,32 +275,143 @@ const GroupProfile = ({
                     {member.user.firstname} {member.user.lastname}
                   </span>
                 </div>
-                {access === "admin" ? (
-                  <IoTrash
-                    className="remove-icon"
-                    onClick={() => {
-                      try {
-                        dispatch(
-                          removeMemberHandler({
-                            member: member.user._id,
-                            groupId: current_group._id,
-                            userId: userId,
-                            token: token,
-                          })
-                        );
-                      } catch (error) {
-                        console.error("error on calling removeMemberHandler", error);
-                      }
-                    }}
-                  />
-                ) : (
-                  <></>
-                )}
+                <div className="member-actions">
+                  {member.role === "admin" && (
+                    <FaCrown className="admin-icon" title="Admin" />
+                  )}
+                  {access === "admin" && member.user._id !== userId && (
+                    <>
+                      {member.role !== "admin" ? (
+                        <FaCrown
+                          className="make-admin-icon"
+                          title="Make Admin"
+                          onClick={() => {
+                            dispatch(
+                              makeAdminHandler({
+                                memberId: member.user._id,
+                                groupId: current_group._id,
+                                requesterId: userId,
+                                token: token
+                              })
+                            );
+                          }}
+                        />
+                      ) : (
+                        <FaCrown
+                          className="remove-admin-icon"
+                          title="Remove Admin"
+                          onClick={() => {
+                            dispatch(
+                              removeAdminHandler({
+                                memberId: member.user._id,
+                                groupId: current_group._id,
+                                requesterId: userId,
+                                token: token
+                              })
+                            );
+                          }}
+                        />
+                      )}
+                      <IoTrash
+                        className="remove-icon"
+                        title="Remove Member"
+                        onClick={() => {
+                          dispatch(
+                            removeMemberHandler({
+                              member: member.user._id,
+                              groupId: current_group._id,
+                              userId: userId,
+                              token: token,
+                            })
+                          );
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </div>
+
+      {/* Leave Group Modal */}
+      {showLeaveModal && (
+        <div className="modal-overlay">
+          <div className="leave-modal">
+            <div className="modal-header">
+              <h3>Leave Group</h3>
+              <IoClose 
+                className="close-modal" 
+                onClick={() => setShowLeaveModal(false)} 
+              />
+            </div>
+            <div className="modal-content">
+              <p>As the group creator, you need to transfer ownership before leaving.</p>
+              
+              <div className="assignment-options">
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="assignmentType"
+                    value="random"
+                    checked={assignmentType === "random"}
+                    onChange={(e) => setAssignmentType(e.target.value)}
+                  />
+                  <span>Assign randomly to an active member</span>
+                </label>
+                
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="assignmentType"
+                    value="manual"
+                    checked={assignmentType === "manual"}
+                    onChange={(e) => setAssignmentType(e.target.value)}
+                  />
+                  <span>Choose a specific member</span>
+                </label>
+              </div>
+
+              {assignmentType === "manual" && (
+                <div className="member-selection">
+                  <label>Select new group creator:</label>
+                  <select
+                    value={selectedNewAdmin}
+                    onChange={(e) => setSelectedNewAdmin(e.target.value)}
+                    required
+                  >
+                    <option value="">Choose a member...</option>
+                    {getEligibleMembers().map((member) => (
+                      <option key={member.user._id} value={member.user._id}>
+                        {member.user.firstname} {member.user.lastname}
+                        {member.role === "admin" ? " (Admin)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                className="cancel-btn" 
+                onClick={() => setShowLeaveModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirm-btn" 
+                onClick={handleConfirmLeave}
+                disabled={assignmentType === "manual" && !selectedNewAdmin}
+              >
+                Leave Group
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {openMediaPage && (
         <MediaPage
           mediaMessgaes={mediaMessages}

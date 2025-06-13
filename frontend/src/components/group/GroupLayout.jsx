@@ -35,7 +35,9 @@ import {
   editGroupMessage,
   addMembersHandler,
   addMembersSocket,
-  removeMemberSocket
+  removeMemberSocket,
+  adminPromoted,
+  adminRemoved,
 } from "../../redux/slice/messageSlice";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -127,6 +129,17 @@ const GroupLayout = () => {
       console.log("data => ", data);
       dispatch(groupUpdated(data));
     });
+    socket.on("admin_promoted", (data) => {
+      dispatch(adminPromoted(data));
+    });
+    socket.on("admin_removed", (data) => {
+      dispatch(adminRemoved(data));
+    });
+
+    socket.on("creator_changed", (data) => {
+      console.log("Creator changed:", data);
+    });
+
     return () => {
       if(socket) {
       // socket.off("group_message");
@@ -138,7 +151,9 @@ const GroupLayout = () => {
       socket.off("group_updated");
       socket.off("group_removed_you");
       socket.off("group_added_you");
-      socket.off("group_added_member")
+      socket.off("group_added_member");
+      socket.off("admin_promoted");
+      socket.off("creator_changed");
       }
     };
   }, [socket]);

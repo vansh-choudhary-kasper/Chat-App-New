@@ -624,15 +624,18 @@ io.on("connection", async (socket) => {
         }
       }
 
-      const participants = members.map((userId, index) => ({
+      // Find the creator (last member in the array)
+      const creatorId = members[members.length - 1];
+      
+      const participants = members.map((userId) => ({
         user: mongoose.Types.ObjectId.createFromHexString(userId),
-        role: index === members.length - 1 ? "admin" : "member",
+        role: userId === creatorId ? "admin" : "member",
+        isCreator: userId === creatorId,
       }));
-
-      const adminId = participants.find((participant) => participant.role === "admin").user;
 
       // Create the group in the database
       const group = await GroupMessage.create({
+        creator: mongoose.Types.ObjectId.createFromHexString(creatorId),
         participants,
         groupName,
         groupProfile: groupProfile ? groupProfile : null,
@@ -646,17 +649,17 @@ io.on("connection", async (socket) => {
 
       const firstMsg = {
         conversation : "group",
-        from: adminId.toString(),
+        from: creatorId,
         type: "date",
         created_at: new Date(Date.now()),
         status: "msg",
       };
       groupInfo.messages.push(firstMsg);
       groupInfo.participants.forEach(async (participant) => {
-        if(participant.user?._id?.toString() === adminId.toString()) return;
+        if(participant.user?._id?.toString() === creatorId) return;
         const sendMessage = {
           conversation : "group",
-          from: adminId.toString(),
+          from: creatorId,
           type: "addMember",
           addedMember: participant.user?._id?.toString(),
           created_at: new Date(Date.now() + 1000),

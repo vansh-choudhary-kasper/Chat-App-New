@@ -12,6 +12,11 @@ router.post("/group/update-group-profile", authorization.protect, upload.single(
 router.patch("/members",authorization.protect, messageController.addmembers);
 router.delete("/member",authorization.protect, messageController.removeMember);
 
+// New group management routes
+router.post("/group/make-admin", authorization.protect, messageController.makeAdmin);
+router.post("/group/leave", authorization.protect, messageController.leaveGroup);
+router.post("/group/remove-admin", authorization.protect, messageController.removeAdmin);
+
 router.get("/selectedGroup",authorization.protect, messageController.selectedGroupConversation);
 
 

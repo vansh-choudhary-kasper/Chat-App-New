@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const GroupMessageSchema = new mongoose.Schema(
   {
+    creator: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      required: true,
+    },
     participants: [
       {
         user: {
@@ -13,6 +18,10 @@ const GroupMessageSchema = new mongoose.Schema(
           type: String,
           enum: ["admin", "member"],
           default: "member",
+        },
+        isCreator: {
+          type: Boolean,
+          default: false,
         },
         status: {
           type: String,

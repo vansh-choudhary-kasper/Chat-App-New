@@ -1,3 +1,4 @@
+/* Existing styles */
 .group-profile {
     position: absolute;
     top: 0;
@@ -12,14 +13,31 @@
     flex-direction: column;
   }
   
-  .group-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 1.2vw;
-    margin-top: 1vw;
-    height: 2.5vw;
-  }
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.2vw;
+  margin-top: 1vw;
+  height: 2.5vw;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+.leave-icon {
+  font-size: 1.3vw;
+  color: #ff4444;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.leave-icon:hover {
+  color: #cc0000;
+}
   
   .group-header h3 {
     font-size: 1.3vw;
@@ -167,16 +185,49 @@
     color: #333;
   }
   
-  .remove-icon {
-    font-size: 1.3vw;
-    color: red;
-    cursor: pointer;
-    transition: color 0.3s;
-  }
-  
-  .remove-icon:hover {
-    color: darkred;
-  }
+.member-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+}
+
+.admin-icon {
+  font-size: 1.2vw;
+  color: #ffd700;
+}
+
+.make-admin-icon {
+  font-size: 1.2vw;
+  color: #646AFD;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.make-admin-icon:hover {
+  color: #4a51d3;
+}
+
+.remove-admin-icon {
+  font-size: 1.2vw;
+  color: #dc3545;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.remove-admin-icon:hover {
+  color: #c82333;
+}
+
+.remove-icon {
+  font-size: 1.3vw;
+  color: red;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.remove-icon:hover {
+  color: darkred;
+}
   
   .group_medias {
    
@@ -267,4 +318,129 @@
     align-items: center;
     justify-content: center;
   }
+
+/* Leave Group Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.leave-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-modal {
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+}
+
+.close-modal:hover {
+  color: #333;
+}
+
+.modal-content {
+  margin-bottom: 20px;
+}
+
+.modal-content p {
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.assignment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+  cursor: pointer;
+}
+
+.member-selection {
+  margin-top: 15px;
+}
+
+.member-selection label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.member-selection select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn, .confirm-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.confirm-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background-color: #c82333;
+}
+
   

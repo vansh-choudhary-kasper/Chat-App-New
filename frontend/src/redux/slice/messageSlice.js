@@ -724,6 +724,7 @@ const conversationSlice = createSlice({
           state.group_chat.current_group.participants.forEach((emp, i) => {
             if(emp.user._id.toString() === member) {
               state.group_chat.current_group.participants[i].status = "left";
+              state.group_chat.current_group.participants[i].role = "member";
             }
           })
         }
@@ -745,6 +746,69 @@ const conversationSlice = createSlice({
           }
           return val;
         });
+      })
+      .addCase(adminPromoted.fulfilled, (state, action) => {
+        if (state.group_chat.current_group) {
+          if (state.group_chat.current_group._id === action.payload.groupId) {
+            state.group_chat.current_group.participants.forEach((member, i) => {
+              if(member.user._id.toString() === action.payload.newAdmin._id) {
+                state.group_chat.current_group.participants[i].role = "admin";
+              }
+            })
+          }
+        }
+      })
+      .addCase(adminRemoved.fulfilled, (state, action) => {
+        // Update the current group's participant role if it's the active group
+        if (state.group_chat.current_group) {
+          if (state.group_chat.current_group._id === action.payload.groupId) {
+            state.group_chat.current_group.participants.forEach((member, i) => {
+              if(member.user._id.toString() === action.payload.demotedAdmin._id) {
+                state.group_chat.current_group.participants[i].role = "member";
+              }
+            })
+          }
+        }
+      })
+      // .addCase(makeAdminHandler.fulfilled, (state, action) => {
+      //   // Update the current group's participant role if it's the active group
+      //   if (state.group_chat.current_group) {
+      //     const memberIndex = state.group_chat.current_group.participants.findIndex(
+      //       p => p.user._id === action.meta.arg.memberId
+      //     );
+      //     if (memberIndex !== -1) {
+      //       state.group_chat.current_group.participants[memberIndex].role = "admin";
+      //     }
+      //   }
+      // })
+      // .addCase(removeAdminHandler.fulfilled, (state, action) => {
+      //   // Update the current group's participant role if it's the active group
+      //   if (state.group_chat.current_group) {
+      //     const memberIndex = state.group_chat.current_group.participants.findIndex(
+      //       p => p.user._id === action.meta.arg.memberId
+      //     );
+      //     if (memberIndex !== -1) {
+      //       state.group_chat.current_group.participants[memberIndex].role = "member";
+      //     }
+      //   }
+      // })
+      .addCase(leaveGroupHandler.fulfilled, (state, action) => {
+        // Handle successful group leave
+        // const groupId = action.meta.arg.groupId;
+        
+        // // Remove group from groups list or update status
+        // // state.group_chat.groups = state.group_chat.groups.filter(
+        // //   group => group._id !== groupId
+        // // );
+        
+        // // Clear current group if it's the one being left
+        // if (state.group_chat.current_group?._id === groupId) {
+        //   state.group_chat.current_group.participants.forEach((member, i) => {
+        //     if(member.user._id.toString() === user_id) {
+        //       state.group_chat.current_group.participants[i].status = "left";
+        //     }
+        //   })
+        // }
       })
   },
 });
@@ -1091,6 +1155,103 @@ export const groupUpdated = createAsyncThunk(
     try {
       console.log("group in function" , data);
       return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const adminPromoted = createAsyncThunk(
+  "conversation/adminPromoted",
+  async (data, { rejectWithValue }) => {
+    try {
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const adminRemoved = createAsyncThunk(
+  "conversation/adminRemoved",
+  async (data, { rejectWithValue }) => {
+    try {
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const creatorRemoved = createAsyncThunk(
+  "conversation/creatorRemoved",
+  async (data, { rejectWithValue }) => {
+    try {
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const makeAdminHandler = createAsyncThunk(
+  "conversation/makeAdmin",
+  async ({ memberId, groupId, requesterId, token }, { rejectWithValue }) => {
+    const confirmed = window.confirm("Are you sure you want to make this member an admin?");
+    if(!confirmed) return;
+    try {
+      const response = await axios.post(
+        `${Base_Url}/api/user/group/make-admin`,
+        { memberId, groupId, requesterId },
+        {
+          headers: {
+            authorization: token
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const removeAdminHandler = createAsyncThunk(
+  "conversation/removeAdmin",
+  async ({ memberId, groupId, requesterId, token }, { rejectWithValue }) => {
+    const confirmed = window.confirm("Are you sure you want to remove admin privileges from this member?");
+    if(!confirmed) return;
+    try {
+      const response = await axios.post(
+        `${Base_Url}/api/user/group/remove-admin`,
+        { memberId, groupId, requesterId },
+        {
+          headers: {
+            authorization: token
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
+export const leaveGroupHandler = createAsyncThunk(
+  "conversation/leaveGroup",
+  async ({ groupId, userId, newAdminId, assignmentType, token }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${Base_Url}/api/user/group/leave`,
+        { groupId, userId, newAdminId, assignmentType },
+        {
+          headers: {
+            authorization: token
+          }
+        }
+      );
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
     }
