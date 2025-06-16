@@ -13,7 +13,6 @@ const LogoutUser = () => {
         const userData = Cookies.get("user");
         if (userData) {
             try {
-                console.log("logout success");
                 Cookies.remove("user");
                 localStorage.clear();
                 sessionStorage.clear();

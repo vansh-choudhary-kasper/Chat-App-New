@@ -126,7 +126,6 @@ const GroupLayout = () => {
       dispatch(removeMemberSocket(data));
     })
     socket.on("group_updated", (data) => {
-      console.log("data => ", data);
       dispatch(groupUpdated(data));
     });
     socket.on("admin_promoted", (data) => {

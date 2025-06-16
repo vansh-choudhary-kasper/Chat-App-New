@@ -128,6 +128,7 @@ export const ImageMessage = ({
   search,
   token,
   setVisible,
+  replyOff
 }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const dispatch = useDispatch();
@@ -154,7 +155,7 @@ export const ImageMessage = ({
               alt="man"
               onClick={() => handleImageClick(val.file)}
             />
-            {visible === i ? (
+            {visible === i && !replyOff ? (
               // ReplyOptions(i, search, val, dispatch, token, setVisible, false)
               <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
             ) : (
@@ -198,6 +199,7 @@ export const LinkMessage = ({
   search,
   token,
   setVisible,
+  replyOff
 }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const dispatch = useDispatch();
@@ -222,7 +224,7 @@ export const LinkMessage = ({
             onClick={() => handleImageClick(val.preview)}
           >
             {val.preview ? <img src={val.preview} alt="man" /> : <></>}
-            {visible === i ? (
+            {visible === i && !replyOff ? (
               // ReplyOptions(i, search, val, dispatch, token, setVisible, false)
               <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
             ) : (
@@ -275,6 +277,7 @@ export const VideoMessage = ({
   search,
   token,
   setVisible,
+  replyOff
 }) => {
   const [previewVideo, setPreviewVideo] = useState(null);
   const videoRef = useRef(null);
@@ -316,7 +319,7 @@ export const VideoMessage = ({
           </div>
           {val.text !== "null" ? <p>{val.text}</p> : <></>}
         </div>
-        {visible === i
+        {visible === i && !replyOff
           ? <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
           : null}
         {val.loading ? (
@@ -361,6 +364,7 @@ export const PdfMessage = ({
   search,
   token,
   setVisible,
+  replyOff
 }) => {
   const dispatch = useDispatch();
   return (
@@ -398,7 +402,7 @@ export const PdfMessage = ({
         </button>
       </div>
 
-      {visible === i
+      {visible === i && !replyOff
         ? 
         <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible} editVisible={false}/>
         : null}
@@ -423,6 +427,7 @@ export const TextMessage = ({
   token,
   setVisible,
   deviceType,
+  replyOff
 }) => {
   const dispatch = useDispatch();
   return (
@@ -450,7 +455,7 @@ export const TextMessage = ({
           }
         >
           {val.text}
-          {visible === val._id ? (
+          {visible === val._id && !replyOff ? (
             // ReplyOptions(i, search, val, dispatch, token, setVisible)
             <ReplyOptions i={i} search={search} val={val} dispatch={dispatch} token={token} setVisible={setVisible}/>
           ) : (

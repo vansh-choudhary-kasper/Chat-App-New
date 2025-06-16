@@ -2,6 +2,7 @@ import { createBrowserRouter,Navigate  } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import ChatLayout from "../components/chat/ChatLayout";
 import GroupLayout from "../components/group/GroupLayout";
+import AdminDashboard from "../components/admin/AdminDashboard";
 
 const Loadable = (Component) => (props) => {
   return (
@@ -33,13 +34,17 @@ export const routes = createBrowserRouter([
       {
         index: true, 
         element: <Navigate to="chat" /> 
-      },{
+      }, {
         path: "chat",
         element: <ChatLayout/>
     },
     {
       path: "group",
       element: <GroupLayout/>
+  },
+  {
+    path: "admin",
+    element: <AdminDashboard/>
   },
     { path: "*", element: <NotFound /> },
   ]

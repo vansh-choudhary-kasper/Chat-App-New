@@ -39,7 +39,6 @@ const conversationSlice = createSlice({
   reducers: {
     sendMessage: (state, action) => {
       const { data, userId } = action.payload;
-      console.log("data in conversationSlice => ", data);
 
       const { message, dateMessage } = data;
       if (message.conversation === "chat") {
@@ -639,7 +638,6 @@ const conversationSlice = createSlice({
           groupProfile,
         };
         state.group_chat.messages = messages;
-        console.log("messages on slice => ", messages);
         state.loading = false;
       })
       .addCase(fetchSelectedGroup.rejected, (state, action) => {
@@ -732,8 +730,6 @@ const conversationSlice = createSlice({
       })
       .addCase(groupUpdated.fulfilled, (state, action) => {
         const group = action.payload
-        console.log(action);
-        console.log("group => ", group);
 
         if(state.group_chat.current_group?._id === group.group_id){
           state.group_chat.current_group.groupName = group.group_name;
@@ -1077,7 +1073,6 @@ export const fetchSelectedGroup = createAsyncThunk(
           },
         }
       );
-      console.log("fetchedGroup => ", response.data.data);
 
       return response.data.data;
     } catch (error) {
@@ -1154,7 +1149,6 @@ export const groupUpdated = createAsyncThunk(
   "conversation/groupUpdated",
   async ({ data }, { rejectWithValue }) => {
     try {
-      console.log("group in function" , data);
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);

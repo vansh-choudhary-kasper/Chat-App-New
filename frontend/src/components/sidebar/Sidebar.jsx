@@ -61,14 +61,40 @@ const Sidebar = ({
             <FiPhone/>
         </div> */}
           {user?.access === "admin" ? (
-            <div
-              className={
-                active === "user" ? "sideLink_icons active" : "sideLink_icons"
-              }
-              onClick={() => (setActive("user"), navigate("/register"))}
-            >
-              <GrUserNew />
-            </div>
+            <>
+              <div
+                className={
+                  active === "user" ? "sideLink_icons active" : "sideLink_icons"
+                }
+                onClick={() => (setActive("user"), navigate("/register"))}
+              >
+                <GrUserNew />
+              </div>
+              <div
+                className={
+                  active === "admin" ? "sideLink_icons active" : "sideLink_icons"
+                }
+                onClick={() => (setActive("admin"), navigate("/home/admin"))}
+                title="Admin Panel"
+              >
+                {/* You can use an icon here, for example a shield or settings icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="sideLink_icons_svg"
+                  style={{ width: "24px", height: "24px" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364-6.364l-2.121 2.121M7.757 16.243l-2.121 2.121m12.728 0l-2.121-2.121M7.757 7.757L5.636 5.636"
+                  />
+                </svg>
+              </div>
+            </>
           ) : (
             <></>
           )}
@@ -121,15 +147,40 @@ const Sidebar = ({
                 <FiPhone/>
             </div> */}
           {user?.access === "admin" ? (
-            <div
-              className={
-                active === "user" ? "sideLink_icons active" : "sideLink_icons"
-              }
-              onClick={() => (setActive("user"), navigate("/register"))}
-            >
-              <GrUserNew />
-            </div>
-          ) : (
+            <>
+              <div
+                className={
+                  active === "user" ? "sideLink_icons active" : "sideLink_icons"
+                }
+                onClick={() => (setActive("user"), navigate("/register"))}
+              >
+                <GrUserNew />
+              </div>
+              <div
+                className={
+                  active === "admin" ? "sideLink_icons active" : "sideLink_icons"
+                }
+                onClick={() => (setActive("admin"), navigate("/home/admin"))}
+                title="Admin Panel"
+              >
+                {/* You can use an icon here, for example a shield or settings icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="sideLink_icons_svg"
+                  style={{ width: "24px", height: "24px" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364-6.364l-2.121 2.121M7.757 16.243l-2.121 2.121m12.728 0l-2.121-2.121M7.757 7.757L5.636 5.636"
+                  />
+                </svg>
+              </div>
+            </> ) : (
             <></>
           )}
         </div>

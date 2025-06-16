@@ -328,7 +328,6 @@ const Home = () => {
 
     errorAudio.play();
   };
-  console.log(incomingCall);
 
   const handleProducerClosed = (remoteProducerId) => {
     setRemoteVideos((prev) =>
@@ -351,7 +350,6 @@ const Home = () => {
             });
           }
         }, 500);
-        console.log("incoming_video_call", isVideoCall);
       });
 
       socket.on("video_ice_candidate", async ({ from, candidate }) => {
@@ -370,9 +368,6 @@ const Home = () => {
       });
 
       socket.on("audio_ice_candidate", async ({ to, candidate }) => {
-        console.log(
-          "audio_ice_candidate"
-        )
         if (peerConnectionRef.current) {
           try {
             await peerConnectionRef.current.addIceCandidate(
@@ -387,7 +382,6 @@ const Home = () => {
         }
       });
       socket.on("incoming_group_call", (data) => {
-        console.log("incoming_group_call", data);
         setIncomingCall(data);
         setTimeout(() => {
           if (audioRef.current) {
@@ -396,10 +390,8 @@ const Home = () => {
             });
           }
         }, 500);
-        console.log(isVideoCall);
       });
       socket.on("incoming_voice_call", async ({ from, offer, user_id }) => {
-        console.log("incoming voice call");
         setIncomingVoiceCall({ from, user_id, offer });
         // setIncomingCall({from, user_id, offer});
         setTimeout(() => {
@@ -418,8 +410,6 @@ const Home = () => {
       );
       socket.on("disable_call", (data) => {
         try {
-        console.log(incomingCall);
-        console.log(data.from);
         if ((incomingCall && incomingCall.user_id === data.from) || (incomingVoiceCall && incomingVoiceCall.user_id === data.from)) {
           // Stop all tracks
           if (myStream) {

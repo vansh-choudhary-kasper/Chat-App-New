@@ -5,6 +5,7 @@ import guestReducer from "./slice/userSlice";
 import callReducer from "./slice/callSlice";
 import conversationReducer from "./slice/messageSlice";
 import createTransform from "redux-persist/es/createTransform";
+import adminReducer from "./slice/adminSlice";
 
 // Define the RESET_STATE action type
 export const RESET_STATE = "RESET_STATE";
@@ -40,6 +41,7 @@ const rootReducer = combineReducers({
   guests: guestReducer,
   conversation: conversationReducer,
   call: callReducer,
+  admin: adminReducer,
 });
 
 // Create a wrapper to reset the state

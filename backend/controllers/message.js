@@ -344,7 +344,6 @@ exports.leaveGroup = async (req, res) => {
       if (participant.status !== 'left' || participant.user.toString() === userId) {
         const user = await User.findById(participant.user);
         if(newAdmin) {
-          console.log("newAdmin => ", newAdmin);
           io.to(user?.socket_id).emit("admin_promoted", {
             groupId,
             newAdmin: {
@@ -615,7 +614,6 @@ exports.addmembers = async (req, res) => {
     // without password
     let newMembers = await User.find({ _id: { $in: membersList } }).select('-password');
     newMembers = newMembers.map((user) => {
-      console.log(user);
       const sendMessage = {
         conversation : "group",
         from: userId,
@@ -661,7 +659,6 @@ exports.addmembers = async (req, res) => {
       ...val,
       user: val.user._id,
     }));
-    console.log(group.participants);
     group.participants.push(...participantsToAdd);
     await group.save();
     res.status(200).json({
@@ -865,9 +862,6 @@ function BSfirstMsg(array, joinedAt, leftAt) {
   };
   let first = 0;
   let last = array.length - 1;
-  console.log("length => ", last);
-  console.log("joinedAt => ", joinedAt);
-  console.log("lastMessage => ", array[last].created_at);
   while (first <= last) {
     const mid = Math.floor((first + last) / 2);
     if (joinedAt > array[mid].created_at) {
@@ -930,7 +924,6 @@ exports.selectedGroupConversation = async (req, res) => {
     const user = conversation.participants.find((per) => per?.user?._id.toString() === userid);
     user?.joinedAt.map((date, i) => {
       const limitedMsgs = BSfirstMsg(conversation.messages, date, user.leftAt[i] ? user.leftAt[i] : Date.now());
-      console.log(limitedMsgs);
       for(let i = limitedMsgs.startingPoint; i < conversation.messages.length && i < limitedMsgs.endingPoint; i++) {
         let message = conversation.messages[i];
         if (message.status === "delete") {

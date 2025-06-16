@@ -80,8 +80,6 @@ const GroupProfile = ({
         member.user._id === userId
       );
       setAccess(user?.role);
-      console.log(user);
-      console.log(current_group.participants);
     }
   }, [current_group, userId]);
 

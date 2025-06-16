@@ -212,19 +212,14 @@ const createWebRtcTransport = async (router) => {
         webRtcTransport_options
       );
 
-      console.log(`New WebRTC Transport created: ${transport.id}`);
 
       transport.on("dtlsstatechange", (dtlsState) => {
-        console.log(
-          `Transport ${transport.id} DTLS state changed: ${dtlsState}`
-        );
         if (dtlsState === "closed") {
           transport.close();
         }
       });
 
       transport.on("close", () => {
-        console.log(`Transport ${transport.id} closed`);
       });
 
       resolve(transport);
@@ -1095,7 +1090,6 @@ io.on("connection", async (socket) => {
     try {
       const { search, messageId } = req.query;
       const { newText, to, from, conversation } = req.body;
-      console.log("io seted");
 
       const from_user = await User.findById({ _id: from });
 
@@ -1324,7 +1318,6 @@ io.on("connection", async (socket) => {
       }
 
       if (userActive.length === 0) {
-        console.log("no user Active or not available to pick up the call");
         io.to(socket.id).emit("group_call_failed", {
           status: "no user Active or not available to pick up the call",
         });
@@ -1401,9 +1394,6 @@ io.on("connection", async (socket) => {
     const roomName = peers[socket.id].roomName;
     const router = rooms[roomName].router;
 
-    console.log(
-      `Creating WebRTC transport for ${socket.id} in room ${roomName}`
-    );
 
     createWebRtcTransport(router).then(
       (transport) => {
@@ -1524,7 +1514,6 @@ io.on("connection", async (socket) => {
       informConsumers(roomName, socket.id, producer.id);
 
       producer.on("transportclose", () => {
-        console.log("transport for this producer closed ");
         producer.close();
       });
 
@@ -1583,11 +1572,9 @@ io.on("connection", async (socket) => {
           });
 
           consumer.on("transportclose", () => {
-            console.log("transport close from consumer");
           });
 
           consumer.on("producerclose", () => {
-            console.log("producer of consumer closed");
             socket.emit("producer-closed", { remoteProducerId });
 
             consumerTransport.close([]);
@@ -1661,7 +1648,6 @@ io.on("connection", async (socket) => {
   });
   socket.on("leaveCall", async (data) => {
     try {
-      console.log(user_id, data);
       await User.findByIdAndUpdate(user_id, { $set: { inCall: false } });
       const to_user = await User.findOne({ _id: data.to });
       if(!to_user) {
@@ -1706,8 +1692,11 @@ app.use("*", (req, res, next) => {
   next();
 });
 
+const adminRoutes = require("./routes/admin");
+
 app.use("/api", routes);
 app.use("/api", routers);
+app.use("/api/admin", adminRoutes);
 
 module.exports = { io, routers };
 

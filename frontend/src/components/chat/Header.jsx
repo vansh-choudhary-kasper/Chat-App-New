@@ -138,8 +138,6 @@ const Header = ({ deviceType }) => {
       }
     };
 
-    console.log("local stream", localStreamRef.current);
-
     processBufferedCandidates();
 
     return peerConnection;
@@ -215,7 +213,6 @@ const Header = ({ deviceType }) => {
     });
     socket.on("room_video_created", async ({ id }) => {
       peerConnectionRef.current = await createPeerConnection(id);
-      console.log("peerConnectionRef.current", peerConnectionRef.current);
 
       const offer = await peerConnectionRef.current.createOffer();
       await peerConnectionRef.current.setLocalDescription(
@@ -282,8 +279,6 @@ const Header = ({ deviceType }) => {
     // });
 
     socket.on("disable_call", (data) => {
-      console.log("current_user", current_user._id);
-      console.log("data.from", data.from);
       if (current_user._id === data.from) {
         // Stop all tracks
         if (myStream) {
@@ -319,17 +314,14 @@ const Header = ({ deviceType }) => {
       }
     });
     socket.on("video_call_answered", async ({ from, answer }) => {
-      console.log("video_call_sockit_answered", answer);
       if (peerConnectionRef.current) {
         await peerConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(answer)
         ).then(() => {
-          console.log("Remote description set successfully");
         }).catch(error => {
           console.error("Error setting remote description:", error);
         });
       }
-      console.log("video_call_answered", peerConnectionRef.current);
     });
 
     socket.on("video_ice_candidate", async ({ from, candidate }) => {
@@ -358,12 +350,10 @@ const Header = ({ deviceType }) => {
         await peerConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(answer)
         ).then(() => {
-          console.log("Remote description set successfully");
         }).catch(error => {
           console.error("Error setting remote description:", error);
         });
       }
-      console.log("voice_call_answered", peerConnectionRef.current);
     });
 
     socket.on("audio_ice_candidate", async ({ from, candidate }) => {
