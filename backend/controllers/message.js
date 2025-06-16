@@ -329,6 +329,14 @@ exports.leaveGroup = async (req, res) => {
     leavingMember.role = "member";
     leavingMember.leftAt.push(new Date(Date.now()));
 
+    const sendMessage = {
+      conversation : "group",
+      from: userId,
+      type: "leftMember",
+      created_at: new Date(Date.now() - 1000),
+    }
+    group.messages.push(sendMessage);
+
     await group.save();
 
     // Notify group members
@@ -346,6 +354,10 @@ exports.leaveGroup = async (req, res) => {
             }
           });
         }
+        io.to(user?.socket_id).emit("group_message", {
+          conversation_id : groupId,
+          message: sendMessage,
+        });
         io.to(user?.socket_id).emit("group_removed_member", {
           groupId,
           member: userId
@@ -543,7 +555,13 @@ exports.addmembers = async (req, res) => {
     }
 
     // Fetch the group and validate the requesting user's role
-    const group = await GroupMessage.findById(groupId);
+    const group = await GroupMessage.findOne({
+      _id: groupId,
+    }).populate(
+      "participants.user",
+      "firstname lastname _id status socket_id profile"
+    );
+
     if (!group) {
       return res.status(404).json({
         status: "failed",
@@ -552,7 +570,7 @@ exports.addmembers = async (req, res) => {
     }
 
     const requestingUser = group.participants.find(
-      (participant) => participant.user.toString() === userId
+      (participant) => participant.user._id.toString() === userId
     );
 
     const RequesterUser = await User.findById(userId);
@@ -570,7 +588,7 @@ exports.addmembers = async (req, res) => {
     }
 
     const existingMemberIds = group.participants.map((participant, i) => {
-      const userIdStr = participant.user.toString();
+      const userIdStr = participant.user._id.toString();
       if (membersList.includes(userIdStr)) {
           group.participants[i].status = "offline";
           group.participants[i].joinedAt.push(new Date(Date.now()));
@@ -614,11 +632,13 @@ exports.addmembers = async (req, res) => {
       };
     });
 
-    io.to(newMembers.map(val => val.user.socket_id)).emit("group_added_you", { group });
+    const { messages, ...groupWithoutMessages } = group.toObject();
+
+    io.to(newMembers.map(val => val.user.socket_id)).emit("group_added_you", { group : groupWithoutMessages });
     // io.to(group.participants.map(val => val.user.socket_id)).emit("group_added_member", { groupId, newMembers });
     group.participants.forEach(async (val) => {
       if(val.status !== 'left') {
-        const emp = await User.findOne({ _id: val.user.toString() });
+        const emp = await User.findOne({ _id: val.user._id.toString() });
         io.to(emp?.socket_id).emit("group_added_member", { groupId, newMembers : newMembers.filter((member) =>  uniqueNewMembers.includes(member.user?._id.toString())), oldMembers : membersList.filter((member) => !uniqueNewMembers.includes(member)) });
         sendMessages.forEach(async (sendMessage) => {
           io.to(emp?.socket_id).emit("group_message", {
@@ -637,6 +657,11 @@ exports.addmembers = async (req, res) => {
       })
     });
 
+    group.participants = group.participants.map((val) => ({
+      ...val,
+      user: val.user._id,
+    }));
+    console.log(group.participants);
     group.participants.push(...participantsToAdd);
     await group.save();
     res.status(200).json({
@@ -731,6 +756,7 @@ exports.removeMember = async (req, res) => {
       (participant) => {
         if(participant._id === memberToRemove._id) {
           participant.status = "left";
+          participant.role = "member";
           participant.leftAt.push(new Date(Date.now()));
         }
 

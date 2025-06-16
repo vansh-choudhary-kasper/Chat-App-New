@@ -692,11 +692,12 @@ const conversationSlice = createSlice({
         }
 
         if(state.group_chat.current_group?._id === group._id){
-          state.group_chat.current_group.participants.forEach((member, i) => {
-            if(member.user._id.toString() === user_id) {
-              state.group_chat.current_group.participants[i].status = "online";
-            }
-          })
+          // state.group_chat.current_group.participants.forEach((member, i) => {
+          //   if(member.user._id.toString() === user_id) {
+          //     state.group_chat.current_group.participants[i].status = "online";
+          //   }
+          // })
+          state.group_chat.current_group = group;
         }
 
         if(!state.group_chat.groups.some((gr) => gr._id === group._id)) {
@@ -708,7 +709,7 @@ const conversationSlice = createSlice({
 
         if(state.group_chat.current_group?._id === groupId) {
           state.group_chat.current_group.participants.forEach((member, i) => {
-            if(oldMembers.includes(member.user._id.toString())) {
+            if(oldMembers.includes(member.user?._id?.toString())) {
               state.group_chat.current_group.participants[i].status = "offline";
             }
           })

@@ -661,7 +661,7 @@ export const MemberSeparator = ({ val, current_group, type }) => {
     let tempRemoved = "";
 
     current_group.participants.forEach((member) => {
-      const memberId = member.user._id.toString();
+      const memberId = member.user?._id?.toString();
       if (memberId === val.from) {
         tempFrom = memberId === uid ? "You" : member.user.firstname;
       } 
@@ -683,11 +683,9 @@ export const MemberSeparator = ({ val, current_group, type }) => {
     <div className="date-separator">
       <hr className="date-line" />
       <div className="date-text">
-        {type === "add" ? (
-          <span>{from} added {removedMember}</span>
-        ) : (
-          <span>{from} removed {removedMember}</span>
-        )}
+        {type === "add" && <span>{from} added {removedMember}</span>}
+        {type === "remove" && <span>{from} removed {removedMember}</span>}
+        {type === "left" && <span>{from} left the group</span>}
       </div>
       <hr className="date-line" />
     </div>

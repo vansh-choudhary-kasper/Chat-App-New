@@ -143,6 +143,13 @@ const Messages = ({
           user_id={userId}
           type="remove"
         />;
+      case "leftMember":
+        return <MemberSeparator 
+          current_group={current_group}
+          val={val} 
+          user_id={userId}
+          type="left" 
+        />;
     }
   };
 
