@@ -277,7 +277,7 @@ exports.leaveGroup = async (req, res) => {
     }
 
     const leavingMember = group.participants.find(p => p.user.toString() === userId);
-    if (!leavingMember) {
+    if (!leavingMember || leavingMember.status === "left") {
       return res.status(404).json({
         status: "failed",
         message: "Member not found in group"

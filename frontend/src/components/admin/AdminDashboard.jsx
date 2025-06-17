@@ -180,6 +180,7 @@ import {
   LinkMessage,
 } from "../chat/MessageType";
 import { DateSeparator, MemberSeparator } from "../group/MessageType";
+import GroupProfile from "../contact/GroupProfile";
 
 const AdminDashboardDetailed = () => {
   const dispatch = useDispatch();
@@ -189,6 +190,7 @@ const AdminDashboardDetailed = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [view, setView] = useState("personal"); // "personal" or "group"
   const [visible, setVisible] = useState(null);
+  const [groupProfile, setGroupProfile] = useState(false);
 
   useEffect(() => {
     try {
@@ -252,33 +254,33 @@ const AdminDashboardDetailed = () => {
       case "text":
         return <TextMessage key={msg._id} {...commonProps} replyOff={true} />;
       case "image":
-        return <ImageMessage key={msg._id} {...commonProps} replyOff={true}/>;
+        return <ImageMessage key={msg._id} {...commonProps} replyOff={true} />;
       case "video":
-        return <VideoMessage key={msg._id} {...commonProps} replyOff={true}/>;
+        return <VideoMessage key={msg._id} {...commonProps} replyOff={true} />;
       case "pdf":
       case "zip":
-        return <PdfMessage key={msg._id} {...commonProps}  replyOff={true}/>;
+        return <PdfMessage key={msg._id} {...commonProps} replyOff={true} />;
       case "link":
-        return <LinkMessage key={msg._id} {...commonProps} replyOff={true}/>;
+        return <LinkMessage key={msg._id} {...commonProps} replyOff={true} />;
       case "date":
         return <DateSeparator val={msg} />;
       case "addMember":
-        return <MemberSeparator 
+        return <MemberSeparator
           current_group={selectedChat}
-          val={msg} 
+          val={msg}
           type="add"
         />;
       case "removeMember":
-        return <MemberSeparator 
+        return <MemberSeparator
           current_group={selectedChat}
-          val={msg} 
+          val={msg}
           type="remove"
         />;
       case "leftMember":
-        return <MemberSeparator 
+        return <MemberSeparator
           current_group={selectedChat}
-          val={msg} 
-          type="left" 
+          val={msg}
+          type="left"
         />;
       default:
         return (
@@ -359,12 +361,23 @@ const AdminDashboardDetailed = () => {
             <div className="chat-detail">
               {selectedChat ? (
                 <>
-                  <h4>Group: {selectedChat.groupName}</h4>
+                  <h4 onClick={() => setGroupProfile(true)} style={{cursor:'pointer'}}>Group: {selectedChat.groupName}</h4>
                   <div className="messages-container">
                     {selectedChat.messages?.map((msg, index) => (
-                      <MessageBubble key={msg._id} msg={msg} index={index}/>
+                      <MessageBubble key={msg._id} msg={msg} index={index} />
                     ))}
                   </div>
+                  {groupProfile ? (
+                    <GroupProfile
+                      setGroupProfile={setGroupProfile}
+                      profile={groupProfile}
+                      current_group={selectedChat}
+                      adminPanelStyle={true}
+                      messages={selectedChat.messages}
+                    />
+                  ) : (
+                    <></>
+                  )}
                 </>
               ) : <p>Select a group to view details</p>}
             </div>

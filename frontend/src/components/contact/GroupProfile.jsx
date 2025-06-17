@@ -16,10 +16,12 @@ const GroupProfile = ({
   profile,
   groupCallHandler,
   current_group,
+  adminPanelStyle = false,
+  messages = []
 }) => {
-  const {
-    group_chat: { messages },
-  } = useSelector((state) => state.conversation);
+  // const {
+  //   group_chat: { messages },
+  // } = useSelector((state) => state.conversation);
   const [openMediaPage, setOpenMediaPage] = useState(false);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
@@ -33,6 +35,8 @@ const GroupProfile = ({
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [selectedNewAdmin, setSelectedNewAdmin] = useState("");
   const [assignmentType, setAssignmentType] = useState("random");
+  const [userExist, setUserExist] = useState(false);
+
   const dispatch = useDispatch();
   const handleDownload = (fileUrl, fileName = "download") => {
     fetch(fileUrl)
@@ -64,6 +68,11 @@ const GroupProfile = ({
       videoPdfImgMessage.push(val);
     }
   });
+
+  useEffect(() => {
+    let user = current_group.participants.find((member) => member?.user?._id?.toString() === userId);
+    setUserExist(user && user?.status !== 'left');
+  }, [current_group]);
 
   useEffect(() => {
     const userData = Cookies.get("user");
@@ -165,7 +174,7 @@ const GroupProfile = ({
         <div className="group-header">
           <h3>Group Info</h3>
           <div className="header-actions">
-            {userId && (
+            {userId && userExist && !adminPanelStyle && (
               <IoExitOutline
                 className="leave-icon"
                 title="Leave Group"
@@ -215,9 +224,9 @@ const GroupProfile = ({
             <button onClick={groupCallHandler}>
               <HiOutlineVideoCamera />
             </button>
-            <button onClick={groupCallHandler}>
+            {/* <button onClick={groupCallHandler}>
               <IoCallOutline />
-            </button>
+            </button> */}
             <button onClick={handleEditGroup}>
               <GrEdit />
             </button>
@@ -230,7 +239,7 @@ const GroupProfile = ({
             <p onClick={handleShowMediaPage}>
               {
                 messages.filter(
-                  (val) => val.type !== "text" && val.type !== "date"
+                  (val) => val.type !== "text" && val.type !== "date" && val.type !== "addMember" && val.type !== "removeMember" && val.type !== "leftMember"
                 ).length
               }{" "}
               <GrNext />
@@ -277,7 +286,7 @@ const GroupProfile = ({
                   {member.role === "admin" && (
                     <FaCrown className="admin-icon" title="Admin" />
                   )}
-                  {access === "admin" && member.user._id !== userId && (
+                  {!adminPanelStyle && access === "admin" && member.user._id !== userId && (
                     <>
                       {member.role !== "admin" ? (
                         <FaCrown

@@ -61,7 +61,7 @@ const Header = () => {
   let videoParams = { params };
   let consumingTransports = [];
   const {
-    group_chat: { current_group },
+    group_chat: { current_group, messages },
   } = useSelector((state) => state.conversation);
   const { guests } = useSelector((state) => state.guests);
 
@@ -762,6 +762,7 @@ const Header = () => {
           groupCallHandler={groupCallHandler}
           profile={profile}
           current_group={current_group}
+          messages={messages}
         />
       )}
       <div className="selected_group_heading">
