@@ -59,7 +59,7 @@ const OneToOneMessageSchema = new mongoose.Schema(
             type: { type: String },
             filename: { type: String },
             text: { type: String },
-            _id: { type: String }
+            _id: { type: mongoose.Schema.Types.ObjectId },
           }, { _id: false })
         },
       },
