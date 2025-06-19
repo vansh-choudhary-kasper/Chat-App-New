@@ -1,10 +1,11 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
 import { Base_Url } from "../../utils/config";
 // import axios from "axios";
 import { axios } from "../../utils/apiInterceptor";
 import Cookies from "js-cookie";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 import { playNotification } from "../../utils/NotificationSound";
+import { socket } from "../../context/context";
 
 let userData = Cookies.get("user");
 let parsedData;
@@ -177,6 +178,19 @@ const conversationSlice = createSlice({
           (val) => val._id === data.conversation_id
         );
 
+        const current_group_convo = JSON.parse(
+            JSON.stringify(state.group_chat.current_group)
+          );
+        const conversationid = current_group_convo?._id;
+        if(current_group_convo && conversationid === data.conversation_id){
+          message.seen?.push(user_id);
+          socket.emit("group_message_seen", {
+            conversation_id: data.conversation_id,
+            messageId: data.message._id,
+            user_id: user_id,
+          });
+        }
+
         const index = conversations.findIndex(
           (val) => val._id === data.conversation_id
         );
@@ -193,10 +207,7 @@ const conversationSlice = createSlice({
             ...state.group_chat.groups.slice(0, index),
             ...state.group_chat.groups.slice(index + 1),
           ];
-          const current_group_convo = JSON.parse(
-            JSON.stringify(state.group_chat.current_group)
-          );
-          const conversationid = current_group_convo?._id;
+          
 
           if (current_group_convo && data.conversation_id === conversationid) {
             if (
@@ -639,6 +650,28 @@ const conversationSlice = createSlice({
         };
         state.group_chat.messages = messages;
         state.loading = false;
+
+        state.group_chat.groups.find((group) => group._id === _id).messages.forEach((message) => {
+          // If the message is received by the user and unseen, mark it as seen
+          if (!message.seen?.includes(user_id)) {
+            message.seen?.push(user_id);
+            // messagesUpdated = true;
+          }
+        });
+
+        // if (messagesUpdated) {
+        //   state.group_chat.current_group.messages = state.group_chat.current_group.messages;
+        //   state.group_chat.current_group.participants.forEach(async (val) => {
+        //     if(val.status !== 'left') {
+        //       const emp = await User.findOne({ _id: val.user.toString() });
+
+        //       io.to(emp?.socket_id).emit("group_message", {
+        //         conversation_id : state.group_chat.current_group._id,
+        //         message: state.group_chat.current_group.messages,
+        //       });
+        //     }
+        //   });
+        // }
       })
       .addCase(fetchSelectedGroup.rejected, (state, action) => {
         state.group_chat.current_group = null;

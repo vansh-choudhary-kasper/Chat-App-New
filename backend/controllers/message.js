@@ -298,7 +298,7 @@ exports.leaveGroup = async (req, res) => {
         }
 
         newAdmin.role = "admin";
-      } else {
+      } else if (group.participants.filter(p => p.role === 'admin').length === 1) {
         // Random assignment
         const activeMembers = group.participants.filter(p => 
           p.user.toString() !== userId && 
@@ -334,6 +334,8 @@ exports.leaveGroup = async (req, res) => {
       from: userId,
       type: "leftMember",
       created_at: new Date(Date.now() - 1000),
+      seen: [userId],
+      _id: new mongoose.Types.ObjectId(),
     }
     group.messages.push(sendMessage);
 
@@ -409,7 +411,7 @@ exports.groups = async (req, res) => {
         ...conv.messages.map((val) => {
           if (val.status === "delete") {
             return {
-              seen: val.seen || "unseen",
+              seen: val.seen || [],
               to: val.to,
               from: val.from,
               type: "text",
@@ -589,11 +591,16 @@ exports.addmembers = async (req, res) => {
     const existingMemberIds = group.participants.map((participant, i) => {
       const userIdStr = participant.user._id.toString();
       if (membersList.includes(userIdStr)) {
-          group.participants[i].status = "offline";
-          group.participants[i].joinedAt.push(new Date(Date.now()));
+          if(group.participants[i].status === 'left') { 
+            group.participants[i].status = "offline";
+            group.participants[i].joinedAt.push(new Date(Date.now()));
+          } else {
+            membersList.splice(membersList.indexOf(userIdStr), 1);
+          }
       }
       return userIdStr;
     });
+    console.log(membersList);
     const uniqueNewMembers = membersList.filter(
       (memberId) => !existingMemberIds.includes(memberId)
     );
@@ -620,6 +627,8 @@ exports.addmembers = async (req, res) => {
         type: "addMember",
         addedMember: user?._id?.toString(),
         created_at: new Date(Date.now() + 1000),
+        seen: [userId],
+        _id: new mongoose.Types.ObjectId(),
       }
       sendMessages.push(sendMessage);
       group.messages.push(sendMessage);
@@ -674,6 +683,12 @@ exports.addmembers = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
 exports.removeMember = async (req, res) => {
   try {
     const { userId, groupId } = req.query;
@@ -715,6 +730,13 @@ exports.removeMember = async (req, res) => {
       (participant) => participant.user.toString() === member
     );
 
+    if(memberToRemove.status === 'left') {
+      return res.status(404).json({
+        status: "failed",
+        message: "Member is not available to remove.",
+      });
+    }
+
     if (!memberToRemove) {
       return res.status(404).json({
         status: "failed",
@@ -746,6 +768,8 @@ exports.removeMember = async (req, res) => {
       type: "removeMember",
       removedMember: member,
       created_at: new Date(Date.now() - 1000),
+      seen: [userId],
+      _id: new mongoose.Types.ObjectId(),
     }
     group.messages.push(sendMessage);
 
@@ -920,6 +944,15 @@ exports.selectedGroupConversation = async (req, res) => {
       });
     }
 
+    let messagesUpdated = false;
+    conversation.messages.forEach((message) => {
+      // If the message is received by the user and unseen, mark it as seen
+      if (!message.seen.includes(userid)) {
+        message.seen.push(userid);
+        messagesUpdated = true;
+      }
+    });
+
     const AccessMsgs = [];
     const user = conversation.participants.find((per) => per?.user?._id.toString() === userid);
     user?.joinedAt.map((date, i) => {
@@ -950,6 +983,10 @@ exports.selectedGroupConversation = async (req, res) => {
       ...conversation.toObject(),
       messages: reversedMessages,
     };
+
+    if (messagesUpdated) {
+      await conversation.save();
+    }
 
     return res.status(200).json({
       status: "success",

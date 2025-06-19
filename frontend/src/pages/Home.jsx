@@ -457,6 +457,8 @@ const Home = () => {
         socket.off("incoming_group_call");
         socket.off("incoming_voice_call");
         socket.off("disable_call");
+        socket.off("new-producer");
+        socket.off("producer-closed");
       }
     };
   }, [socket, incomingCall, isVideoCall, incomingVoiceCall]);

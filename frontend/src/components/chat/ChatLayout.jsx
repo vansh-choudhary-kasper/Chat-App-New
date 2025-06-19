@@ -106,6 +106,7 @@ const ChatLayout = () => {
       if(socket) {
       // socket.off("new_message", handleNewMessage);
       socket.off("delete_message", handleDeleteMessage);
+      socket.off("edit_message", handleEditMessage);
       socket.off("user_status", handleUserStatus);
       socket.off("connect_error", handleConnectError);
       }

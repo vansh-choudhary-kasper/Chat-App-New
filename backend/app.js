@@ -250,6 +250,25 @@ io.on("connection", async (socket) => {
     await User.findByIdAndUpdate(user_id, { socket_id, status: "Online" });
   }
 
+  socket.on("group_message_seen", async (data) => {
+    try {
+      console.log(data);
+      //push user_id to seen array
+      const updatedConversation = await GroupMessage.findOneAndUpdate(
+        {
+          _id: data.conversation_id,
+          "messages._id": data.messageId,
+        },
+        { $addToSet: { "messages.$.seen": data.user_id } }, 
+        { new: true }
+      );
+      console.log(updatedConversation);
+      if (!updatedConversation) {
+        return;
+      }
+    } catch (error) { }
+  });
+
   socket.on("text_message", async (data) => {
     let { to, from, message, conversation_id, type, conversation, reply } = data;
 
@@ -467,7 +486,7 @@ io.on("connection", async (socket) => {
           to,
           from,
           type,
-          seen: "unseen",
+          seen: [],
           text: message,
           created_at: new Date().toISOString(),
           conversation,
@@ -475,6 +494,7 @@ io.on("connection", async (socket) => {
         };
         if (!from) return;
         const from_user = await User.findOne({ _id: from });
+        new_message.seen.push(from_user._id.toString());
 
         chat = await GroupMessage.findById(conversation_id);
         if (!new_message._id) {
@@ -839,12 +859,13 @@ io.on("connection", async (socket) => {
           type,
           msgId,
           text,
-          seen: "unseen",
+          seen: [],
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
           filename: req.body.filename,
           reply
         };
+        new_message.seen.push(from);
         const from_user = await User.findById(from);
         if (!new_message._id) {
           new_message._id = new mongoose.Types.ObjectId();

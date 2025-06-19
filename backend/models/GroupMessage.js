@@ -97,10 +97,12 @@ const GroupMessageSchema = new mongoose.Schema(
             _id: { type: String }
           }, { _id: false })
         },
-        seen: {
-          type: String,
-          default: "unseen",
-        },
+        seen: [
+          {
+            type: mongoose.Schema.ObjectId,
+            ref: "User",
+          }
+        ],
         status: {
           type: String,
           default: "msg",

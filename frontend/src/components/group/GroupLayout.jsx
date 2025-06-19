@@ -141,17 +141,18 @@ const GroupLayout = () => {
 
     return () => {
       if(socket) {
-      // socket.off("group_message");
       socket.off("new_group");
       socket.off("delete_group_message");
       socket.off("edit_group_message");
       socket.off("user_status");
       socket.off("connect_error");
-      socket.off("group_updated");
       socket.off("group_removed_you");
       socket.off("group_added_you");
       socket.off("group_added_member");
+      socket.off("group_removed_member");
+      socket.off("group_updated");
       socket.off("admin_promoted");
+      socket.off("admin_removed");
       socket.off("creator_changed");
       }
     };

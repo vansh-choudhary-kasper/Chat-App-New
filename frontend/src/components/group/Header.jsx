@@ -210,6 +210,14 @@ const Header = () => {
     socket.on("producer-closed", ({ remoteProducerId }) =>
       handleProducerClosed(remoteProducerId)
     );
+
+    return () => {
+      if(socket) {
+        socket.off("group_call_failed");
+        socket.off("new-producer");
+        socket.off("producer-closed");
+      }
+    };
   }, [socket]);
   const getProducers = () => {
     socket.emit("getProducers", (producerIds) => {
@@ -331,6 +339,7 @@ const Header = () => {
   };
   const memberHandler = async () => {
     const membersList = selectedUsers.map((val) => val._id);
+    setSelectedUsers([]);
     const addMembers = await dispatch(
       addMembersHandler({
         membersList,
@@ -340,7 +349,6 @@ const Header = () => {
       })
     );
     if(addMembers?.payload?.message === "Members added successfully") {
-      setSelectedUsers([]);
       setQuery("");
       setModalOpen(false);
     }

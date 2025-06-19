@@ -72,16 +72,15 @@ const GroupProfile = ({
   useEffect(() => {
     let user = current_group.participants.find((member) => member?.user?._id?.toString() === userId);
     setUserExist(user && user?.status !== 'left');
-  }, [current_group]);
+  }, [current_group, userId]);
 
+  const userData = Cookies.get("user");
   useEffect(() => {
-    const userData = Cookies.get("user");
-
     if (!userData) return;
     const parsedData = JSON.parse(userData);
     setUserId(parsedData.userId);
     setToken(parsedData.token);
-  }, []);
+  }, [userData]);
 
   useEffect(() => {
     if(current_group) {
@@ -270,7 +269,7 @@ const GroupProfile = ({
         <div className="participants">
           <div className="participants_heading">
             <p>Participants</p>
-            <p>{current_group?.participants.length}</p>
+            <p>{current_group?.participants.filter((member) => member.status !== 'left').length}</p>
           </div>
 
           <ul>

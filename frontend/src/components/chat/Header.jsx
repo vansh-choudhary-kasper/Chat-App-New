@@ -368,8 +368,10 @@ const Header = ({ deviceType }) => {
     });
     return () => {
       if (socket) {
-        socket.off("user_call_status");
+        socket.off("user_video_call_status");
         socket.off("room_video_created");
+        socket.off("user_voice_call_status");
+        socket.off("disable_call");
         // socket.off("incoming_video_call");
         socket.off("video_call_answered");
         socket.off("video_ice_candidate");
