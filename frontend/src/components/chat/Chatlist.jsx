@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./chatlayout.css";
-import profiles from "../../assets/img/manprofile.png";
 import { useSelector, useDispatch } from "react-redux";
 import {
   chatStatus,
@@ -144,8 +143,8 @@ const Chatlist = ({
       className="chatlist_main_container"
       style={
         current_conversation === val._id && current_user._id === _id
-          ? { border: "none", borderBottom: "none", backgroundColor: "#F1F1FF" }
-          : { border: "none", borderBottom: "1px solid #DFDFDF" }
+          ? { backgroundColor: "#E1EFFF" }
+          : { backgroundColor: "#FAFAFA" }
       }
       // onDoubleClick={() => {
       //   setShowOptions(val._id);
@@ -181,7 +180,13 @@ const Chatlist = ({
           <></>
         )}
         <div className="chatlist_image_container">
-          <img src={profile ? profile : profiles} alt="profile" />
+          {profile ? (
+            <img src={profile} alt="profile image" />
+          ) : (
+            <span class="font-medium text-[var(--color-blue)] dark:text-gray-300 uppercase">
+              {`${firstname[0] + lastname[0]}`}
+            </span>
+          )}
         </div>
         <div className="chatlist_name_container">
           <h4>{`${firstname} ${lastname}`.slice(0, 16)}</h4>

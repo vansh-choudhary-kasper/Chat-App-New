@@ -12,7 +12,9 @@ const SelfProfile = ({ user, handleClose, setProfileToggle }) => {
   const [aboutText, setAboutText] = useState(
     user?.about || "Hey! I am using this chat app."
   );
-  const [name, setName] = useState(user?.firstname + " " + user?.lastname || "");
+  const [name, setName] = useState(
+    user?.firstname + " " + user?.lastname || ""
+  );
   const [profilePic, setProfilePic] = useState(user?.profile || null);
   const [profileFile, setProfileFile] = useState(null); // Store file separately for dispatch
 
@@ -77,12 +79,17 @@ const SelfProfile = ({ user, handleClose, setProfileToggle }) => {
         </div>
         {isEditing ? (
           <>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </>
         ) : (
           <p className="user-name">
             {user?.firstname} {user?.lastname || "Your Name"}
-          </p>)}
+          </p>
+        )}
       </div>
 
       <div className="about">

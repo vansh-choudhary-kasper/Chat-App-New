@@ -30,6 +30,7 @@ const Sidebar = ({
           ? "sideLink mobileSideBarOpen"
           : "sideLink mobileSideBarClose"
       }
+      style={{ border: "1px solid red" }}
     >
       <div className="sidelink_conatiner">
         <div className="sideLink_logo">
@@ -72,7 +73,9 @@ const Sidebar = ({
               </div>
               <div
                 className={
-                  active === "admin" ? "sideLink_icons active" : "sideLink_icons"
+                  active === "admin"
+                    ? "sideLink_icons active"
+                    : "sideLink_icons"
                 }
                 onClick={() => (setActive("admin"), navigate("/home/admin"))}
                 title="Admin Panel"
@@ -120,7 +123,7 @@ const Sidebar = ({
       )}
     </div>
   ) : (
-    <div className={"sideLink"}>
+    <div className={"sideLink border border-red-500"}>
       <div className="sidelink_conatiner">
         <div className="sideLink_logo">
           <img src={logo} alt="logo" />
@@ -158,7 +161,9 @@ const Sidebar = ({
               </div>
               <div
                 className={
-                  active === "admin" ? "sideLink_icons active" : "sideLink_icons"
+                  active === "admin"
+                    ? "sideLink_icons active"
+                    : "sideLink_icons"
                 }
                 onClick={() => (setActive("admin"), navigate("/home/admin"))}
                 title="Admin Panel"
@@ -180,7 +185,8 @@ const Sidebar = ({
                   />
                 </svg>
               </div>
-            </> ) : (
+            </>
+          ) : (
             <></>
           )}
         </div>
