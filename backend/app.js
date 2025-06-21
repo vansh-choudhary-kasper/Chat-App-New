@@ -182,6 +182,8 @@ const createRoom = async (roomName, socketId, user_id) => {
     router1 = rooms[roomName].router;
     peers = rooms[roomName].peers;
     user_ids = rooms[roomName].user_ids;
+    console.log("roomName", roomName);
+    console.log("room[roomName]", rooms[roomName]);
   } else {
     router1 = await worker.createRouter({ mediaCodecs });
   }
@@ -1334,7 +1336,7 @@ io.on("connection", async (socket) => {
       callback({ call: true });
     }
   });
-  socket.on("joinGroupCall", async ({ chat, roomName, producer }, callback) => {
+  socket.on("joinGroupCall", async ({ chat, roomName, producer, groupId }, callback) => {
     // let call = await CallRecord.findOne({ roomName, status: "active" });
     // // console.log(producer);
 
@@ -1390,7 +1392,9 @@ io.on("connection", async (socket) => {
             { $set: { inCall: true } }
           );
         });
-
+        if(groupId) {
+          await GroupMessage.findOneAndUpdate({ _id: groupId }, { $addToSet: { "meetingRooms": { meetingRoomId: roomName } } });
+        }
         await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
         const router1 = await createRoom(roomName, socket.id, user_id);
 
@@ -1706,6 +1710,9 @@ io.on("connection", async (socket) => {
         peers: rooms[roomName].peers.filter(
           (socketId) => socketId !== socket.id
         ),
+        user_ids: rooms[roomName].user_ids.filter(
+          (socketId) => socketId !== socket.id
+        ),
       };
     }
     await User.findByIdAndUpdate(user_id, { $set: { inCall: false } });
@@ -1770,9 +1777,7 @@ const port = process.env.PORT || 4000;
 // });
 
 httpsServer.listen(port, () => {
-  console.log(
-    `Express HTTPS server running on https://${process.env.WEBRTC_LISTEN_IP}:${port}`
-  );
+  console.log(`Express HTTPS server running on https://${process.env.WEBRTC_LISTEN_IP}:${port}`);
 });
 
 module.exports = app;

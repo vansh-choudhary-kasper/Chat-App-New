@@ -32,6 +32,9 @@ import Sidebar from "../components/sidebar/Sidebar";
 import { sendMessage } from "../redux/slice/messageSlice";
 import NavHeader from "../components/Nav-Header/NavHeader";
 const Home = () => {
+  const {
+    group_chat: { current_group },
+  } = useSelector((state) => state.conversation);
   const pathname = useLocation().pathname.split("/")[2];
   const audioRef = useRef(null);
   const [isVideoCall, setIsVideoCall] = useState(false);
@@ -52,6 +55,8 @@ const Home = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [incomingCall, setIncomingCall] = useState(null);
   const [isVideoEnabled, setIsVideoEnabled] = useState(false);
+  const { showIncomingCall, setShowIncomingCall, existingCalls, setExistingCalls } = useContext(contextData);
+  
   let rtpCapabilities;
   let device = useRef(undefined);
   const remoteAudioRef = useRef(null);
@@ -84,6 +89,24 @@ const Home = () => {
       videoGoogleStartBitrate: 1000,
     },
   };
+
+  useEffect(() => {
+    console.log("current_group.meetingRooms => ", current_group);
+    if(current_group && current_group.meetingRooms) {
+      setExistingCalls(current_group.meetingRooms);
+    }
+  }, [current_group]);
+
+  useEffect(() => {
+    if(showIncomingCall) {
+      setIncomingCall((prev) => {
+        if(prev && prev !== null) {
+          return prev;
+        }
+        return existingCalls.length > 0 ? { roomName: existingCalls[existingCalls.length - 1].meetingRoomId } : null
+      });
+    }
+  }, [showIncomingCall]);
 
   let audioParams;
   let videoParams = { params };
@@ -352,6 +375,7 @@ const Home = () => {
         // }
         // console.log("user = ", user);
         setIncomingCall({ from, user_id, offer });
+        setShowIncomingCall(true);
         setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.play().catch((error) => {
@@ -392,6 +416,8 @@ const Home = () => {
       });
       socket.on("incoming_group_call", (data) => {
         setIncomingCall(data);
+        setShowIncomingCall(true);
+        setExistingCalls([...existingCalls, data]);
         setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.play().catch((error) => {
@@ -536,7 +562,8 @@ const Home = () => {
           if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
-            setIncomingCall(null);
+            // setIncomingCall(null);
+            setShowIncomingCall(false);
           }
         }
       }, 20000);
@@ -549,6 +576,7 @@ const Home = () => {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
             setIncomingCall(null);
+            setShowIncomingCall(false);
           }
         }
       }, 20000);
@@ -983,7 +1011,7 @@ const Home = () => {
             </div>
           </div>
         )}
-        {incomingCall && !isVideoEnabled && (
+        {incomingCall && showIncomingCall && !isVideoEnabled && (
           <div className="modal-overlay">
             <div className="modal-content">
               <h2>Incoming video Call</h2>

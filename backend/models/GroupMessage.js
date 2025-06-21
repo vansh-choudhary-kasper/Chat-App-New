@@ -113,6 +113,9 @@ const GroupMessageSchema = new mongoose.Schema(
     groupName: { type: String, required: true },
     groupstatus: { type: String, default: "group", enum: ["group", "pinned"] },
     groupProfile: { type: String },
+    meetingRooms: [{
+      meetingRoomId: { type: String }
+    }]
   },
   {
     timestamps: true,

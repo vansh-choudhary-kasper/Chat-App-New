@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import Cookies from "js-cookie";
 import { Base_Url } from "../utils/config";
-export const contextData = createContext();
+export const  contextData = createContext();
 export let socket;
 export const ContextProvider = ({ children }) => {
   let user_id;
@@ -13,6 +13,8 @@ export const ContextProvider = ({ children }) => {
     window.innerWidth < 768 ? "mobile" : "web"
   );
   const [sideToggle, setSideToggle] = useState(false);
+  const [showIncomingCall, setShowIncomingCall] = useState(false);
+  const [existingCalls, setExistingCalls] = useState([]);
   if (userData) {
     parsedData = JSON.parse(userData);
     user_id = parsedData.userId;
@@ -58,6 +60,10 @@ export const ContextProvider = ({ children }) => {
         deviceType,
         sideToggle,
         setSideToggle,
+        showIncomingCall,
+        setShowIncomingCall,
+        existingCalls,
+        setExistingCalls,
       }}
     >
       {children}

@@ -11,7 +11,6 @@ const GroupList = ({ val, user_id, token,handleClick,}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  console.error("Group value is => ", val);
   // const unseen = [1,2];
   const unseen = val.messages.length > 0 && val.messages.filter((val) => !val.seen.includes(user_id));
   
