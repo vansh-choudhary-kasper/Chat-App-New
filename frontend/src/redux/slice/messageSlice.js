@@ -640,6 +640,7 @@ const conversationSlice = createSlice({
           participants,
           messages,
           groupProfile,
+          meetingRooms,
         } = data[0];
         state.group_chat.current_group = {
           groupName,
@@ -647,6 +648,7 @@ const conversationSlice = createSlice({
           _id,
           participants,
           groupProfile,
+          meetingRooms,
         };
         state.group_chat.messages = messages;
         state.loading = false;

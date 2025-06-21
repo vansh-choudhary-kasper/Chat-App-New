@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState, useCallback } from "react";
+import React, { memo, useEffect, useRef, useState, useCallback, useContext } from "react";
 import "./GroupLayout.css";
 import {
   FiMic,
@@ -18,7 +18,7 @@ import Cookies from "js-cookie";
 import { persistor } from "../../redux/store";
 import { useNavigate } from "react-router-dom";
 import { addMembersHandler } from "../../redux/slice/messageSlice";
-import { socket } from "../../context/context";
+import { socket, contextData } from "../../context/context";
 import { v4 as uuidv4 } from "uuid";
 import * as mediasoupClient from "mediasoup-client";
 import GroupProfile from "../contact/GroupProfile";
@@ -79,6 +79,8 @@ const Header = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [groupProfile, setGroupProfile] = useState(false);
   const [incomingGroupVideoCall, seIncomingGroupVideoCall] = useState(false);
+  const { showIncomingCall, setShowIncomingCall } = useContext(contextData);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const membersListfunc = (list) =>
@@ -437,7 +439,7 @@ const Header = () => {
               const roomid = uuidv4();
               socket.emit(
                 "joinGroupCall",
-                { chat: membersList, roomName: roomid, producer: true },
+                { chat: membersList, roomName: roomid, producer: true, groupId: current_group._id },
                 (data) => {
                   console.log(
                     ` Router RTP Capabilities... ${data.rtpCapabilities}`
@@ -796,6 +798,10 @@ const Header = () => {
           </div>
         </div>
         <div className="call_container">
+          {!showIncomingCall && <div className="audio_call" onClick={() => setShowIncomingCall(true)}>
+            <FiVideo style={{color:"red"}} />
+          </div>}
+          
           <div className="audio_call" onClick={groupCallHandler}>
             <FiVideo />
           </div>
