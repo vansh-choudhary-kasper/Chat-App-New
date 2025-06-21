@@ -31,8 +31,6 @@ app.use(express.json({ limit: "100mb" }));
 app.use(mongoSanitize());
 app.use(xssClean());
 
-
-
 app.use(
   cors({
     origin: `${process.env.FRONTEND_URL}`,
@@ -90,7 +88,8 @@ const server = http.createServer(app);
 const fetchLinkPreviewData = async (url) => {
   try {
     const response = await axios.get(
-      `https://api.linkpreview.net/?key=${process.env.LINKPREVIEW
+      `https://api.linkpreview.net/?key=${
+        process.env.LINKPREVIEW
       }&q=${encodeURIComponent(url)}`
     );
 
@@ -214,15 +213,13 @@ const createWebRtcTransport = async (router) => {
         webRtcTransport_options
       );
 
-
       transport.on("dtlsstatechange", (dtlsState) => {
         if (dtlsState === "closed") {
           transport.close();
         }
       });
 
-      transport.on("close", () => {
-      });
+      transport.on("close", () => {});
 
       resolve(transport);
     } catch (error) {
@@ -261,18 +258,19 @@ io.on("connection", async (socket) => {
           _id: data.conversation_id,
           "messages._id": data.messageId,
         },
-        { $addToSet: { "messages.$.seen": data.user_id } }, 
+        { $addToSet: { "messages.$.seen": data.user_id } },
         { new: true }
       );
       console.log(updatedConversation);
       if (!updatedConversation) {
         return;
       }
-    } catch (error) { }
+    } catch (error) {}
   });
 
   socket.on("text_message", async (data) => {
-    let { to, from, message, conversation_id, type, conversation, reply } = data;
+    let { to, from, message, conversation_id, type, conversation, reply } =
+      data;
 
     let chat;
     if (conversation === "chat") {
@@ -290,7 +288,7 @@ io.on("connection", async (socket) => {
           text: message,
           created_at: new Date().toISOString(),
           conversation,
-          reply
+          reply,
         };
         if (conversation_id === undefined) {
           let newChats;
@@ -492,7 +490,7 @@ io.on("connection", async (socket) => {
           text: message,
           created_at: new Date().toISOString(),
           conversation,
-          reply
+          reply,
         };
         if (!from) return;
         const from_user = await User.findOne({ _id: from });
@@ -503,9 +501,11 @@ io.on("connection", async (socket) => {
           new_message._id = new mongoose.Types.ObjectId();
         }
 
-        const user = chat.participants.find((member) => member.user.toString() == from);
-        if(user) {
-          if(user.status === 'left') return;
+        const user = chat.participants.find(
+          (member) => member.user.toString() == from
+        );
+        if (user) {
+          if (user.status === "left") return;
         } else {
           return;
         }
@@ -524,7 +524,7 @@ io.on("connection", async (socket) => {
             };
             chat.messages.push(dateMessage);
             chat.participants.forEach(async (val) => {
-              if(val.status !== 'left') {
+              if (val.status !== "left") {
                 const emp = await User.findOne({ _id: val.user.toString() });
 
                 io.to(emp?.socket_id).emit("group_message", {
@@ -556,7 +556,7 @@ io.on("connection", async (socket) => {
             };
             chat.messages.push(dateMessage);
             chat.participants.forEach(async (val) => {
-              if(val.status !== 'left') {
+              if (val.status !== "left") {
                 const emp = await User.findOne({ _id: val.user.toString() });
 
                 io.to(emp?.socket_id).emit("group_message", {
@@ -573,7 +573,7 @@ io.on("connection", async (socket) => {
         }
 
         chat.participants.forEach(async (val) => {
-          if(val.status !== 'left') {
+          if (val.status !== "left") {
             const emp = await User.findOne({ _id: val.user.toString() });
 
             io.to(emp?.socket_id).emit("group_message", {
@@ -602,7 +602,7 @@ io.on("connection", async (socket) => {
       if (!updatedConversation) {
         return;
       }
-    } catch (error) { }
+    } catch (error) {}
   });
   routers.post("/user/group", upload.single("file"), async (req, res) => {
     const { groupName, groupMember } = req.body;
@@ -628,10 +628,7 @@ io.on("connection", async (socket) => {
       let groupProfile = null;
       if (req.file) {
         try {
-          const cloudinaryRes = await uploadToCloudinary(
-            req.file,
-            "image"
-          ); // Pass the file path and type
+          const cloudinaryRes = await uploadToCloudinary(req.file, "image"); // Pass the file path and type
           groupProfile = cloudinaryRes.secure_url; // Get the URL of the uploaded image
         } catch (error) {
           return res.status(500).json({
@@ -643,7 +640,7 @@ io.on("connection", async (socket) => {
 
       // Find the creator (last member in the array)
       const creatorId = members[members.length - 1];
-      
+
       const participants = members.map((userId) => ({
         user: mongoose.Types.ObjectId.createFromHexString(userId),
         role: userId === creatorId ? "admin" : "member",
@@ -665,7 +662,7 @@ io.on("connection", async (socket) => {
       );
 
       const firstMsg = {
-        conversation : "group",
+        conversation: "group",
         from: creatorId,
         type: "date",
         created_at: new Date(Date.now()),
@@ -673,14 +670,14 @@ io.on("connection", async (socket) => {
       };
       groupInfo.messages.push(firstMsg);
       groupInfo.participants.forEach(async (participant) => {
-        if(participant.user?._id?.toString() === creatorId) return;
+        if (participant.user?._id?.toString() === creatorId) return;
         const sendMessage = {
-          conversation : "group",
+          conversation: "group",
           from: creatorId,
           type: "addMember",
           addedMember: participant.user?._id?.toString(),
           created_at: new Date(Date.now() + 1000),
-        }
+        };
         groupInfo.messages.push(sendMessage);
       });
       await groupInfo.save();
@@ -720,13 +717,13 @@ io.on("connection", async (socket) => {
         conversation,
         reply = {},
       } = req.body;
-      reply = reply && reply !== null && reply !== 'undefined' ? JSON.parse(reply) : {};
+      reply =
+        reply && reply !== null && reply !== "undefined"
+          ? JSON.parse(reply)
+          : {};
 
       if (conversation === "chat") {
-        const cloudinaryRes = await uploadToCloudinary(
-          req.file,
-          req.body.type
-        );
+        const cloudinaryRes = await uploadToCloudinary(req.file, req.body.type);
 
         let new_message = {
           to,
@@ -739,7 +736,7 @@ io.on("connection", async (socket) => {
           seen: "unseen",
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
-          filename: req.body.filename,  
+          filename: req.body.filename,
           reply,
         };
         let chat;
@@ -756,7 +753,7 @@ io.on("connection", async (socket) => {
           }
           if (chat) {
             new_message.loading = false;
-            
+
             chat.messages.push(new_message);
             from_user.status = "Online";
 
@@ -838,7 +835,7 @@ io.on("connection", async (socket) => {
             conversation_id,
             message: new_message,
           });
-          
+
           io.to(from_user.socket_id).emit("new_message", {
             conversation_id,
             message: new_message,
@@ -849,10 +846,7 @@ io.on("connection", async (socket) => {
           });
         }
       } else if (conversation === "group") {
-        const cloudinaryRes = await uploadToCloudinary(
-          req.file,
-          req.body.type
-        );
+        const cloudinaryRes = await uploadToCloudinary(req.file, req.body.type);
 
         let new_message = {
           conversation,
@@ -865,7 +859,7 @@ io.on("connection", async (socket) => {
           created_at: Date.now(),
           file: cloudinaryRes.secure_url,
           filename: req.body.filename,
-          reply
+          reply,
         };
         new_message.seen.push(from);
         const from_user = await User.findById(from);
@@ -893,7 +887,7 @@ io.on("connection", async (socket) => {
           await chat.save({});
           await from_user.save({});
           chat.participants.forEach(async (val) => {
-            if(val.status !== 'left') {
+            if (val.status !== "left") {
               const emp = await User.findOne({ _id: val.user.toString() });
 
               io.to(emp?.socket_id).emit("group_message", {
@@ -911,7 +905,7 @@ io.on("connection", async (socket) => {
           await chat.save({});
           await from_user.save({});
           chat.participants.forEach(async (val) => {
-            if(val.status !== 'left') {
+            if (val.status !== "left") {
               const emp = await User.findOne({ _id: val.user.toString() });
 
               io.to(emp?.socket_id).emit("group_message", {
@@ -966,10 +960,10 @@ io.on("connection", async (socket) => {
     const doc = await OneToOneMessage.findById(search);
 
     const index = doc?.messages.findIndex(
-      m => m._id.equals(messageId) && m.from.equals(from)
+      (m) => m._id.equals(messageId) && m.from.equals(from)
     );
 
-    if (index === -1) return {modifiedCount: 0};
+    if (index === -1) return { modifiedCount: 0 };
 
     const fieldPath = `messages.${index}.status`;
 
@@ -984,10 +978,10 @@ io.on("connection", async (socket) => {
     const doc = await GroupMessage.findById(search);
 
     const index = doc?.messages.findIndex(
-      m => m._id.equals(messageId) && m.from.equals(from)
+      (m) => m._id.equals(messageId) && m.from.equals(from)
     );
 
-    if (index === -1) return {modifiedCount: 0};
+    if (index === -1) return { modifiedCount: 0 };
 
     const fieldPath = `messages.${index}.status`;
 
@@ -1006,35 +1000,40 @@ io.on("connection", async (socket) => {
         const { search, messageId } = req.query;
         const { to, from, conversation } = req.body;
         const from_user = await User.findById({ _id: from });
-        
+
         if (!search || search.trim() === "") {
           return res.status(400).json({
             status: "failed",
             message: "Conversation ID is required",
           });
         }
-        
+
         if (!messageId || messageId.trim() === "") {
           return res.status(400).json({
             status: "failed",
             message: "Message ID is required",
           });
         }
-        
-        if(req.user_id != from){
+
+        if (req.user_id != from) {
           return res.status(400).json({
             status: "failed",
             message: "You are not authorized to delete this message",
           });
         }
-        
+
         let result;
-        if(conversation && conversation === "group"){
-          result = await updateGroupMessageStatus(search, messageId, from, "delete");
+        if (conversation && conversation === "group") {
+          result = await updateGroupMessageStatus(
+            search,
+            messageId,
+            from,
+            "delete"
+          );
         } else {
           result = await updateMessageStatus(search, messageId, from, "delete");
         }
-        
+
         if (result.modifiedCount === 0) {
           return res.status(404).json({
             status: "failed",
@@ -1042,17 +1041,22 @@ io.on("connection", async (socket) => {
             data: [],
           });
         }
-        if(conversation && conversation === "group"){
+        if (conversation && conversation === "group") {
           let group_participants = await GroupMessage.findById(search).populate(
             "participants.user",
             "socket_id"
           );
-          let socket_ids = group_participants.participants.map(val => val.user.socket_id);
+          let socket_ids = group_participants.participants.map(
+            (val) => val.user.socket_id
+          );
           io.to(socket_ids).emit("delete_group_message", { search, messageId });
         } else {
           const to_user = await User.findById({ _id: to });
-          io.to(to_user.socket_id).emit("delete_message", { search, messageId });
-          
+          io.to(to_user.socket_id).emit("delete_message", {
+            search,
+            messageId,
+          });
+
           io.to(from_user.socket_id).emit("delete_message", {
             search,
             messageId,
@@ -1077,7 +1081,7 @@ io.on("connection", async (socket) => {
     const doc = await OneToOneMessage.findById(search);
 
     const index = doc?.messages.findIndex(
-      m => m._id.equals(messageId) && m.from.equals(from)
+      (m) => m._id.equals(messageId) && m.from.equals(from)
     );
 
     if (index === -1) return { modifiedCount: 0 };
@@ -1095,7 +1099,7 @@ io.on("connection", async (socket) => {
     const doc = await GroupMessage.findById(search);
 
     const index = doc?.messages.findIndex(
-      m => m._id.equals(messageId) && m.from.equals(from)
+      (m) => m._id.equals(messageId) && m.from.equals(from)
     );
 
     if (index === -1) return { modifiedCount: 0 };
@@ -1151,7 +1155,6 @@ io.on("connection", async (socket) => {
         result = await updateOneToOneMessage(search, messageId, from, newText);
       }
 
-
       if (result.modifiedCount === 0) {
         return res.status(404).json({
           status: "failed",
@@ -1165,11 +1168,21 @@ io.on("connection", async (socket) => {
           "participants.user",
           "socket_id"
         );
-        let socket_ids = group_participants.participants.map(val => val.user.socket_id);
-        io.to(socket_ids).emit("edit_group_message", { search, messageId, newText });
+        let socket_ids = group_participants.participants.map(
+          (val) => val.user.socket_id
+        );
+        io.to(socket_ids).emit("edit_group_message", {
+          search,
+          messageId,
+          newText,
+        });
       } else {
         const to_user = await User.findById({ _id: to });
-        io.to(to_user.socket_id).emit("edit_message", { search, messageId, newText });
+        io.to(to_user.socket_id).emit("edit_message", {
+          search,
+          messageId,
+          newText,
+        });
 
         io.to(from_user.socket_id).emit("edit_message", {
           search,
@@ -1190,7 +1203,7 @@ io.on("connection", async (socket) => {
         message: "Server error",
       });
     }
-});
+  });
 
   socket.on("join-video-room", async ({ to, roomId, from }) => {
     createOneToOneRoom(roomId, from);
@@ -1220,18 +1233,33 @@ io.on("connection", async (socket) => {
   });
   socket.on("video_call_user", async ({ to, offer }) => {
     try {
-      io.to(to).emit("incoming_video_call", { from: socket.id, user_id, offer });
+      io.to(to).emit("incoming_video_call", {
+        from: socket.id,
+        user_id,
+        offer,
+      });
       await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
-      await User.findOneAndUpdate({ socket_id: to }, { $set: { inCall: true } });
+      await User.findOneAndUpdate(
+        { socket_id: to },
+        { $set: { inCall: true } }
+      );
     } catch (error) {
       console.log(error);
     }
   });
   socket.on("answer_video_call", ({ to, answer }) => {
-    io.to(to).emit("video_call_answered", { from: socket.id, user_id: user_id, answer });
+    io.to(to).emit("video_call_answered", {
+      from: socket.id,
+      user_id: user_id,
+      answer,
+    });
   });
   socket.on("video_ice_candidate", ({ to, candidate }) => {
-    io.to(to).emit("video_ice_candidate", { from: socket.id, user_id: user_id, candidate });
+    io.to(to).emit("video_ice_candidate", {
+      from: socket.id,
+      user_id: user_id,
+      candidate,
+    });
   });
   socket.on("join-voice-room", async ({ to, roomId, from }) => {
     createOneToOneRoom(roomId, from);
@@ -1262,9 +1290,16 @@ io.on("connection", async (socket) => {
   });
   socket.on("voice_call_user", async ({ to, offer }) => {
     try {
-      io.to(to).emit("incoming_voice_call", { from: socket.id, user_id, offer });
+      io.to(to).emit("incoming_voice_call", {
+        from: socket.id,
+        user_id,
+        offer,
+      });
       await User.findByIdAndUpdate(user_id, { $set: { inCall: true } });
-      await User.findOneAndUpdate({ socket_id: to }, { $set: { inCall: true } });
+      await User.findOneAndUpdate(
+        { socket_id: to },
+        { $set: { inCall: true } }
+      );
     } catch (error) {
       console.log(error);
     }
@@ -1273,7 +1308,11 @@ io.on("connection", async (socket) => {
     io.to(to).emit("voice_call_answered", { from: socket.id, user_id, answer });
   });
   socket.on("audio_ice_candidate", ({ to, candidate }) => {
-    io.to(to).emit("audio_ice_candidate", { from: socket.id, user_id, candidate });
+    io.to(to).emit("audio_ice_candidate", {
+      from: socket.id,
+      user_id,
+      candidate,
+    });
   });
 
   //group video calll
@@ -1347,8 +1386,11 @@ io.on("connection", async (socket) => {
         return;
       } else {
         userActive.forEach(async (val) => {
-          io.to(val).emit("incoming_group_call", { roomName })
-          await User.findOneAndUpdate({ socket_id: val }, { $set: { inCall: true } });
+          io.to(val).emit("incoming_group_call", { roomName });
+          await User.findOneAndUpdate(
+            { socket_id: val },
+            { $set: { inCall: true } }
+          );
         });
         if(groupId) {
           await GroupMessage.findOneAndUpdate({ _id: groupId }, { $addToSet: { "meetingRooms": { meetingRoomId: roomName } } });
@@ -1411,14 +1453,16 @@ io.on("connection", async (socket) => {
   socket.on("call_users", async ({ chat, roomName, producer }, callback) => {
     if (producer)
       userActive.map(async (val) => {
-        io.to(val).emit("incoming_group_call")
-        await User.findOneAndUpdate({ socket_id: val }, { $set: { inCall: true } });
+        io.to(val).emit("incoming_group_call");
+        await User.findOneAndUpdate(
+          { socket_id: val },
+          { $set: { inCall: true } }
+        );
       });
   });
   socket.on("createWebRtcTransport", async ({ consumer }, callback) => {
     const roomName = peers[socket.id].roomName;
     const router = rooms[roomName].router;
-
 
     createWebRtcTransport(router).then(
       (transport) => {
@@ -1596,8 +1640,7 @@ io.on("connection", async (socket) => {
             paused: true,
           });
 
-          consumer.on("transportclose", () => {
-          });
+          consumer.on("transportclose", () => {});
 
           consumer.on("producerclose", () => {
             socket.emit("producer-closed", { remoteProducerId });
@@ -1653,7 +1696,7 @@ io.on("connection", async (socket) => {
     );
     await consumer.resume();
   });
-  socket.on("leave_call", async() => {
+  socket.on("leave_call", async () => {
     consumers = removeItems(consumers, socket.id, "consumer");
     producers = removeItems(producers, socket.id, "producer");
     transports = removeItems(transports, socket.id, "transport");
@@ -1678,12 +1721,12 @@ io.on("connection", async (socket) => {
     try {
       await User.findByIdAndUpdate(user_id, { $set: { inCall: false } });
       const to_user = await User.findOne({ _id: data.to });
-      if(!to_user) {
+      if (!to_user) {
         return;
       }
-      io.to(to_user.socket_id).emit("disable_call", { from: user_id }); 
+      io.to(to_user.socket_id).emit("disable_call", { from: user_id });
       await User.findByIdAndUpdate(to_user._id, { $set: { inCall: false } });
-    } catch (error) { 
+    } catch (error) {
       console.log(error);
     }
   });
@@ -1728,17 +1771,10 @@ app.use("/api/admin", adminRoutes);
 
 module.exports = { io, routers };
 
-
-
-
-
-
 const port = process.env.PORT || 4000;
 // server.listen(port, '0.0.0.0', () => {
 //   console.log(`server connected on port ${port}`);
 // });
-
-
 
 httpsServer.listen(port, () => {
   console.log(`Express HTTPS server running on https://${process.env.WEBRTC_LISTEN_IP}:${port}`);

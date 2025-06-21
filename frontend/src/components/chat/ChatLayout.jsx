@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useContext, createContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  createContext,
+} from "react";
 import { GoPlusCircle } from "react-icons/go";
 import { PiChatCenteredTextLight } from "react-icons/pi";
 import { RiInboxArchiveLine } from "react-icons/ri";
@@ -25,12 +31,14 @@ import {
   messageStatu,
   messageEdit,
 } from "../../redux/slice/messageSlice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { persistor, store } from "../../redux/store";
 import { setStatus } from "../../redux/slice/messageSlice";
 import { RESET_DIRECT_CHAT } from "../../redux/rootReducers";
-import {SharedContext} from "../../utils/replyContext";
+import { SharedContext } from "../../utils/replyContext";
+import { SquarePen, Search } from "lucide-react";
+import { use } from "react";
 
 const ChatLayout = () => {
   // const SharedContext = createContext();
@@ -86,7 +94,7 @@ const ChatLayout = () => {
       dispatch(messageEdit(data));
     };
     socket.on("edit_message", handleEditMessage);
-    const handleUserStatus =  (data) => {
+    const handleUserStatus = (data) => {
       dispatch(setStatus(data));
     };
     socket.on("user_status", handleUserStatus);
@@ -103,12 +111,12 @@ const ChatLayout = () => {
     };
     socket.on("connect_error", handleConnectError);
     return () => {
-      if(socket) {
-      // socket.off("new_message", handleNewMessage);
-      socket.off("delete_message", handleDeleteMessage);
-      socket.off("edit_message", handleEditMessage);
-      socket.off("user_status", handleUserStatus);
-      socket.off("connect_error", handleConnectError);
+      if (socket) {
+        // socket.off("new_message", handleNewMessage);
+        socket.off("delete_message", handleDeleteMessage);
+        socket.off("edit_message", handleEditMessage);
+        socket.off("user_status", handleUserStatus);
+        socket.off("connect_error", handleConnectError);
       }
     };
   }, [socket, current_conversation]);
@@ -244,6 +252,15 @@ const ChatLayout = () => {
       }, delay);
     }
   };
+
+  // chat and grup setting
+  const pathname = useLocation().pathname;
+
+  console.log(pathname);
+  const [activePath, setActivePath] = useState(pathname);
+  const userData = Cookies.get("user");
+  const Navigate = useNavigate();
+
   return (
     <>
       {/* {modalOpen && (
@@ -343,7 +360,7 @@ const ChatLayout = () => {
       )}
       <div
         className="chatlayout"
-        style={deviceType === "mobile" ? { width: "100vw" } : {}}
+        style={deviceType === "mobile" ? {} : { width: "100%" }}
       >
         {deviceType === "mobile" ? (
           <>
@@ -455,14 +472,42 @@ const ChatLayout = () => {
           </>
         ) : (
           <>
-            <div className="chat_message_container">
-              <div className="chat_heading">
-                <h5>Messages</h5>
-                <GoPlusCircle onClick={() => setModalOpen(true)} />
+            <div className="w-[20vw] h-[100vh] overflow-hidden border-r border-[var(--background-color)] bg-white">
+              {/* search bar  & add button*/}
+              <div className="flex items-center max-w-sm mx-auto gap-2 relative px-2 mt-4">
+                <label for="simple-search" className="sr-only">
+                  Search
+                </label>
+                <div className="relative w-full">
+                  <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <Search
+                      size={18}
+                      className="text-[var(--secondary-font-color)]"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    id="simple-search"
+                    className="bg-[#F6F5F8] border border-white text-gray-900 text-sm rounded-full block w-full ps-10 p-2 focus:border focus:border-[var(--color-blue)] focus:outline-none"
+                    placeholder="Search..."
+                    onChange={(e) => findHandler(e)}
+                  />
+                </div>
+                <div className="p-2 bg-[#F6F5F8] rounded-full h-full">
+                  <SquarePen
+                    onClick={() => setModalOpen(true)}
+                    size={18}
+                    className="text-[var(--color-blue)]"
+                  />
+                </div>
               </div>
-              <hr />
+              {/* active button of the group */}
               <div className="chat_list_main_container">
-                <div className="chat_list_button_container">
+                {/* buttonfor the archived and chats button */}
+                {/* <div
+                  className="chat_list_button_container"
+                  style={{ border: "1px solid red" }}
+                >
                   <div
                     className={
                       active === "chat"
@@ -500,19 +545,31 @@ const ChatLayout = () => {
                       <></>
                     )}
                   </div>
-                </div>
-                <div className="search_container">
-                  <div className="input_container">
-                    <input
-                      placeholder="Search by chats"
-                      onChange={(e) => findHandler(e)}
-                    />
+                </div> */}
+                {/* button grup for the chats and group chats
+                 */}
+                <div className="mt-3 flex items-center justify-center w-full p-2">
+                  <div className="w-full flex items-center justify-between gap-2 rounded-full bg-[#F6F5F8]">
+                    {Navigation.map((navList, index) => (
+                      <button
+                        onClick={() => {
+                          setActivePath(navList.path);
+                          Navigate(navList.path);
+                        }}
+                        className={`p-[6px_20px] rounded-full font-medium ${
+                          navList.path === activePath
+                            ? "bg-[var(--color-blue)] text-white"
+                            : "bg-[#F6F5F8] text-black"
+                        }`}
+                      >
+                        {navList.name}
+                      </button>
+                    ))}
                   </div>
-                  <div className="search_conatiner_button">
-                    <CiSearch />
-                  </div>
                 </div>
-                <div className="chat_list_container">
+
+                {/* chat list of the container */}
+                <div className="chat_list_container p-2">
                   {active === "chat" ? (
                     <>
                       {chat?.map((val, i) => (
@@ -547,13 +604,13 @@ const ChatLayout = () => {
             </div>
             {current_conversation !== null ? (
               <SharedContext.Provider value={{ replyChat, setReplyChat }}>
-                  <div className="selected_chat_container">
+                <div className="selected_chat_container">
                   <Header />
                   <hr />
                   <Chat userId={userId} token={token} />
 
                   <Footer token={token} />
-                  </div>
+                </div>
               </SharedContext.Provider>
             ) : (
               <div className="noSelected_chat_container">
@@ -568,3 +625,9 @@ const ChatLayout = () => {
 };
 
 export default ChatLayout;
+
+const Navigation = [
+  { name: "Chats", path: "/home/chat" },
+  { name: "Groups", path: "/home/group" },
+  { name: "Admin", path: "home/admin" },
+];

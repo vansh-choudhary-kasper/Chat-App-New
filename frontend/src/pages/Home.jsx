@@ -30,6 +30,7 @@ import { RESET_STATE } from "../redux/rootReducers";
 import SelfProfile from "../components/contact/SelfProdile";
 import Sidebar from "../components/sidebar/Sidebar";
 import { sendMessage } from "../redux/slice/messageSlice";
+import NavHeader from "../components/Nav-Header/NavHeader";
 const Home = () => {
   const {
     group_chat: { current_group },
@@ -151,7 +152,7 @@ const Home = () => {
             consumer,
           },
         ];
-        
+
         setRemoteVideos((prev) => {
           const existingIds = new Set(prev.map((video) => video.id));
           const filteredRemoteVideos = prev.filter((video) => {
@@ -235,13 +236,21 @@ const Home = () => {
     //   // },
     // ],
     iceServers: [
-      { urls: ['stun:stun.l.google.com:19302', 'stun:bn-turn1.xirsys.com'] },
+      { urls: ["stun:stun.l.google.com:19302", "stun:bn-turn1.xirsys.com"] },
       {
-        username: "GPGALnFu1elMv2Mjo5S9nrZfoZ-MDkfJzSPq-7C99LY5KKn39w6EZvpK5y_7ZkBaAAAAAGgUdaZ2YW5zaGNob3VkaGF5",
+        username:
+          "GPGALnFu1elMv2Mjo5S9nrZfoZ-MDkfJzSPq-7C99LY5KKn39w6EZvpK5y_7ZkBaAAAAAGgUdaZ2YW5zaGNob3VkaGF5",
         credential: "f5c15896-2727-11f0-a058-0242ac140004",
-        urls: ["turn:bn-turn1.xirsys.com:80?transport=udp", "turn:bn-turn1.xirsys.com:3478?transport=udp", "turn:bn-turn1.xirsys.com:80?transport=tcp", "turn:bn-turn1.xirsys.com:3478?transport=tcp", "turns:bn-turn1.xirsys.com:443?transport=tcp", "turns:bn-turn1.xirsys.com:5349?transport=tcp"]
-      }
-    ]
+        urls: [
+          "turn:bn-turn1.xirsys.com:80?transport=udp",
+          "turn:bn-turn1.xirsys.com:3478?transport=udp",
+          "turn:bn-turn1.xirsys.com:80?transport=tcp",
+          "turn:bn-turn1.xirsys.com:3478?transport=tcp",
+          "turns:bn-turn1.xirsys.com:443?transport=tcp",
+          "turns:bn-turn1.xirsys.com:5349?transport=tcp",
+        ],
+      },
+    ],
   };
   const iceCandidateBuffer = [];
 
@@ -436,42 +445,45 @@ const Home = () => {
       );
       socket.on("disable_call", (data) => {
         try {
-        if ((incomingCall && incomingCall.user_id === data.from) || (incomingVoiceCall && incomingVoiceCall.user_id === data.from)) {
-          // Stop all tracks
-          if (myStream) {
-            myStream.getTracks().forEach((track) => track.stop());
-            setMyStream(null);
-          }
-          // Close peer connection
-          if (peerConnectionRef.current) {
-            peerConnectionRef.current.close();
-            peerConnectionRef.current = null;
-          }
-          // Clear video elements
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = null;
-          }
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = null;
-          }
+          if (
+            (incomingCall && incomingCall.user_id === data.from) ||
+            (incomingVoiceCall && incomingVoiceCall.user_id === data.from)
+          ) {
+            // Stop all tracks
+            if (myStream) {
+              myStream.getTracks().forEach((track) => track.stop());
+              setMyStream(null);
+            }
+            // Close peer connection
+            if (peerConnectionRef.current) {
+              peerConnectionRef.current.close();
+              peerConnectionRef.current = null;
+            }
+            // Clear video elements
+            if (localVideoRef.current) {
+              localVideoRef.current.srcObject = null;
+            }
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = null;
+            }
 
-          // Clear audio elements
-          if (localStreamRef.current) {
-            localStreamRef.current.srcObject = null;
+            // Clear audio elements
+            if (localStreamRef.current) {
+              localStreamRef.current.srcObject = null;
+            }
+            if (remoteAudioRef.current) {
+              remoteAudioRef.current.srcObject = null;
+            }
+            // Reset state
+            setIncomingCall(null);
+            setIncomingVoiceCall(null);
+            setIsVideoEnabled(false);
+            setIsVideoCall(false);
+            setIsVoiceCallModalOpen(false);
           }
-          if (remoteAudioRef.current) {
-            remoteAudioRef.current.srcObject = null;
-          }
-          // Reset state
-          setIncomingCall(null);
-          setIncomingVoiceCall(null);
-          setIsVideoEnabled(false);
-          setIsVideoCall(false);
-          setIsVoiceCallModalOpen(false);
-      }
-      } catch (error) {
-        console.error("Error in disable_call handler:", error);
-      }
+        } catch (error) {
+          console.error("Error in disable_call handler:", error);
+        }
       });
     }
 
@@ -511,7 +523,7 @@ const Home = () => {
 
   const userData = Cookies.get("user");
   useEffect(() => {
-    if (!socket) return; 
+    if (!socket) return;
     if (!userData) return;
 
     const parsedData = JSON.parse(userData);
@@ -675,7 +687,7 @@ const Home = () => {
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
 
-    audioProducer.on("trackended", () => { });
+    audioProducer.on("trackended", () => {});
 
     audioProducer.on("transportclose", () => {
       // close audio track
@@ -780,11 +792,11 @@ const Home = () => {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
-        if (incomingCall) {
-          setIncomingCall(null);
-        } else if (incomingVoiceCall) {
-          setIncomingVoiceCall(null);
-        }
+      if (incomingCall) {
+        setIncomingCall(null);
+      } else if (incomingVoiceCall) {
+        setIncomingVoiceCall(null);
+      }
       socket.emit("leaveCall", { to: incomingCall.user_id });
     } catch (error) {
       console.error("Error pausing audio:", error);
@@ -802,7 +814,7 @@ const Home = () => {
           .filter((item) => item.kind === "audio")
           .map((audio) => (
             <AudioComponent key={audio.id} audio={audio} />
-          ))}   
+          ))}
       </>
     );
   };
@@ -830,9 +842,7 @@ const Home = () => {
       }
     }, [audio.stream]);
 
-    return (
-      <audio ref={audioRef} autoPlay playsInline/>
-    );
+    return <audio ref={audioRef} autoPlay playsInline />;
   };
   const profileHandler = () => {
     setProfileToggle(true);
@@ -912,7 +922,7 @@ const Home = () => {
         socket.emit("leaveCall", { to: incomingVoiceCall.user_id });
       }
     }
-      
+
     // Stop all tracks
     if (myStream) {
       myStream.getTracks().forEach((track) => track.stop());
@@ -949,12 +959,20 @@ const Home = () => {
   };
   const { deviceType } = useContext(contextData);
   return (
-    <>
+    <div className="main_container">
+      {/* header */}
+      <NavHeader
+        user={user}
+        setShowLogout={setShowLogout}
+        showLogout={showLogout}
+        modalRef={modalRef}
+        profileHandler={profileHandler}
+        setShowLogoutConfirm={setShowLogoutConfirm}
+      />
+
       <div className={deviceType === "mobile" ? "home mobile_home" : "home"}>
-        {profileToggle && (
-          <SelfProfile user={user} setProfileToggle={setProfileToggle} />
-        )}
-        <Sidebar
+        {/* sidebar */}
+        {/* <Sidebar
           active={active}
           setActive={setActive}
           user={user}
@@ -963,7 +981,11 @@ const Home = () => {
           modalRef={modalRef}
           profileHandler={profileHandler}
           setShowLogoutConfirm={setShowLogoutConfirm}
-        />
+        /> */}
+        {profileToggle && (
+          <SelfProfile user={user} setProfileToggle={setProfileToggle} />
+        )}
+
         {showLogoutConfirm && (
           <div className="modal">
             <div className="modal-content">
@@ -1147,7 +1169,7 @@ const Home = () => {
         )}
         <Outlet />
       </div>
-    </>
+    </div>
   );
 };
 
